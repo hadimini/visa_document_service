@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlmodel import create_engine, SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.core.config import DATABASE_URL
+from app.config import DATABASE_URL
 
 
 DB_URL = f"{DATABASE_URL}_test" if os.environ.get("TESTING") else DATABASE_URL
