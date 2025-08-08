@@ -1,0 +1,19 @@
+# app
+fastapi
+uvicorn
+pydantic
+email-validator
+python-multipart
+# db
+databases[postgresql]
+SQLAlchemy
+alembic
+psycopg2-binary
+# auth
+pyjwt
+passlib[bcrypt]
+# dev
+pytest
+pytest-asyncio
+httpx
+asgi-lifespan
