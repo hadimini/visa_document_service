@@ -2,7 +2,6 @@ import os
 import warnings
 
 import alembic
-import pytest
 import pytest_asyncio
 from alembic.config import Config as AlembicConfig
 from asgi_lifespan import LifespanManager
