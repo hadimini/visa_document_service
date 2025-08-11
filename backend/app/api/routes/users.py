@@ -15,7 +15,7 @@ async def list(
     users = await users_repo.get_all()
     return users
 
-@router.get("/{id}", response_model=UserPublic, name="users:user-get")
+@router.get("/{id}", response_model=UserPublic, name="users:users-get")
 async def get(
         id: int,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
