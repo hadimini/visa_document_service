@@ -95,55 +95,29 @@ async def run_async_migrations() -> None:
     await connectable.dispose()
 
 
-# async def run_migrations_online() -> None:
-#     """Run migrations in 'online' mode."""
-#     DB_URL = f"{DATABASE_URL}_test" if os.environ.get("TESTING") else str(DATABASE_URL)
-#
-#     # handle testing config for migrations
-#     if os.environ.get("TESTING"):
-#         # connect to primary db
-#         default_engine = create_engine(str(DATABASE_URL), isolation_level="AUTOCOMMIT")
-#         # drop testing db if it exists and create a fresh one
-#         with default_engine.connect() as default_conn:
-#             default_conn.execute(f"DROP DATABASE IF EXISTS {POSTGRES_DB}_test")
-#             default_conn.execute(f"CREATE DATABASE {POSTGRES_DB}_test")
-#
-#     connectable = async_engine_from_config(
-#         config.get_section(config.config_ini_section, {}),
-#         prefix="sqlalchemy.",
-#         poolclass=pool.NullPool,
-#     )
-#     config.set_main_option("sqlalchemy.url", DB_URL)
-#
-#     async with connectable.connect() as connection:
-#         await connection.run_sync(do_run_migrations)
-#     await connectable.dispose()
-#
-#     #
-#     # if connectable is None:
-#     #     connectable = engine_from_config(
-#     #         config.get_section(config.config_ini_section),
-#     #         prefix="sqlalchemy.",
-#     #         poolclass=pool.NullPool,
-#     #     )
-#     #
-#     # with connectable.connect() as connection:
-#     #     alembic.context.configure(
-#     #         connection=connection,
-#     #         target_metadata=None
-#     #     )
-#     #
-#     #     with alembic.context.begin_transaction():
-#     #         alembic.context.run_migrations()
-#
-#     # previous
-#     # asyncio.run(run_async_migrations())
-
-def run_migrations_online() -> None:
+async def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
+    DB_URL = f"{DATABASE_URL}_test" if os.environ.get("TESTING") else str(DATABASE_URL)
 
-    asyncio.run(run_async_migrations())
+    # handle testing config for migrations
+    if os.environ.get("TESTING"):
+        # connect to primary db
+        default_engine = create_engine(str(DATABASE_URL), isolation_level="AUTOCOMMIT")
+        # drop testing db if it exists and create a fresh one
+        with default_engine.connect() as default_conn:
+            default_conn.execute(f"DROP DATABASE IF EXISTS {POSTGRES_DB}_test")
+            default_conn.execute(f"CREATE DATABASE {POSTGRES_DB}_test")
 
+    connectable = async_engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+    config.set_main_option("sqlalchemy.url", DB_URL)
+
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
+    await connectable.dispose()
 
 if context.is_offline_mode():
     run_migrations_offline()
