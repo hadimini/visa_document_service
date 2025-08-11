@@ -21,6 +21,5 @@ class UsersRepository(BaseRepository):
         result = await self.db.execute(statement)
         user = result.scalars().first()
 
-        print('\n\n\nUser: ', user)
         if user:
             return user
