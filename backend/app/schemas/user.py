@@ -1,17 +1,19 @@
-from pydantic import EmailStr
+from typing import Optional
+from pydantic import EmailStr, constr
 
 from app.schemas.core import CoreModel, IDModelMixin, DateTimeModelMixin
 
 
 class UserBase(CoreModel):
-    email: EmailStr
+    email: Optional[EmailStr]
     email_verified: bool = False
     is_active: bool = True
 
 
-class UserInDB(UserBase):
-    password: str
-    salt: str
+class UserCreate(CoreModel):
+    email: EmailStr
+    name: constr(min_length=4, max_length=30, pattern=r"^[a-zA-Z0-9]+$")
+    password: constr(min_length=7, max_length=30)
 
 
 class UserPublic(IDModelMixin, DateTimeModelMixin, UserBase):

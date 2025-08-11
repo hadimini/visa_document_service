@@ -5,7 +5,6 @@ from pydantic import BaseModel, field_validator
 
 class CoreModel(BaseModel):
     class Config:
-        orm_mode = True
         from_attributes = True
 
 

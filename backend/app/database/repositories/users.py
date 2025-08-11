@@ -3,23 +3,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.users import User
 from app.database.repositories.base import BaseRepository
-from app.schemas.user import UserInDB
 
 
 class UsersRepository(BaseRepository):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(db)
 
-    async def get_all(self) -> list[UserInDB]:
+    async def get_all(self) -> list[User]:
         statement = select(User).order_by(User.id)
         result = await self.db.execute(statement)
         users = result.scalars().all()
-        return users
+        return list(users)
 
-    async def get_by_id(self, *, id: int) -> UserInDB:
+    async def get_by_id(self, *, id: int) -> User | None:
         statement = select(User).where(User.id == id)
         result = await self.db.execute(statement)
-        user = result.scalars().first()
+        user = result.one_or_none()
 
-        if user:
-            return user
+        return user[0] if user else None
