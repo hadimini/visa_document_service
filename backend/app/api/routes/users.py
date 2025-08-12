@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 
 from app.api.dependencies.db import get_repository
 from app.database.repositories.users import UsersRepository
-from app.schemas.user import UserPublic
+from app.schemas.user import UserPublic, UserCreate
 
 
 router = APIRouter()
@@ -15,6 +15,15 @@ async def list(
     users = await users_repo.get_all()
     return users
 
+@router.post("/", response_model=UserPublic, name="users:users-create")
+async def create(
+        new_user: UserCreate,
+        user_repo: UsersRepository = Depends(get_repository(UsersRepository))
+):
+    created_user = await user_repo.create(new_user=new_user)
+    return created_user
+
+
 @router.get("/{id}", response_model=UserPublic, name="users:users-get")
 async def get(
         id: int,
@@ -25,3 +34,4 @@ async def get(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
+

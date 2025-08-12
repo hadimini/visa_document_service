@@ -7,6 +7,9 @@ from alembic.config import Config as AlembicConfig
 from asgi_lifespan import LifespanManager
 from fastapi import FastAPI
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.api.dependencies.db import get_db
 
 
 # Apply migrations at beginning and end of testing session
@@ -27,6 +30,12 @@ def app(apply_migrations) -> FastAPI:
     return get_application()
 
 
+
+@pytest_asyncio.fixture
+def db(app):
+    return get_db()
+
+
 @pytest_asyncio.fixture
 async def client(app: FastAPI) -> AsyncClient:
     async with LifespanManager(app):
@@ -35,3 +44,8 @@ async def client(app: FastAPI) -> AsyncClient:
             headers={"Content-Type": "application/json"}
         ) as client:
             yield client
+
+
+@pytest_asyncio.fixture
+async def test_user(db: AsyncSession):
+    pass

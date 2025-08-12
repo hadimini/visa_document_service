@@ -119,6 +119,32 @@ async def run_migrations_online() -> None:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()
 
+    #
+    # if connectable is None:
+    #     connectable = engine_from_config(
+    #         config.get_section(config.config_ini_section),
+    #         prefix="sqlalchemy.",
+    #         poolclass=pool.NullPool,
+    #     )
+    #
+    # with connectable.connect() as connection:
+    #     alembic.context.configure(
+    #         connection=connection,
+    #         target_metadata=None
+    #     )
+    #
+    #     with alembic.context.begin_transaction():
+    #         alembic.context.run_migrations()
+#
+#     # previous
+#     # asyncio.run(run_async_migrations())
+
+# def run_migrations_online() -> None:
+#     """Run migrations in 'online' mode."""
+#
+#     asyncio.run(run_async_migrations())
+
+
 if context.is_offline_mode():
     run_migrations_offline()
 else:

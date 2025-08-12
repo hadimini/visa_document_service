@@ -13,8 +13,18 @@ class UserBase(CoreModel):
 class UserCreate(CoreModel):
     email: EmailStr
     name: constr(min_length=4, max_length=30, pattern=r"^[a-zA-Z0-9]+$")
-    password: constr(min_length=7, max_length=30)
+    # password: constr(min_length=5, max_length=30)
+    password: str
+
+
+class UserCreateInDB(UserCreate):
+    salt: str
 
 
 class UserPublic(IDModelMixin, DateTimeModelMixin, UserBase):
     pass
+
+
+class UserPasswordUpdate(CoreModel):
+    password: str
+    salt: str
