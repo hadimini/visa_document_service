@@ -32,5 +32,10 @@ class UsersRepository(BaseRepository):
         statement = select(User).where(User.id == id)
         result = await self.db.execute(statement)
         user = result.one_or_none()
-
         return user[0] if user else None
+
+    async def get_by_email(self, *, email: str) -> User | None:
+        statement = select(User).where(User.email == email)
+        result = await self.db.execute(statement)
+        user = result.one_or_none()
+        return user[0]

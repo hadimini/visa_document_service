@@ -9,7 +9,9 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies.db import get_db
+from app.database.db import async_session
+from app.database.repositories.users import UsersRepository
+from app.schemas.user import UserCreate
 
 
 # Apply migrations at beginning and end of testing session
@@ -32,9 +34,9 @@ def app(apply_migrations) -> FastAPI:
 
 
 @pytest_asyncio.fixture
-def db(app):
-    return get_db()
-
+async def db(app):
+    async with async_session() as session:
+        yield session
 
 @pytest_asyncio.fixture
 async def client(app: FastAPI) -> AsyncClient:
@@ -48,4 +50,10 @@ async def client(app: FastAPI) -> AsyncClient:
 
 @pytest_asyncio.fixture
 async def test_user(db: AsyncSession):
-    pass
+    new_user = UserCreate(
+        email="user@example.com",
+        name="James",
+        password="samplepassword",
+    )
+    user_repo = UsersRepository(db)
+    return await user_repo.create(new_user=new_user)
