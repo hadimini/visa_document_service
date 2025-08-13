@@ -1,12 +1,16 @@
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient, ASGITransport
+from pydantic.v1 import EmailStr
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import NullPool
 
 from app.api.server import get_application
 from app.config import DATABASE_URL
+from app.database.repositories.users import UsersRepository
+from app.models.users import User
+from app.schemas.user import UserCreate
 
 
 @pytest_asyncio.fixture
@@ -84,13 +88,13 @@ async def async_client(async_db, app: FastAPI):
     app.dependency_overrides[get_session] = override_get_db
     return AsyncClient(transport=ASGITransport(app=app), base_url="http://localhost")
 
-#
-# @pytest_asyncio.fixture
-# async def test_user(db: AsyncSession):
-#     new_user = UserCreate(
-#         email="user@example.com",
-#         name="James",
-#         password="samplepassword",
-#     )
-#     user_repo = UsersRepository(db)
-#     return await user_repo.create(new_user=new_user)
+
+@pytest_asyncio.fixture
+async def test_user(async_db: AsyncSession) -> User:
+    new_user = UserCreate(
+        email=EmailStr("testuser@example.com"),
+        name="James",
+        password="samplepassword",
+    )
+    user_repo = UsersRepository(async_db)
+    return await user_repo.create(new_user=new_user)

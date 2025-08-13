@@ -4,6 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.users import UsersRepository
+from app.models.users import User
 
 pytestmark = pytest.mark.asyncio
 
@@ -23,8 +24,8 @@ class TestCreate:
     ):
         user_rpo = UsersRepository(async_db)
         user_data = {
-            "email": "testuser2@example.com",
-            "name": "user2",
+            "email": "user@example.com",
+            "name": "user name",
             "password": "samplepassword"
         }
 
@@ -37,3 +38,20 @@ class TestCreate:
         user_in_db = await user_rpo.get_by_email(email=user_data["email"])
         assert user_in_db is not None
         assert user_in_db.name == user_data["name"]
+
+    async def test_create_user_email_exists_error(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            test_user: User,
+    ) -> None:
+        user_data = {
+            "email": "testuser@example.com",
+            "name": "name surname",
+            "password": "PasswordSample"
+        }
+        response = await async_client.post(
+            app.url_path_for("users:users-create"),
+            json=user_data,
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST

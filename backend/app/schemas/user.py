@@ -12,9 +12,8 @@ class UserBase(CoreModel):
 
 class UserCreate(CoreModel):
     email: EmailStr
-    name: constr(min_length=3, max_length=30, pattern=r"^[a-zA-Z0-9]+$")
-    # password: constr(min_length=5, max_length=30)
-    password: str
+    name: constr(min_length=3, max_length=30, pattern=r"^[a-zA-Z0-9 ]+$")
+    password: constr(min_length=5, max_length=100)
 
 
 class UserCreateInDB(UserCreate):

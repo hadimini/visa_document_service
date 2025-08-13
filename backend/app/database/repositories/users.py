@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +15,9 @@ class UsersRepository(BaseRepository):
         self.auth_service = AuthService()
 
     async def create(self, *, new_user: UserCreate) -> User:
+        if await self.get_by_email(email=new_user.email):
+            raise HTTPException(status_code=400, detail="Email already registered")
+
         user_password_update = self.auth_service.create_salt_and_hashed_password(
             plaintext_password=new_user.password
         )
@@ -34,8 +39,8 @@ class UsersRepository(BaseRepository):
         user = result.one_or_none()
         return user[0] if user else None
 
-    async def get_by_email(self, *, email: str) -> User | None:
+    async def get_by_email(self, *, email: EmailStr) -> User | None:
         statement = select(User).where(User.email == email)
         result = await self.db.execute(statement)
         user = result.one_or_none()
-        return user[0]
+        return user[0] if user else None
