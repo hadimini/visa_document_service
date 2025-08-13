@@ -25,7 +25,8 @@ class TestCreate:
         user_rpo = UsersRepository(async_db)
         user_data = {
             "email": "user@example.com",
-            "name": "user name",
+            "first_name": "James",
+            "last_name": "Doe",
             "password": "samplepassword"
         }
 
@@ -37,7 +38,8 @@ class TestCreate:
 
         user_in_db = await user_rpo.get_by_email(email=user_data["email"])
         assert user_in_db is not None
-        assert user_in_db.name == user_data["name"]
+        assert user_in_db.first_name == user_data["first_name"]
+        assert user_in_db.last_name == user_data["last_name"]
 
     async def test_create_user_email_exists_error(
             self,
@@ -47,7 +49,8 @@ class TestCreate:
     ) -> None:
         user_data = {
             "email": "testuser@example.com",
-            "name": "name surname",
+            "first_name": "Joe",
+            "last_name": "Doe",
             "password": "PasswordSample"
         }
         response = await async_client.post(

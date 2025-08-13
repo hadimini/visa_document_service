@@ -93,7 +93,8 @@ async def async_client(async_db, app: FastAPI):
 async def test_user(async_db: AsyncSession) -> User:
     new_user = UserCreate(
         email=EmailStr("testuser@example.com"),
-        name="James",
+        first_name="James",
+        last_name="Smith",
         password="samplepassword",
     )
     user_repo = UsersRepository(async_db)
