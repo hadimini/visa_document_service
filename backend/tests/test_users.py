@@ -9,8 +9,8 @@ pytestmark = pytest.mark.asyncio
 
 
 class TestUserRoutes:
-    async def test_route_exist(self, app: FastAPI, client: AsyncClient) -> None:
-        response = await client.get(app.url_path_for("users:user-list"))
+    async def test_route_exist(self, app: FastAPI, async_client: AsyncClient) -> None:
+        response = await async_client.get(app.url_path_for("users:user-list"))
         assert response.status_code == status.HTTP_200_OK
 
 
@@ -18,17 +18,17 @@ class TestCreate:
     async def test_create_user_success(
             self,
             app: FastAPI,
-            client: AsyncClient,
-            db: AsyncSession,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
     ):
-        user_rpo = UsersRepository(db)
+        user_rpo = UsersRepository(async_db)
         user_data = {
-            "email": "testuser5@example.com",
-            "name": "user1",
+            "email": "testuser2@example.com",
+            "name": "user2",
             "password": "samplepassword"
         }
 
-        response = await client.post(
+        response = await async_client.post(
             app.url_path_for("users:users-create"),
             json=user_data,
         )
