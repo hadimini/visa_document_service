@@ -5,19 +5,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import config
 from app.api.routes import router as api_router
-from app.database.db import engine, Base
+from app.database.db import init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
+    print("✅ Application started and database tables created!")
+    await init_db()
     yield  # This will pause here until the app shuts down
-
     # Shutdown: Dispose of the engine
-    await engine.dispose()
-
+    # await engine.dispose()
+    print("🛑 Application shutting down!")
 
 def get_application() -> FastAPI:
     app = FastAPI(
