@@ -1,6 +1,7 @@
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient, ASGITransport
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import NullPool
 
@@ -12,15 +13,42 @@ from app.config import DATABASE_URL
 def app() -> FastAPI:
     return get_application()
 
-async_engine = create_async_engine(
-    url=f"{DATABASE_URL}_test",
-    echo=False,
-    poolclass=NullPool,
-)
+
+async def handle_test_db(db_url: str):
+    """Create database if it doesn't exist"""
+    # Extract base URL without db name
+    base_url = db_url.rsplit("/", 1)[0]
+    db_name = db_url.split("/")[-1]
+
+    # Connect to postgres default database to check/create our db
+    temp_engine = create_async_engine(f"{base_url}/postgres", isolation_level="AUTOCOMMIT")
+
+    async with temp_engine.connect() as conn:
+        await conn.execute(
+            text(f"DROP DATABASE IF EXISTS {db_name};")
+        )
+        await conn.execute(
+            text(f"CREATE DATABASE {db_name} ENCODING 'utf8' TEMPLATE template1")
+        )
+        print(f"Created database {db_name}")
+
+    await temp_engine.dispose()
+
 
 from app.database.db import Base, get_session
 @pytest_asyncio.fixture(scope="function")
 async def async_db_engine():
+
+    db_url = f"{DATABASE_URL}_test"
+
+    await handle_test_db(db_url)
+
+    async_engine = create_async_engine(
+        url=db_url,
+        echo=False,
+        poolclass=NullPool,
+    )
+
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
