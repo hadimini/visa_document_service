@@ -9,9 +9,10 @@ API_PREFIX = "/api"
 
 SECRET_KEY = config("SECRET_KEY", cast=Secret)
 
-JWT_EXPIRE_MINUTES = config("JWT_EXPIRE_MINUTES", cast=int, default=7 * 24 * 60)  # 1 Week
+JWT_ACCESS_TOKEN_EXPIRES_MINUTES = 30
+JWT_REFRESH_TOKEN_EXPIRES_MINUTES = 15 * 24 * 60  # 15 days
 JWT_ALGORITHM = config("JWT_ALGORITHM", cast=str, default="HS256")
-JWT_AUDIENCE = config("JWT_AUDIENCE", cast=str, default="vs:auth")
+# JWT_AUDIENCE = config("JWT_AUDIENCE", cast=str, default="vs:auth")
 JWT_TOKEN_PREFIX = config("JWT_TOKEN_PREFIX", cast=str, default="Bearer")
 
 POSTGRES_USER = config("POSTGRES_USER", cast=str)

@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Body, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic.v1 import EmailStr
 
-from app.api.dependencies.auth import get_current_user
+# from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.db import get_repository
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
-from app.schemas.token import AccessToken
+from app.schemas.token import AccessToken, TokenPair
 from app.schemas.user import UserPublic, UserCreate
-from app.services import auth_service
+from app.services import auth_service, jwt_service
 
 
 router = APIRouter()
@@ -42,24 +42,15 @@ async def get(
     return user
 
 
-@router.post("/login", response_model=AccessToken, name="users:user-login")
-async def login_for_access_token(
+@router.post("/login", name="users:user-login")
+async def login(
         form_data: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
-    user: User = await user_repo.authenticate(email=EmailStr(form_data.username), password=form_data.password)
+    user: User = await user_repo.authenticate(email=form_data.username, password=form_data.password)
 
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
 
-    return AccessToken(
-        access_token=auth_service.create_access_token(user=user),
-        token_type='bearer',
-    )
-
-
-@router.get("/me", response_model=UserPublic, name="users:users-current-user")
-async def current_user(
-        current_user: User = Depends(get_current_user),
-):
-    return current_user
+    token_pair: TokenPair = jwt_service.create_token_pair(user=user)
+    return token_pair.access.token
