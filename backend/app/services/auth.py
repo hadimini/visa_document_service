@@ -1,3 +1,4 @@
+import bcrypt
 from passlib.context import CryptContext
 from app.schemas.user import UserPasswordUpdate
 

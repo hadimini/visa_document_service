@@ -1,14 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic.v1 import EmailStr
 
-# from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.db import get_repository
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
-from app.schemas.token import AccessToken, TokenPair
+from app.schemas.token import TokenPair, TokenVerify
 from app.schemas.user import UserPublic, UserCreate
-from app.services import auth_service, jwt_service
+from app.services import jwt_service
 from app.services.jwt import SUB
 
 
@@ -57,13 +55,13 @@ async def login(
     return token_pair.access.token
 
 
-@router.get("/verify", name="users:user-token-verify")
-async def verify(
-        token: str,
+@router.post("/verify_token", name="users:user-token-verify")
+async def verify_token(
+        token_data: TokenVerify,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
-    payload = jwt_service.decode_access_token(token=token)
-    user = await user_repo.get_by_id(user_id=payload[SUB])
+    payload = jwt_service.decode_access_token(token=token_data.token)
+    user = await user_repo.get_by_id(user_id=int(payload.sub))
 
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

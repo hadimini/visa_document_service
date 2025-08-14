@@ -13,7 +13,8 @@ from app.models.users import User
 
 from app.schemas.token import (
     JWTSchema,
-    TokenPair
+    TokenPair,
+    JWTPayload
 )
 
 
@@ -23,14 +24,14 @@ EXP = "exp"
 IAT = "iat"
 JTI = "jti"
 
-# jwt.encode({"sub": "test"}, "T1KDz6lY8_joerpiTFc2QDnFOG4G7_Z78QJj5jkjXSI", algorithm="HS256")
-# decoded = jwt.decode(new_token, "T1KDz6lY8_joerpiTFc2QDnFOG4G7_Z78QJj5jkjXSI", algorithms=["HS256"])
+
 class JWTService:
 
     def create_access_token(self, *, payload: dict, minutes: int | None = None) -> JWTSchema:
         expire = datetime.now() + timedelta(
             minutes=minutes or JWT_ACCESS_TOKEN_EXPIRES_MINUTES
         )
+        expire = int(expire.timestamp())
         payload[EXP] = expire
         token = JWTSchema(
             token=jwt.encode(payload=payload, key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM)),
@@ -41,6 +42,7 @@ class JWTService:
 
     def _create_refresh_token(self, *, payload: dict) -> JWTSchema:
         expire = datetime.now() + timedelta(minutes=JWT_REFRESH_TOKEN_EXPIRES_MINUTES)
+        expire = int(expire.timestamp())
         payload[EXP] = expire
         token = JWTSchema(
             token=jwt.encode(payload=payload, key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM)),
@@ -54,7 +56,7 @@ class JWTService:
         payload = {
             SUB: str(user.id),
             JTI: str(uuid.uuid4()),
-            IAT: str(datetime.now())
+            IAT: int(datetime.now().timestamp())
         }
 
         pair = TokenPair(
@@ -63,11 +65,11 @@ class JWTService:
         )
         return pair
 
-    def decode_access_token(self, *, token: str):
+    def decode_access_token(self, *, token: str) -> JWTPayload:
         payload = jwt.decode(
-            token,
-            str(SECRET_KEY),
+            jwt=token,
+            key=str(SECRET_KEY),
             algorithms=[str(JWT_ALGORITHM)],
         )
 
-        return payload
+        return JWTPayload(**payload)
