@@ -29,7 +29,7 @@ async def get(
         id: int,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
-    user = await user_repo.get_by_id(id=id)
+    user = await user_repo.get_by_id(user_id=id)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

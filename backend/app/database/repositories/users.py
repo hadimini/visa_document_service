@@ -33,7 +33,7 @@ class UsersRepository(BaseRepository):
         users = result.scalars().all()
         return list(users)
 
-    async def get_by_id(self, *, id: int) -> User | None:
+    async def get_by_id(self, *, user_id: int) -> User | None:
         statement = select(User).where(User.id == id)
         result = await self.db.execute(statement)
         user = result.one_or_none()
