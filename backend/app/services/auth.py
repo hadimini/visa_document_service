@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import bcrypt
 import jwt
 from fastapi import HTTPException, status
@@ -7,6 +9,8 @@ from pydantic import ValidationError
 from app.config import (
     SECRET_KEY,
     JWT_ALGORITHM,
+    JWT_AUDIENCE,
+    JWT_EXPIRE_MINUTES
 )
 from app.models.users import User
 from app.schemas.token import JWTMeta, JWTCreds, JWTPayload
@@ -35,10 +39,16 @@ class AuthService:
             self,
             *,
             user: User,
+            audience: str = str(JWT_AUDIENCE),
             secret_key: str = str(SECRET_KEY),
+            expires_in: int = JWT_EXPIRE_MINUTES
     ) -> str:
-        jwt_meta = JWTMeta()
-        jwt_creds = JWTCreds(email=user.email, first_name=user.first_name, last_name=user.last_name)
+        jwt_meta = JWTMeta(
+            aud=audience,
+            iat=datetime.timestamp(datetime.now()),
+            exp=datetime.timestamp(datetime.now() + timedelta(minutes=expires_in)),
+        )
+        jwt_creds = JWTCreds(email=user.email)
         token_payload = JWTPayload(**jwt_meta.model_dump(), **jwt_creds.model_dump())
         access_token = jwt.encode(token_payload.model_dump(), secret_key, algorithm=JWT_ALGORITHM)
         return access_token

@@ -16,8 +16,6 @@ class JWTMeta(CoreModel):
 class JWTCreds(CoreModel):
     """How we will identify users"""
     email: EmailStr
-    first_name: str
-    last_name: str
 
 
 class JWTPayload(JWTMeta, JWTCreds):
