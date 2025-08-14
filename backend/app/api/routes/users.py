@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, status
+from fastapi.security import OAuth2PasswordRequestForm
+from pydantic.v1 import EmailStr
 
 from app.api.dependencies.db import get_repository
 from app.database.repositories.users import UsersRepository
+from app.models.users import User
 from app.schemas.user import UserPublic, UserCreate
 
 
@@ -32,6 +35,18 @@ async def get(
     user = await user_repo.get_by_id(user_id=user_id)
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
 
+
+@router.post("/login", name="users:user-login")
+async def login_for_access_token(
+        form_data: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
+        user_repo: UsersRepository = Depends(get_repository(UsersRepository))
+):
+    user: User = await user_repo.authenticate(email=EmailStr(form_data.username), password=form_data.password)
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
+
+    return user

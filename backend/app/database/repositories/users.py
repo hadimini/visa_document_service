@@ -34,7 +34,7 @@ class UsersRepository(BaseRepository):
         return list(users)
 
     async def get_by_id(self, *, user_id: int) -> User | None:
-        statement = select(User).where(User.id == id)
+        statement = select(User).where(User.id == user_id)
         result = await self.db.execute(statement)
         user = result.one_or_none()
         return user[0] if user else None
@@ -44,3 +44,14 @@ class UsersRepository(BaseRepository):
         result = await self.db.execute(statement)
         user = result.one_or_none()
         return user[0] if user else None
+
+    async def authenticate(self, *, email: EmailStr, password: str) -> User | None:
+        user = await self.get_by_email(email=email)
+
+        if not user:
+            return None
+
+        if not self.auth_service.verify_password(password=password, salt=user.salt, hashed_password=user.password):
+            return None
+
+        return user

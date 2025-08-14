@@ -18,3 +18,6 @@ class AuthService:
         salt = self.generate_salt()
         hashed_password = self.hash_password(password=plaintext_password, salt=salt)
         return UserPasswordUpdate(password=hashed_password, salt=salt)
+
+    def verify_password(self, *, password: str, salt: str, hashed_password: str) -> bool:
+        return pwd_context.verify(password + salt, hashed_password)
