@@ -8,7 +8,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class AuthService:
-    def generate_salt(self):
+    def generate_salt(self) -> str:
         return bcrypt.gensalt().decode()
 
     def hash_password(self, *, password: str, salt: str) -> str:
