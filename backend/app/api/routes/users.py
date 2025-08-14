@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Body, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic.v1 import EmailStr
 
+from app.api.dependencies.auth import get_current_user
 from app.api.dependencies.db import get_repository
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
@@ -29,7 +30,7 @@ async def create(
     return created_user
 
 
-@router.get("/{user_id}", response_model=UserPublic, name="users:users-get")
+@router.get("/get/{user_id}", response_model=UserPublic, name="users:users-get")
 async def get(
         user_id: int,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
@@ -55,3 +56,10 @@ async def login_for_access_token(
         access_token=auth_service.create_access_token(user=user),
         token_type='bearer',
     )
+
+
+@router.get("/me", response_model=UserPublic, name="users:users-current-user")
+async def current_user(
+        current_user: User = Depends(get_current_user),
+):
+    return current_user
