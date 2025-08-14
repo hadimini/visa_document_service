@@ -33,7 +33,7 @@ class JWTService:
         )
         payload[EXP] = expire
         token = JWTSchema(
-            token=jwt.encode(payload=payload, key="T1KDz6lY8_joerpiTFc2QDnFOG4G7_Z78QJj5jkjXSI", algorithm=str(JWT_ALGORITHM)),
+            token=jwt.encode(payload=payload, key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM)),
             payload=payload,
             expire=expire,
         )
@@ -43,7 +43,7 @@ class JWTService:
         expire = datetime.now() + timedelta(minutes=JWT_REFRESH_TOKEN_EXPIRES_MINUTES)
         payload[EXP] = expire
         token = JWTSchema(
-            token=jwt.encode(payload=payload, key="T1KDz6lY8_joerpiTFc2QDnFOG4G7_Z78QJj5jkjXSI", algorithm=str(JWT_ALGORITHM)),
+            token=jwt.encode(payload=payload, key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM)),
             payload=payload,
             expire=expire,
         )
@@ -62,3 +62,6 @@ class JWTService:
             refresh=self._create_refresh_token(payload=payload)
         )
         return pair
+
+    def decode_access_token(self, *, token: str) -> JWTSchema:
+        payload = jwt.
