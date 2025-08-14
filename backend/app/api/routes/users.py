@@ -5,7 +5,9 @@ from pydantic.v1 import EmailStr
 from app.api.dependencies.db import get_repository
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
+from app.schemas.token import AccessToken
 from app.schemas.user import UserPublic, UserCreate
+from app.services import auth_service
 
 
 router = APIRouter()
@@ -39,7 +41,7 @@ async def get(
     return user
 
 
-@router.post("/login", name="users:user-login")
+@router.post("/login", response_model=AccessToken, name="users:user-login")
 async def login_for_access_token(
         form_data: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
@@ -49,4 +51,7 @@ async def login_for_access_token(
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
 
-    return user
+    return AccessToken(
+        access_token=auth_service.create_access_token(user=user),
+        token_type='bearer',
+    )

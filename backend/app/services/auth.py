@@ -1,6 +1,15 @@
 import bcrypt
+import jwt
 from passlib.context import CryptContext
 
+from app.config import (
+    SECRET_KEY,
+    JWT_AUDIENCE,
+    JWT_EXPIRE_MINUTES,
+    JWT_ALGORITHM,
+)
+from app.models.users import User
+from app.schemas.token import AccessToken, JWTMeta, JWTCreds, JWTPayload
 from app.schemas.user import UserPasswordUpdate
 
 
@@ -21,3 +30,29 @@ class AuthService:
 
     def verify_password(self, *, password: str, salt: str, hashed_password: str) -> bool:
         return pwd_context.verify(password + salt, hashed_password)
+
+    def create_access_token(
+            self,
+            *,
+            user: User,
+            secret_key: str = str(SECRET_KEY),
+            audience: str = str(JWT_AUDIENCE),
+            # expires_in: int = JWT_EXPIRE_MINUTES
+    ) -> str:
+        jwt_meta = JWTMeta(
+            # aud=audience,
+            # iat=datetime.utcnow(),
+        )
+        jwt_creds = JWTCreds(
+            email=user.email,
+            first_name=user.first_name,
+            last_name=user.last_name,
+        )
+
+        token_payload = JWTPayload(
+            **jwt_meta.model_dump(),
+            **jwt_creds.model_dump()
+        )
+
+        access_token = jwt.encode(token_payload.model_dump(), secret_key, algorithm=JWT_ALGORITHM)
+        return access_token
