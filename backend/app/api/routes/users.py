@@ -24,12 +24,12 @@ async def create(
     return created_user
 
 
-@router.get("/{id}", response_model=UserPublic, name="users:users-get")
+@router.get("/{user_id}", response_model=UserPublic, name="users:users-get")
 async def get(
-        id: int,
+        user_id: int,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
-    user = await user_repo.get_by_id(user_id=id)
+    user = await user_repo.get_by_id(user_id=user_id)
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
