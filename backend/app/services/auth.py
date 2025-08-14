@@ -1,6 +1,8 @@
 import bcrypt
 import jwt
+from fastapi import HTTPException, status
 from passlib.context import CryptContext
+from pydantic import ValidationError
 
 from app.config import (
     SECRET_KEY,
@@ -40,3 +42,15 @@ class AuthService:
         token_payload = JWTPayload(**jwt_meta.model_dump(), **jwt_creds.model_dump())
         access_token = jwt.encode(token_payload.model_dump(), secret_key, algorithm=JWT_ALGORITHM)
         return access_token
+
+    def get_email_from_token(self, *, token: str, secret_key: str) -> User | None:
+        try:
+            decoded_token = jwt.decode(token, secret_key, algorithms=[JWT_ALGORITHM])
+            payload = JWTPayload(**decoded_token)
+        except (jwt.PyJWTError, ValidationError):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate token credentials.",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        return payload.email
