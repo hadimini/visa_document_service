@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.dependencies.auth import get_current_active_user
@@ -11,6 +11,7 @@ from app.schemas.core import SuccessResponseScheme
 from app.schemas.token import TokenPairScheme, TokenVerifyScheme
 from app.schemas.user import UserPublicScheme, UserCreateScheme
 from app.services import jwt_service
+from app.tasks import write_notification
 
 router = APIRouter()
 
@@ -25,9 +26,11 @@ async def list(
 @router.post("/", response_model=UserPublicScheme, name="users:user-create", status_code=status.HTTP_201_CREATED)
 async def create(
         new_user: UserCreateScheme,
-        user_repo: UsersRepository = Depends(get_repository(UsersRepository))
+        bg_tasks: BackgroundTasks,
+        user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
 ):
     created_user = await user_repo.create(new_user=new_user)
+    bg_tasks.add_task(write_notification, created_user.email, message="some notification")
     return created_user
 
 
