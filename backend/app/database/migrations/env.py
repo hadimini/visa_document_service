@@ -27,7 +27,9 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
+from app.models.tokens import BlackListToken
 from app.models.users import User
+
 # target_metadata = mymodel.Base.metadata
 target_metadata = Base.metadata
 

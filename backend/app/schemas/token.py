@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from app.schemas.core import CoreModel
 
@@ -38,3 +39,8 @@ class RefreshToken(CoreModel):
 class AccessToken(CoreModel):
     access_token: str
     token_type: str
+
+
+class BlackListToken(CoreModel):
+    id: UUID
+    expire: datetime
