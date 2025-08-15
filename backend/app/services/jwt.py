@@ -55,12 +55,12 @@ class JWTService:
         return token
 
     def create_token_pair(self, *, user: User) -> TokenPair:
-        token_meta = JWTMeta(
+        token_meta: JWTMeta = JWTMeta(
             jti=str(uuid.uuid4()),
             iat=int(datetime.now().timestamp()),
             sub=None
         )
-        token_creds = JWTCreds(sub=str(user.id))
+        token_creds: JWTCreds = JWTCreds(sub=str(user.id))
         payload: JWTPayload = JWTPayload(
             **token_meta.model_dump(),
             **token_creds.model_dump()
