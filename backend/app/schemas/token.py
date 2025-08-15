@@ -10,8 +10,7 @@ class JWTMeta(CoreModel):
 
 
 class JWTCreds(CoreModel):
-    sub: int
-
+    sub: str  # SUBJECT MUST BE A STRING
 
 class JWTPayload(JWTMeta, JWTCreds):
     pass

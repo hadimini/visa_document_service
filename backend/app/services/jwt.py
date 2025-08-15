@@ -74,7 +74,7 @@ class JWTService:
         )
         return pair
 
-    def decode_access_token(self, *, token: str) -> JWTPayload:
+    def decode_token(self, *, token: str) -> JWTPayload:
         payload: dict = jwt.decode(
             jwt=token,
             key=str(SECRET_KEY),

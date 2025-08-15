@@ -50,7 +50,9 @@ async def login(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
 
     token_pair: TokenPair = jwt_service.create_token_pair(user=user)
-    return token_pair.access.token
+    return {
+        "token": token_pair.access.token
+    }
 
 
 @router.post("/verify_token", name="users:user-token-verify")
@@ -58,7 +60,7 @@ async def verify_token(
         token_data: TokenVerify,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
-    payload = jwt_service.decode_access_token(token=token_data.token)
+    payload = jwt_service.decode_token(token=token_data.token)
     user = await user_repo.get_by_id(user_id=int(payload.sub))
 
     if not user:

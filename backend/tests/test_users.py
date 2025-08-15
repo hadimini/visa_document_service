@@ -5,7 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
-from app.services import auth_service
+from app.schemas.token import JWTPayload
+from app.services import auth_service, jwt_service
 
 pytestmark = pytest.mark.asyncio
 
@@ -130,3 +131,28 @@ class TestCreate:
             json=user_data,
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+class TestLogin:
+
+    async def test_user_login_success(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            test_user: User,
+    ):
+        async_client.headers["content-type"] = "application/x-www-form-urlencoded"
+        login_data = {
+            "username": test_user.email,
+            "password": "samplepassword",
+        }
+        response = await async_client.post(
+            app.url_path_for("users:user-login"),
+            data=login_data
+        )
+        assert response.status_code == status.HTTP_200_OK
+        access_token = response.json().get("token")
+
+        assert access_token is not None
+        payload: JWTPayload = jwt_service.decode_token(token=access_token)
+        assert payload.sub == str(test_user.id)
