@@ -25,7 +25,7 @@ async def get_user_from_token(
         return user
 
 
-async def get_current_active_user(current_user: User = Depends(get_user_from_token)):
+async def get_current_active_user(current_user: User = Depends(get_user_from_token)) -> User | None:
     if not current_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
