@@ -1,5 +1,7 @@
 from datetime import datetime
+from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
@@ -12,6 +14,12 @@ class TokensRepository(BaseRepository):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(db)
         self.jwt_service = JWTService()
+
+    async def get_by_id(self, *, token_id: UUID) -> BlackListToken | None:
+        statement = select(BlackListToken).where(BlackListToken.id == token_id)
+        result = await self.db.execute(statement)
+        token = result.one_or_none()
+        return token[0] if token else None
 
     async def blacklist_token(self, *, token: str) -> BlackListToken:
         payload: JWTPayload = self.jwt_service.decode_token(token=token)
