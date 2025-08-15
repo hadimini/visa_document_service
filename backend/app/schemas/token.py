@@ -10,7 +10,7 @@ class JWTMeta(CoreModel):
 
 
 class JWTCreds(CoreModel):
-    sub: str
+    sub: int
 
 
 class JWTPayload(JWTMeta, JWTCreds):
