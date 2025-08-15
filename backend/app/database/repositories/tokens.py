@@ -6,7 +6,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
 from app.models.tokens import BlackListToken
-from app.schemas.token import JWTPayload
 from app.services.jwt import JWTService
 
 

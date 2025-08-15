@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
-from app.schemas.token import JWTPayload
+from app.schemas.token import JWTPayloadScheme
 from app.services import auth_service, jwt_service
 
 pytestmark = pytest.mark.asyncio

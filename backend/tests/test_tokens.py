@@ -2,7 +2,7 @@ import pytest
 from fastapi import FastAPI
 
 from app.models.users import User
-from app.schemas.token import JWTSchema, TokenPair
+from app.schemas.token import JWTSchema, TokenPairScheme
 from app.services import jwt_service
 
 pytestmark = pytest.mark.asyncio

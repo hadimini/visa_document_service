@@ -1,46 +1,46 @@
 from datetime import datetime
 from uuid import UUID
 
-from app.schemas.core import CoreModel
+from app.schemas.core import CoreScheme
 
 
-class JWTMeta(CoreModel):
+class JWTMetaScheme(CoreScheme):
     jti: str
     iat: int
     exp: int | None = None
 
 
-class JWTCreds(CoreModel):
+class JWTCredsScheme(CoreScheme):
     sub: str  # SUBJECT MUST BE A STRING
 
-class JWTPayload(JWTMeta, JWTCreds):
+class JWTPayloadScheme(JWTMetaScheme, JWTCredsScheme):
     pass
 
 
-class JWTSchema(CoreModel):
+class JWTSchema(CoreScheme):
     token: str
-    payload: JWTPayload
+    payload: JWTPayloadScheme
     expire: datetime
 
 
-class TokenPair(CoreModel):
+class TokenPairScheme(CoreScheme):
     access: JWTSchema
     refresh: JWTSchema
 
 
-class TokenVerify(CoreModel):
+class TokenVerifyScheme(CoreScheme):
     token: str
 
 
-class RefreshToken(CoreModel):
+class RefreshTokenScheme(CoreScheme):
     refresh: str
 
 
-class AccessToken(CoreModel):
+class AccessTokenScheme(CoreScheme):
     access_token: str
     token_type: str
 
 
-class BlackListTokenScheme(CoreModel):
+class BlackListTokenScheme(CoreScheme):
     id: UUID
     expire: datetime

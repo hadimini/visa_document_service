@@ -4,34 +4,34 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
 from app.api.dependencies.token import get_current_user_token
-from app.database.repositories.users import UsersRepository
 from app.database.repositories.tokens import TokensRepository
+from app.database.repositories.users import UsersRepository
 from app.models.users import User
 from app.schemas.core import SuccessResponseScheme
-from app.schemas.token import TokenPair, TokenVerify, JWTPayload
-from app.schemas.user import UserPublic, UserCreate
+from app.schemas.token import TokenPairScheme, TokenVerifyScheme
+from app.schemas.user import UserPublicScheme, UserCreateScheme
 from app.services import jwt_service
 
 router = APIRouter()
 
 
-@router.get("/", response_model=list[UserPublic], name="users:user-list")
+@router.get("/", response_model=list[UserPublicScheme], name="users:user-list")
 async def list(
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
     users = await users_repo.get_all()
     return users
 
-@router.post("/", response_model=UserPublic, name="users:user-create", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=UserPublicScheme, name="users:user-create", status_code=status.HTTP_201_CREATED)
 async def create(
-        new_user: UserCreate,
+        new_user: UserCreateScheme,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
     created_user = await user_repo.create(new_user=new_user)
     return created_user
 
 
-@router.get("/get/{user_id}", response_model=UserPublic, name="users:user-detail")
+@router.get("/get/{user_id}", response_model=UserPublicScheme, name="users:user-detail")
 async def get(
         user_id: int,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
@@ -53,7 +53,7 @@ async def login(
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
 
-    token_pair: TokenPair = jwt_service.create_token_pair(user=user)
+    token_pair: TokenPairScheme = jwt_service.create_token_pair(user=user)
     return {
         "token": token_pair.access.token
     }
@@ -70,7 +70,7 @@ async def logout(
     }
 
 
-@router.get("/me", response_model=UserPublic, name="users:user-me")
+@router.get("/me", response_model=UserPublicScheme, name="users:user-me")
 async def profile(
         current_user: User = Depends(get_current_active_user),
 ):
@@ -79,7 +79,7 @@ async def profile(
 
 @router.post("/verify_token", name="users:user-token-verify")
 async def verify_token(
-        token_data: TokenVerify,
+        token_data: TokenVerifyScheme,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
     payload = jwt_service.decode_token(token=token_data.token)

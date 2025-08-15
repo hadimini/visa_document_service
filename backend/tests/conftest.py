@@ -10,7 +10,7 @@ from app.api.server import get_application
 from app.config import DATABASE_URL
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreateScheme
 
 
 @pytest_asyncio.fixture
@@ -91,7 +91,7 @@ async def async_client(async_db, app: FastAPI):
 
 @pytest_asyncio.fixture
 async def test_user(async_db: AsyncSession) -> User:
-    new_user = UserCreate(
+    new_user = UserCreateScheme(
         email=EmailStr("testuser@example.com"),
         first_name="James",
         last_name="Smith",

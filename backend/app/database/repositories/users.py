@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
 from app.models.users import User
-from app.schemas.user import UserCreate, UserCreateInDB
+from app.schemas.user import UserCreateScheme, UserCreateInDBScheme
 from app.services.auth import AuthService
 
 
@@ -14,14 +14,17 @@ class UsersRepository(BaseRepository):
         super().__init__(db)
         self.auth_service = AuthService()
 
-    async def create(self, *, new_user: UserCreate) -> User:
+    async def create(self, *, new_user: UserCreateScheme) -> User:
         if await self.get_by_email(email=new_user.email):
             raise HTTPException(status_code=400, detail="Email already registered")
 
         user_password_update = self.auth_service.create_salt_and_hashed_password(
             plaintext_password=new_user.password
         )
-        new_user = UserCreateInDB(**new_user.model_dump(exclude={"password"}), **user_password_update.model_dump())
+        new_user = UserCreateInDBScheme(
+            **new_user.model_dump(exclude={"password"}),
+            **user_password_update.model_dump()
+        )
         new_user = User(**new_user.model_dump())
         self.db.add(new_user)
         await self.db.commit()

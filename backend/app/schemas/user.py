@@ -1,10 +1,10 @@
 from typing import Optional
 from pydantic import EmailStr, constr
 
-from app.schemas.core import CoreModel, IDModelMixin, DateTimeModelMixin
+from app.schemas.core import CoreScheme, IDSchemeMixin, DateTimeSchemeMixin
 
 
-class UserBase(CoreModel):
+class UserBaseScheme(CoreScheme):
     email: Optional[EmailStr]
     email_verified: bool = False
     first_name: Optional[str] = None
@@ -12,21 +12,21 @@ class UserBase(CoreModel):
     is_active: bool = True
 
 
-class UserCreate(CoreModel):
+class UserCreateScheme(CoreScheme):
     email: EmailStr
     first_name: constr(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9 ]+$")
     last_name: constr(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9 ]+$")
     password: constr(min_length=5, max_length=100)
 
 
-class UserCreateInDB(UserCreate):
+class UserCreateInDBScheme(UserCreateScheme):
     salt: str
 
 
-class UserPublic(IDModelMixin, DateTimeModelMixin, UserBase):
+class UserPublicScheme(IDSchemeMixin, DateTimeSchemeMixin, UserBaseScheme):
     pass
 
 
-class UserPasswordUpdate(CoreModel):
+class UserPasswordUpdate(CoreScheme):
     password: str
     salt: str
