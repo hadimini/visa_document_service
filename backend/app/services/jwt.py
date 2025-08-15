@@ -20,13 +20,6 @@ from app.schemas.token import (
 )
 
 
-REFRESH_COOKIE_NAME = "refresh"
-# SUB = "sub"
-# EXP = "exp"
-# IAT = "iat"
-# JTI = "jti"
-
-
 class JWTService:
 
     def create_access_token(self, *, payload: JWTPayload, minutes: int | None = None) -> JWTSchema:
