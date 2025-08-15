@@ -54,7 +54,10 @@ class JWTService:
 
         return token
 
-    def create_token_pair(self, *, user: User) -> TokenPair:
+    def create_token_pair(self, *, user: User) -> TokenPair | None:
+        if not user:
+            return None
+
         token_meta: JWTMeta = JWTMeta(
             jti=str(uuid.uuid4()),
             iat=int(datetime.now().timestamp()),

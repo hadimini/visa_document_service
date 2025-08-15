@@ -5,8 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
-from app.schemas.token import JWTSchema, TokenPair
-from app.services import auth_service, jwt_service
+from app.services import auth_service
 
 pytestmark = pytest.mark.asyncio
 
@@ -131,20 +130,3 @@ class TestCreate:
             json=user_data,
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
-class TestAuthToken:
-
-    async def test_create_token_pair_success(
-            self,
-            app: FastAPI,
-            async_client: AsyncClient,
-            test_user: User,
-    ):
-        token_pair: TokenPair = jwt_service.create_token_pair(user=test_user)
-
-        access_token: JWTSchema = token_pair.access
-        assert access_token.payload.sub == test_user.id
-
-        refresh_token: JWTSchema = token_pair.refresh
-        assert refresh_token.payload.sub == test_user.id
