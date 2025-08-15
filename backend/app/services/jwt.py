@@ -14,38 +14,40 @@ from app.models.users import User
 from app.schemas.token import (
     JWTSchema,
     TokenPair,
+    JWTMeta,
+    JWTCreds,
     JWTPayload
 )
 
 
 REFRESH_COOKIE_NAME = "refresh"
-SUB = "sub"
-EXP = "exp"
-IAT = "iat"
-JTI = "jti"
+# SUB = "sub"
+# EXP = "exp"
+# IAT = "iat"
+# JTI = "jti"
 
 
 class JWTService:
 
-    def create_access_token(self, *, payload: dict, minutes: int | None = None) -> JWTSchema:
+    def create_access_token(self, *, payload: JWTPayload, minutes: int | None = None) -> JWTSchema:
         expire = datetime.now() + timedelta(
             minutes=minutes or JWT_ACCESS_TOKEN_EXPIRES_MINUTES
         )
         expire = int(expire.timestamp())
-        payload[EXP] = expire
+        payload: JWTPayload = payload.copy(update={"exp": expire})
         token = JWTSchema(
-            token=jwt.encode(payload=payload, key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM)),
+            token=jwt.encode(payload=payload.model_dump(), key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM)),
             payload=payload,
             expire=expire,
         )
         return token
 
-    def _create_refresh_token(self, *, payload: dict) -> JWTSchema:
+    def _create_refresh_token(self, *, payload: JWTPayload) -> JWTSchema:
         expire = datetime.now() + timedelta(minutes=JWT_REFRESH_TOKEN_EXPIRES_MINUTES)
         expire = int(expire.timestamp())
-        payload[EXP] = expire
+        payload: JWTPayload = payload.copy(update={"exp": expire})
         token = JWTSchema(
-            token=jwt.encode(payload=payload, key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM)),
+            token=jwt.encode(payload=payload.model_dump(), key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM)),
             payload=payload,
             expire=expire,
         )
@@ -53,12 +55,16 @@ class JWTService:
         return token
 
     def create_token_pair(self, *, user: User) -> TokenPair:
-        payload = {
-            SUB: str(user.id),
-            JTI: str(uuid.uuid4()),
-            IAT: int(datetime.now().timestamp())
-        }
-
+        token_meta = JWTMeta(
+            jti=str(uuid.uuid4()),
+            iat=int(datetime.now().timestamp()),
+            sub=None
+        )
+        token_creds = JWTCreds(sub=str(user.id))
+        payload: JWTPayload = JWTPayload(
+            **token_meta.model_dump(),
+            **token_creds.model_dump()
+        )
         pair = TokenPair(
             access=self.create_access_token(payload=payload),
             refresh=self._create_refresh_token(payload=payload)
@@ -66,7 +72,7 @@ class JWTService:
         return pair
 
     def decode_access_token(self, *, token: str) -> JWTPayload:
-        payload = jwt.decode(
+        payload: dict = jwt.decode(
             jwt=token,
             key=str(SECRET_KEY),
             algorithms=[str(JWT_ALGORITHM)],

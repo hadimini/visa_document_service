@@ -3,16 +3,23 @@ from datetime import datetime
 from app.schemas.core import CoreModel
 
 
-class JWTPayload(CoreModel):
-    sub: int
+class JWTMeta(CoreModel):
     jti: str
     iat: int
-    exp: int
+    exp: int | None = None
+
+
+class JWTCreds(CoreModel):
+    sub: str
+
+
+class JWTPayload(JWTMeta, JWTCreds):
+    pass
 
 
 class JWTSchema(CoreModel):
     token: str
-    payload: dict
+    payload: JWTPayload
     expire: datetime
 
 
