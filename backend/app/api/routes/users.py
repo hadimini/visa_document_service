@@ -20,7 +20,7 @@ async def list(
     users = await users_repo.get_all()
     return users
 
-@router.post("/", response_model=UserPublic, name="users:users-create", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=UserPublic, name="users:user-create", status_code=status.HTTP_201_CREATED)
 async def create(
         new_user: UserCreate,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
@@ -29,7 +29,7 @@ async def create(
     return created_user
 
 
-@router.get("/get/{user_id}", response_model=UserPublic, name="users:users-get")
+@router.get("/get/{user_id}", response_model=UserPublic, name="users:user-detail")
 async def get(
         user_id: int,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))

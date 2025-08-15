@@ -7,6 +7,8 @@ from app.schemas.core import CoreModel, IDModelMixin, DateTimeModelMixin
 class UserBase(CoreModel):
     email: Optional[EmailStr]
     email_verified: bool = False
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
     is_active: bool = True
 
 
