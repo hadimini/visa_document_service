@@ -1,5 +1,3 @@
-import datetime
-
 import pytest
 from fastapi import FastAPI, status
 from httpx import AsyncClient
@@ -7,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
+from app.services import auth_service
 
 pytestmark = pytest.mark.asyncio
 
@@ -83,6 +82,36 @@ class TestCreate:
         assert user_in_db is not None
         assert user_in_db.first_name == user_data["first_name"]
         assert user_in_db.last_name == user_data["last_name"]
+
+    async def test_saved_password_is_hashed_and_has_salt(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+    ):
+        user_repo = UsersRepository(async_db)
+        user_data = {
+            "email": "test_user@example.io",
+            "first_name": "James",
+            "last_name": "Doe",
+            "password": "Password"
+        }
+
+        response = await async_client.post(
+            app.url_path_for("users:user-create"),
+            json=user_data,
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+
+        db_user = await user_repo.get_by_email(email=user_data["email"])
+        assert db_user is not None
+        assert db_user.password is not None and db_user.password != user_data["password"]
+        assert db_user.salt is not None
+        assert auth_service.verify_password(
+            password=user_data["password"],
+            salt=db_user.salt,
+            hashed_password=db_user.password,
+        )
 
     async def test_create_user_email_exists_error(
             self,
