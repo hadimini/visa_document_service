@@ -41,6 +41,6 @@ class AccessToken(CoreModel):
     token_type: str
 
 
-class BlackListToken(CoreModel):
+class BlackListTokenScheme(CoreModel):
     id: UUID
     expire: datetime

@@ -3,9 +3,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
+from app.api.dependencies.token import get_current_user_token
 from app.database.repositories.users import UsersRepository
+from app.database.repositories.tokens import TokensRepository
 from app.models.users import User
-from app.schemas.token import TokenPair, TokenVerify
+from app.schemas.core import SuccessResponseScheme
+from app.schemas.token import TokenPair, TokenVerify, JWTPayload
 from app.schemas.user import UserPublic, UserCreate
 from app.services import jwt_service
 
@@ -53,6 +56,17 @@ async def login(
     token_pair: TokenPair = jwt_service.create_token_pair(user=user)
     return {
         "token": token_pair.access.token
+    }
+
+
+@router.get("/logout", response_model=SuccessResponseScheme, name="users:user-logout")
+async def logout(
+        token: str = Depends(get_current_user_token),
+        tokens_repo: TokensRepository = Depends(get_repository(TokensRepository))
+):
+    await tokens_repo.blacklist_token(token=token)
+    return {
+        "message": "Successfully logged out"
     }
 
 

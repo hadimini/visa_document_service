@@ -28,3 +28,7 @@ class DateTimeModelMixin(BaseModel):
     @field_validator("updated_at")
     def parse_updated_at(cls, value: datetime) -> str:
         return value.strftime("%Y-%m-%d %H:%M:%S")
+
+
+class SuccessResponseScheme(BaseModel):
+    message: str

@@ -10,7 +10,6 @@ from app.config import (
     SECRET_KEY
 )
 from app.models.users import User
-
 from app.schemas.token import (
     JWTSchema,
     TokenPair,
