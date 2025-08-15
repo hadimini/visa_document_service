@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
+from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
@@ -53,6 +54,13 @@ async def login(
     return {
         "token": token_pair.access.token
     }
+
+
+@router.get("/me", response_model=UserPublic, name="users:user-me")
+async def profile(
+        current_user: User = Depends(get_current_active_user),
+):
+    return current_user
 
 
 @router.post("/verify_token", name="users:user-token-verify")
