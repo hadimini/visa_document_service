@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.dependencies.db import get_repository
@@ -7,8 +7,6 @@ from app.models.users import User
 from app.schemas.token import TokenPair, TokenVerify
 from app.schemas.user import UserPublic, UserCreate
 from app.services import jwt_service
-from app.services.jwt import SUB
-
 
 router = APIRouter()
 
