@@ -29,5 +29,6 @@ jobs:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         run: |
           touch .env
+          echo "${{ secrets.ENV_FILE }}" > .env
           docker compose up
           pytest -v
