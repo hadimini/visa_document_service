@@ -11,7 +11,7 @@ from app.schemas.core import SuccessResponseScheme
 from app.schemas.token import TokenPairSchema, TokenVerifySchema
 from app.schemas.user import UserPublicScheme, UserCreateScheme
 from app.services import jwt_service
-from app.tasks import write_notification
+from app.tasks import task_notify_on_email_confirm
 
 router = APIRouter()
 
@@ -30,7 +30,7 @@ async def create(
         user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
 ):
     created_user = await user_repo.create(new_user=new_user)
-    bg_tasks.add_task(write_notification, created_user.email, message="some notification")
+    bg_tasks.add_task(task_notify_on_email_confirm, created_user.id, user_repo)
     return created_user
 
 
