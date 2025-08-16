@@ -16,6 +16,7 @@ jobs:
       - name: Build Docker Image
         run: docker compose build
       - name: Run Tests
+        working-directory: /backend
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
@@ -24,5 +25,5 @@ jobs:
           POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         run: |
-          pip install -r /backend/requirements.txt
+          pip install -r requirements.txt
           pytest
