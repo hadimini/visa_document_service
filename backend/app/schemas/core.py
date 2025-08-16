@@ -3,16 +3,16 @@ from datetime import datetime
 from pydantic import BaseModel, field_validator
 
 
-class CoreScheme(BaseModel):
+class CoreSchema(BaseModel):
     class Config:
         from_attributes = True
 
 
-class IDSchemeMixin(BaseModel):
+class IDSchemaMixin(BaseModel):
     id: int
 
 
-class DateTimeSchemeMixin(BaseModel):
+class DateTimeSchemaMixin(BaseModel):
     created_at: datetime
     updated_at: datetime
 

@@ -6,7 +6,7 @@ from app.api.dependencies.db import get_repository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
-from app.schemas.token import JWTPayloadScheme
+from app.schemas.token import JWTPayloadSchema
 from app.services import jwt_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/login")
@@ -19,7 +19,7 @@ async def get_user_from_token(
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ) -> User | None:
     try:
-        payload: JWTPayloadScheme = jwt_service.decode_token(token=token)
+        payload: JWTPayloadSchema = jwt_service.decode_token(token=token)
         # Check if token is blacklisted
         if await tokens_repo.get_by_id(token_id=payload.jti):
             raise InvalidTokenError()

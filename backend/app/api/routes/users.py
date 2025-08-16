@@ -8,7 +8,7 @@ from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
 from app.models.users import User
 from app.schemas.core import SuccessResponseScheme
-from app.schemas.token import TokenPairScheme, TokenVerifyScheme
+from app.schemas.token import TokenPairSchema, TokenVerifySchema
 from app.schemas.user import UserPublicScheme, UserCreateScheme
 from app.services import jwt_service
 from app.tasks import write_notification
@@ -56,7 +56,7 @@ async def login(
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
 
-    token_pair: TokenPairScheme = jwt_service.create_token_pair(user=user)
+    token_pair: TokenPairSchema = jwt_service.create_token_pair(user=user)
     return {
         "token": token_pair.access.token
     }
@@ -82,7 +82,7 @@ async def profile(
 
 @router.post("/verify_token", name="users:user-token-verify")
 async def verify_token(
-        token_data: TokenVerifyScheme,
+        token_data: TokenVerifySchema,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
     payload = jwt_service.decode_token(token=token_data.token)
