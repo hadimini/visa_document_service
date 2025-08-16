@@ -12,7 +12,7 @@ jobs:
       max-parallel: 1
       matrix:
         python-version: [3.12]
-      steps:
-        - uses: actions/checkout@v4
-        - name: Build Docker Image
-          run: docker build . 
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker Image
+        run: docker build .
