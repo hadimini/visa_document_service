@@ -6,11 +6,11 @@ on:
 
 jobs:
   build:
-    runs-on: python:3.12-slim
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.12]
+        python-version: [3.9]
     steps:
       - uses: actions/checkout@v4
       - name: Build Docker Image
