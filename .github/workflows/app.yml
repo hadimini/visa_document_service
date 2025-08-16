@@ -13,10 +13,10 @@ jobs:
         python-version: [3.12]
     steps:
       - uses: actions/checkout@v4
-      - name: Build Docker Image
-        run: docker compose build
+#      - name: Build Docker Image
+#        run: docker compose build
       - name: Run Tests
-        working-directory: /backend
+        working-directory: backend
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
