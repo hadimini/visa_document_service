@@ -27,5 +27,6 @@ jobs:
           POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         run: |
+          docker compose up
           pip install -r requirements.txt
           pytest -v
