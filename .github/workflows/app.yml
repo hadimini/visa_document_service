@@ -16,6 +16,14 @@ jobs:
       - name: Build Docker Image
         working-directory: backend
         run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.12]
+    steps:
       - name: Run Tests
         working-directory: backend
         run: |
