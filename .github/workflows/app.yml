@@ -24,5 +24,5 @@ jobs:
           POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         run: |
-          pip install -r requirements.txt
+          pip install -r /backend/requirements.txt
           pytest
