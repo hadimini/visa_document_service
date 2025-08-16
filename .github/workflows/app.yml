@@ -28,4 +28,4 @@ jobs:
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         run: |
           pip install -r requirements.txt
-          pytest
+          pytest -v
