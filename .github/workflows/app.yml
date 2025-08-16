@@ -27,6 +27,6 @@ jobs:
           POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         run: |
-          docker compose up
+          docker build . --file Dockerfile --tag my-image-name:$(date +%s)
           pip install -r requirements.txt
           pytest -v
