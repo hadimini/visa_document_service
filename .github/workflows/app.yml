@@ -22,5 +22,4 @@ jobs:
           touch .env
           echo "${{ secrets.ENV_FILE }}" > .env
           docker compose up -d
-          docker exec visa_document_service-app-1 bash
-          python -m pytest
+          docker exec visa_document_service-app-1 pytest
