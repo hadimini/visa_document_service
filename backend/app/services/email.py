@@ -1,3 +1,7 @@
+import logging
+import requests
+
+from app.config import MAILGUN_API_KEY, MAILGUN_API_URL
 from app.schemas.recipient import RecipientSchema
 
 
@@ -11,4 +15,20 @@ class EmailService:
     @staticmethod
     def send(recipients: list[RecipientSchema]):
         for recipient in recipients:
-            write_notification(recipient.email, message=recipient.subject)
+            try:
+                response = requests.post(
+                    MAILGUN_API_URL,
+                    auth=("api", MAILGUN_API_KEY),
+                    data={
+                        "from": "hadimini@gmail.com",
+                        "to": recipient.email,
+                        "subject": recipient.subject,
+                        "html": recipient.html,
+                    }
+                )
+                if response.status_code != 200:
+                    logging.error(f"failed to send email to {recipient.email}")
+                else:
+                    logging.info(f"Successfully sent an email to '{recipient.email}' via Mailgun API.")
+            except Exception as e:
+                logging.exception(f"Mailgun error: {e}")
