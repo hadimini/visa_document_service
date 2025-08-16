@@ -9,8 +9,6 @@ jobs:
     runs-on: python:3.12-slim
     strategy:
       max-parallel: 4
-      matrix:
-        python-version: [3.12]
     steps:
       - uses: actions/checkout@v4
       - name: Build Docker Image
@@ -23,4 +21,4 @@ jobs:
           POSTGRES_SERVER=${{ secrets.POSTGRES_SERVER }}
           POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}
           POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-        run: pytest -vush
+        run: pytest -v
