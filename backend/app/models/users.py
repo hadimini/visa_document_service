@@ -24,3 +24,7 @@ class User(Base):
 
     def __repr__(self):
         return f"<User {self.id}>"
+
+    @staticmethod
+    def get_model_type() -> str:
+        return "user"

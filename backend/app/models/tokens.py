@@ -16,3 +16,7 @@ class BlackListToken(Base):
 
     def __repr__(self):
         return f"<BlackListToken {self.id}>"
+
+    @staticmethod
+    def get_model_type() -> str:
+        return "black_list_token"
