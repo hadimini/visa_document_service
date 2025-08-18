@@ -62,12 +62,9 @@ async def login(
 
     entry_log: EntryLogCreateSchema = EntryLogCreateSchema(
         user_id=user.id,
-        action=LogEntry.ACTION_ACCESS,
-        model_type=User.get_model_type()
+        action=LogEntry.ACTION_LOGIN
     )
-    await audit_repo.create(
-        new_entry=entry_log
-    )
+    await audit_repo.create(new_entry=entry_log)
 
     token_pair: TokenPairSchema = jwt_service.create_token_pair(user=user)
     return {

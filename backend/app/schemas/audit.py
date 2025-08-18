@@ -4,9 +4,9 @@ from app.schemas.core import CoreSchema, CreatedAtSchemaMixin, IDSchemaMixin
 
 
 class EntryLogBaseSchema(CoreSchema):
-    user_id: Optional[int]
-    action: Optional[str]
-    model_type: Optional[str]
+    user_id: Optional[int] = None
+    action: Optional[str] = ""
+    model_type: Optional[str] = ""
 
 
 class EntryLogPublicSchema(IDSchemaMixin, CreatedAtSchemaMixin, EntryLogBaseSchema):
@@ -15,4 +15,3 @@ class EntryLogPublicSchema(IDSchemaMixin, CreatedAtSchemaMixin, EntryLogBaseSche
 
 class EntryLogCreateSchema(EntryLogBaseSchema):
     action: str
-    model_type: str
