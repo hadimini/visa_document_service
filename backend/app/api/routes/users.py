@@ -9,23 +9,23 @@ from app.database.repositories.users import UsersRepository
 from app.models.users import User
 from app.schemas.core import SuccessResponseScheme
 from app.schemas.token import TokenPairSchema, TokenVerifySchema
-from app.schemas.user import UserPublicScheme, UserCreateScheme
+from app.schemas.user import UserPublicSchema, UserCreateSchema
 from app.services import jwt_service
 from app.tasks import task_notify_on_email_confirm
 
 router = APIRouter()
 
 
-@router.get("/", response_model=list[UserPublicScheme], name="users:user-list")
+@router.get("/", response_model=list[UserPublicSchema], name="users:user-list")
 async def list(
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
     users = await users_repo.get_all()
     return users
 
-@router.post("/", response_model=UserPublicScheme, name="users:user-create", status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=UserPublicSchema, name="users:user-create", status_code=status.HTTP_201_CREATED)
 async def create(
-        new_user: UserCreateScheme,
+        new_user: UserCreateSchema,
         bg_tasks: BackgroundTasks,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
 ):
@@ -34,7 +34,7 @@ async def create(
     return created_user
 
 
-@router.get("/get/{user_id}", response_model=UserPublicScheme, name="users:user-detail")
+@router.get("/get/{user_id}", response_model=UserPublicSchema, name="users:user-detail")
 async def get(
         user_id: int,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))
@@ -73,7 +73,7 @@ async def logout(
     }
 
 
-@router.get("/me", response_model=UserPublicScheme, name="users:user-me")
+@router.get("/me", response_model=UserPublicSchema, name="users:user-me")
 async def profile(
         current_user: User = Depends(get_current_active_user),
 ):

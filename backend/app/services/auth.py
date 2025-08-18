@@ -1,6 +1,6 @@
 import bcrypt
 from passlib.context import CryptContext
-from app.schemas.user import UserPasswordUpdate
+from app.schemas.user import UserPasswordUpdateSchema
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -13,10 +13,10 @@ class AuthService:
     def hash_password(self, *, password: str, salt: str) -> str:
         return pwd_context.hash(password + salt)
 
-    def create_salt_and_hashed_password(self, *, plaintext_password: str) -> UserPasswordUpdate:
+    def create_salt_and_hashed_password(self, *, plaintext_password: str) -> UserPasswordUpdateSchema:
         salt = self.generate_salt()
         hashed_password = self.hash_password(password=plaintext_password, salt=salt)
-        return UserPasswordUpdate(password=hashed_password, salt=salt)
+        return UserPasswordUpdateSchema(password=hashed_password, salt=salt)
 
     def verify_password(self, *, password: str, salt: str, hashed_password: str) -> bool:
         return pwd_context.verify(password + salt, hashed_password)
