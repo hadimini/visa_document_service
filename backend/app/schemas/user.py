@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import EmailStr, constr, field_serializer
+from pydantic import EmailStr, constr
 
 from app.models.users import User
 from app.schemas.core import CoreSchema, IDSchemaMixin, DateTimeSchemaMixin
