@@ -1,3 +1,4 @@
+from argparse import Action
 from collections.abc import Sequence
 
 import pytest
@@ -69,6 +70,8 @@ class TestCreate:
             async_client: AsyncClient,
             async_db: AsyncSession,
     ):
+        audit_repo = AuditRepository(async_db)
+
         user_rpo = UsersRepository(async_db)
         user_data = {
             "email": "user@example.com",
@@ -87,6 +90,11 @@ class TestCreate:
         assert user_in_db is not None
         assert user_in_db.first_name == user_data["first_name"]
         assert user_in_db.last_name == user_data["last_name"]
+
+        log_entries = await audit_repo.get_for_user(user_id=user_in_db.id)
+        assert len(log_entries) == 1
+        assert log_entries[0].user_id == user_in_db.id
+        assert log_entries[0].action == LogEntry.ACTION_SIGNUP
 
     async def test_saved_password_is_hashed_and_has_salt(
             self,
@@ -147,6 +155,8 @@ class TestLogin:
             test_user: User,
     ):
         audit_repo = AuditRepository(async_db)
+        log_entries: Sequence = await audit_repo.get_for_user(user_id=test_user.id)
+        assert log_entries == []
 
         async_client.headers["content-type"] = "application/x-www-form-urlencoded"
         login_data = {

@@ -9,7 +9,7 @@ from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
 from app.models.audit import LogEntry
 from app.models.users import User
-from app.schemas.audit import EntryLogCreateSchema
+from app.schemas.audit import LogEntryCreateSchema
 from app.schemas.core import SuccessResponseScheme
 from app.schemas.token import TokenPairSchema, TokenVerifySchema
 from app.schemas.user import UserPublicSchema, UserCreateSchema
@@ -31,8 +31,12 @@ async def create(
         new_user: UserCreateSchema,
         bg_tasks: BackgroundTasks,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
+        audit_rep: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
     created_user = await user_repo.create(new_user=new_user)
+    await audit_rep.create(
+        new_entry=LogEntryCreateSchema(user_id=created_user.id, action=LogEntry.ACTION_SIGNUP)
+    )
     bg_tasks.add_task(task_notify_on_email_confirm, created_user.id, user_repo)
     return created_user
 
@@ -60,7 +64,7 @@ async def login(
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
 
-    entry_log: EntryLogCreateSchema = EntryLogCreateSchema(
+    entry_log: LogEntryCreateSchema = LogEntryCreateSchema(
         user_id=user.id,
         action=LogEntry.ACTION_LOGIN
     )
