@@ -1,9 +1,13 @@
+from collections.abc import Sequence
+
 import pytest
 from fastapi import FastAPI, status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.repositories.audit import AuditRepository
 from app.database.repositories.users import UsersRepository
+from app.models.audit import LogEntry
 from app.models.users import User
 from app.schemas.token import JWTPayloadSchema
 from app.services import auth_service, jwt_service
@@ -139,8 +143,11 @@ class TestLogin:
             self,
             app: FastAPI,
             async_client: AsyncClient,
+            async_db: AsyncSession,
             test_user: User,
     ):
+        audit_repo = AuditRepository(async_db)
+
         async_client.headers["content-type"] = "application/x-www-form-urlencoded"
         login_data = {
             "username": test_user.email,
@@ -152,7 +159,13 @@ class TestLogin:
         )
         assert response.status_code == status.HTTP_200_OK
         access_token = response.json().get("token")
-
+        # Check logs
+        log_entries: Sequence | None = await audit_repo.get_for_user(user_id=test_user.id)
+        assert len(log_entries) == 1
+        log_entry = log_entries[0]
+        assert log_entry.user_id == test_user.id
+        assert log_entry.action == LogEntry.ACTION_LOGIN
+        # Check tokens
         assert access_token is not None
-        payload: JWTPayload = jwt_service.decode_token(token=access_token)
+        payload: JWTPayloadSchema = jwt_service.decode_token(token=access_token)
         assert payload.sub == str(test_user.id)

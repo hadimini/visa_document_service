@@ -15,7 +15,7 @@ class TestJwtToken:
             app: FastAPI,
             test_user: User,
     ):
-        token_pair: TokenPair = jwt_service.create_token_pair(user=test_user)
+        token_pair: TokenPairS = jwt_service.create_token_pair(user=test_user)
 
         access_token: JWTSchema = token_pair.access
         assert access_token.payload.sub == str(test_user.id)
