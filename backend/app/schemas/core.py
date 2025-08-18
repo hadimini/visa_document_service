@@ -5,7 +5,7 @@ from pydantic import BaseModel, field_validator
 
 class CoreSchema(BaseModel):
     class Config:
-        arbitrary_types_allowed = True
+        # arbitrary_types_allowed = True
         from_attributes = True
 
 
@@ -13,22 +13,32 @@ class IDSchemaMixin(BaseModel):
     id: int
 
 
-class DateTimeSchemaMixin(BaseModel):
+class CreatedAtSchemaMixin(BaseModel):
     created_at: datetime
-    updated_at: datetime
 
     @field_validator("created_at")
     def parse_created_at(cls, value: datetime) -> str:
         return value.strftime("%Y-%m-%d %H:%M:%S")
 
-
-    @field_validator('created_at', 'updated_at')
+    @field_validator('created_at')
     def default_created_at(cls, value: datetime) -> datetime:
         return value or datetime.now()
+
+
+class UpdatedAtSchemaMixin(BaseModel):
+    updated_at: datetime
 
     @field_validator("updated_at")
     def parse_updated_at(cls, value: datetime) -> str:
         return value.strftime("%Y-%m-%d %H:%M:%S")
+
+    @field_validator('updated_at')
+    def default_updated_at(cls, value: datetime) -> datetime:
+        return value or datetime.now()
+
+
+class DateTimeSchemaMixin(CreatedAtSchemaMixin, UpdatedAtSchemaMixin):
+    pass
 
 
 class SuccessResponseScheme(BaseModel):

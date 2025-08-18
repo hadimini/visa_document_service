@@ -4,9 +4,12 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
 from app.api.dependencies.token import get_current_user_token
+from app.database.repositories.audit import AuditRepository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
+from app.models.audit import LogEntry
 from app.models.users import User
+from app.schemas.audit import EntryLogCreateSchema
 from app.schemas.core import SuccessResponseScheme
 from app.schemas.token import TokenPairSchema, TokenVerifySchema
 from app.schemas.user import UserPublicSchema, UserCreateSchema
@@ -49,12 +52,22 @@ async def get(
 @router.post("/login", name="users:user-login")
 async def login(
         form_data: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
-        user_repo: UsersRepository = Depends(get_repository(UsersRepository))
+        user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
+        audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
     user: User = await user_repo.authenticate(email=form_data.username, password=form_data.password)
 
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
+
+    entry_log: EntryLogCreateSchema = EntryLogCreateSchema(
+        user_id=user.id,
+        action=LogEntry.ACTION_ACCESS,
+        model_type=User.get_model_type()
+    )
+    await audit_repo.create(
+        new_entry=entry_log
+    )
 
     token_pair: TokenPairSchema = jwt_service.create_token_pair(user=user)
     return {

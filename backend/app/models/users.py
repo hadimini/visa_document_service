@@ -32,7 +32,7 @@ class User(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     # todo: fix below causing error!
-    # entry_logs: Mapped[list["LogEntry"]] = relationship(back_populates="user")
+    entry_logs: Mapped[list["LogEntry"]] = relationship(back_populates="user")
 
     def __repr__(self):
         return f"<User {self.id}>"
