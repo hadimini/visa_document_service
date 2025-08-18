@@ -15,7 +15,7 @@ class TestJwtToken:
             app: FastAPI,
             test_user: User,
     ):
-        token_pair: TokenPairS = jwt_service.create_token_pair(user=test_user)
+        token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_user)
 
         access_token: JWTSchema = token_pair.access
         assert access_token.payload.sub == str(test_user.id)
@@ -24,5 +24,5 @@ class TestJwtToken:
         assert refresh_token.payload.sub == str(test_user.id)
 
     async def test_token_missing_user_is_none(self, app: FastAPI) -> None:
-        token_pair: TokenPair = jwt_service.create_token_pair(user=None)
+        token_pair: TokenPairSchema = jwt_service.create_token_pair(user=None)
         assert token_pair is None
