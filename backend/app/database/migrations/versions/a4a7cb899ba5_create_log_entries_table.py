@@ -1,19 +1,19 @@
-"""Create log_entries table
+"""Create log_entries_table
 
-Revision ID: e0acab11d70c
+Revision ID: a4a7cb899ba5
 Revises: 61d55ffb777f
-Create Date: 2025-08-18 10:30:21.777483
+Create Date: 2025-08-18 11:45:00.013865
 
 """
 from alembic import op
 import sqlalchemy as sa
-import sqlalchemy_utils
 
+from app.database.custom_types import ChoiceType
 from app.models.audit import LogEntry
 
 
 # revision identifiers, used by Alembic
-revision = 'e0acab11d70c'
+revision = 'a4a7cb899ba5'
 down_revision = '61d55ffb777f'
 branch_labels = None
 depends_on = None
@@ -24,7 +24,7 @@ def upgrade() -> None:
     op.create_table('log_entries',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
-    sa.Column('action', sqlalchemy_utils.types.choice.ChoiceType(choices=LogEntry.ACTION_CHOICES), nullable=False),
+    sa.Column('action', ChoiceType(choices=LogEntry.ACTION_CHOICES), nullable=False),
     sa.Column('model_type', sa.String(length=30), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),

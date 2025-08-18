@@ -1,6 +1,5 @@
 from typing import Optional
 from pydantic import EmailStr, constr, field_serializer
-from sqlalchemy_utils import Choice
 
 from app.models.users import User
 from app.schemas.core import CoreSchema, IDSchemaMixin, DateTimeSchemaMixin
@@ -12,11 +11,7 @@ class UserBaseSchema(CoreSchema):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     is_active: bool = True
-    role: Optional[Choice] = User.ROLE_USER
-
-    @field_serializer("role")
-    def serialize_role(self, value) -> str:
-        return value.code
+    role: Optional[str] = User.ROLE_USER
 
 
 class UserCreateSchema(CoreSchema):

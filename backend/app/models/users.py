@@ -3,9 +3,9 @@ from datetime import datetime
 from sqlalchemy import String, Integer, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
-from sqlalchemy_utils import ChoiceType
 
 from app.database.db import Base
+from app.database.custom_types import ChoiceType
 
 
 class User(Base):
@@ -25,7 +25,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     password: Mapped[str] = mapped_column(String(100), nullable=False)
-    role: Mapped[str] = mapped_column(ChoiceType(ROLE_CHOICES), nullable=False, default=ROLE_USER, server_default=ROLE_USER)
+    role: Mapped[str] = mapped_column(ChoiceType(ROLE_CHOICES), nullable=True, server_default=ROLE_USER)
     salt: Mapped[str] = mapped_column(String(100), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
