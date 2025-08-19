@@ -19,6 +19,7 @@ class UserCreateSchema(CoreSchema):
     first_name: constr(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9 ]+$")
     last_name: constr(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9 ]+$")
     password: constr(min_length=5, max_length=100)
+    role: Optional[str] = User.ROLE_USER
 
 
 class UserCreateInDBSchema(UserCreateSchema):

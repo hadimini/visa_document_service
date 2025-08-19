@@ -99,3 +99,18 @@ async def test_user(async_db: AsyncSession) -> User:
     )
     user_repo = UsersRepository(async_db)
     return await user_repo.create(new_user=new_user)
+
+
+@pytest_asyncio.fixture
+async def test_admin(
+        async_db: AsyncSession,
+) -> User:
+    new_user = UserCreateSchema(
+        email=EmailStr("admin@example.com"),
+        first_name="Max",
+        last_name="Smith",
+        password="Samplepassword",
+        role=User.ROLE_ADMIN
+    )
+    user_repo = UsersRepository(async_db)
+    return await user_repo.create(new_user=new_user)
