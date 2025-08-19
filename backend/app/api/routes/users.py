@@ -78,6 +78,7 @@ async def login(
 
 @router.get("/logout", response_model=SuccessResponseScheme, name="users:user-logout")
 async def logout(
+        current_user: User = Depends(get_current_active_user),
         token: str = Depends(get_current_user_token),
         tokens_repo: TokensRepository = Depends(get_repository(TokensRepository))
 ):

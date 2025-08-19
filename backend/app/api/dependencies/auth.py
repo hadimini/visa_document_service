@@ -1,10 +1,11 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 
 from app.api.dependencies.db import get_repository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
+from app.exceptions import AuthTokenBlacklistedException, AuthTokenExpiredException
 from app.models.users import User
 from app.schemas.token import JWTPayloadSchema
 from app.services import jwt_service
@@ -20,17 +21,17 @@ async def get_user_from_token(
 ) -> User | None:
     try:
         payload: JWTPayloadSchema = jwt_service.decode_token(token=token)
-        # Check if token is blacklisted
+
         if await tokens_repo.get_by_id(token_id=payload.jti):
-            raise InvalidTokenError()
+            raise AuthTokenBlacklistedException()
 
         user = await users_repo.get_by_id(user_id=int(payload.sub))
-    except InvalidTokenError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token is blacklisted.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+
+    except ExpiredSignatureError:
+        raise AuthTokenExpiredException()
+
+    except AuthTokenBlacklistedException:
+        raise AuthTokenBlacklistedException()
     else:
         return user
 
