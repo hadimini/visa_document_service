@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+from jwt.exceptions import ExpiredSignatureError
 
 from app.api.dependencies.db import get_repository
 from app.database.repositories.tokens import TokensRepository
