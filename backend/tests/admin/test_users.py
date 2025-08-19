@@ -4,6 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.users import User
+from app.schemas.core import STRFTIME_FORMAT
 from app.schemas.token import TokenPairSchema, JWTSchema
 from app.services import jwt_service
 
@@ -37,8 +38,8 @@ class TestUsers:
         assert r_user["email_verified"] == test_admin.email_verified
         assert r_user["is_active"] == test_admin.is_active
         assert r_user["role"] == test_admin.role
-        assert r_user["created_at"] == test_admin.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        assert r_user["updated_at"] == test_admin.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+        assert r_user["created_at"] == test_admin.created_at.strftime(STRFTIME_FORMAT)
+        assert r_user["updated_at"] == test_admin.updated_at.strftime(STRFTIME_FORMAT)
 
     async def test_user_detail(
             self,
@@ -63,5 +64,5 @@ class TestUsers:
         assert result["last_name"] == test_admin.last_name
         assert result["email_verified"] == test_admin.email_verified
         assert result["is_active"] == test_admin.is_active
-        assert result["created_at"] == test_admin.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        assert result["updated_at"] == test_admin.updated_at.strftime("%Y-%m-%d %H:%M:%S")
+        assert result["created_at"] == test_admin.created_at.strftime(STRFTIME_FORMAT)
+        assert result["updated_at"] == test_admin.updated_at.strftime(STRFTIME_FORMAT)

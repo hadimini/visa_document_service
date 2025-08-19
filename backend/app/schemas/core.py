@@ -3,6 +3,9 @@ from datetime import datetime
 from pydantic import BaseModel, field_validator
 
 
+STRFTIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
+
 class CoreSchema(BaseModel):
     class Config:
         # arbitrary_types_allowed = True
@@ -18,7 +21,7 @@ class CreatedAtSchemaMixin(BaseModel):
 
     @field_validator("created_at")
     def parse_created_at(cls, value: datetime) -> str:
-        return value.strftime("%Y-%m-%d %H:%M:%S")
+        return value.strftime(STRFTIME_FORMAT)
 
     @field_validator('created_at')
     def default_created_at(cls, value: datetime) -> datetime:
@@ -30,7 +33,7 @@ class UpdatedAtSchemaMixin(BaseModel):
 
     @field_validator("updated_at")
     def parse_updated_at(cls, value: datetime) -> str:
-        return value.strftime("%Y-%m-%d %H:%M:%S")
+        return value.strftime(STRFTIME_FORMAT)
 
     @field_validator('updated_at')
     def default_updated_at(cls, value: datetime) -> datetime:

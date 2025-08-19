@@ -9,8 +9,8 @@ from app.database.repositories.audit import AuditRepository
 from app.database.repositories.users import UsersRepository
 from app.models.audit import LogEntry
 from app.models.users import User
+from app.schemas.core import STRFTIME_FORMAT
 from app.schemas.token import JWTPayloadSchema, TokenPairSchema, JWTSchema
-from app.schemas.user import UserPublicSchema
 from app.services import auth_service, jwt_service
 
 pytestmark = pytest.mark.asyncio
@@ -159,3 +159,34 @@ class TestProfile:
         assert user_data["email_verified"] == test_user.email_verified
         assert user_data["is_active"] == test_user.is_active
         assert user_data["role"] == test_user.role
+        assert user_data["created_at"] == test_user.created_at.strftime(STRFTIME_FORMAT)
+        assert user_data["updated_at"] == test_user.updated_at.strftime(STRFTIME_FORMAT)
+
+    async def test_user_profile_update(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            test_user: User,
+    ):
+        token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_user)
+        access_token: JWTSchema = token_pair.access.token
+        update_data = {
+            "first_name": "Updated fname",
+            "last_name": "Updated lname",
+        }
+        response = await async_client.put(
+            app.url_path_for("auth:profile-detail"),
+            json=update_data,
+            headers={"Authorization": f"Bearer {access_token}"}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        user_data: dict = response.json()
+        assert user_data["id"] == test_user.id
+        assert user_data["email"] == test_user.email
+        assert user_data["first_name"] == update_data["first_name"]
+        assert user_data["last_name"] == update_data["last_name"]
+        assert user_data["email_verified"] == test_user.email_verified
+        assert user_data["is_active"] == test_user.is_active
+        assert user_data["role"] == test_user.role
+        assert user_data["created_at"] == test_user.created_at.strftime(STRFTIME_FORMAT)
+        assert user_data["updated_at"] == test_user.updated_at.strftime(STRFTIME_FORMAT)

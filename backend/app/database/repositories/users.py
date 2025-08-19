@@ -31,7 +31,6 @@ class UsersRepository(BaseRepository):
         return new_user
 
     async def update(self, *, user: User, data: UserUpdateSchema) -> User:
-        print("\n\ngot data?", user, "\n\n")
         statement = update(User).where(User.id == user.id).values(
             **data.model_dump()
         )
