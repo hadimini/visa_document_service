@@ -9,7 +9,8 @@ from app.database.repositories.audit import AuditRepository
 from app.database.repositories.users import UsersRepository
 from app.models.audit import LogEntry
 from app.models.users import User
-from app.schemas.token import JWTPayloadSchema
+from app.schemas.token import JWTPayloadSchema, TokenPairSchema, JWTSchema
+from app.schemas.user import UserPublicSchema
 from app.services import auth_service, jwt_service
 
 pytestmark = pytest.mark.asyncio
@@ -131,3 +132,30 @@ class TestLogin:
         assert access_token is not None
         payload: JWTPayloadSchema = jwt_service.decode_token(token=access_token)
         assert payload.sub == str(test_user.id)
+
+
+class TestProfile:
+
+    async def test_user_profile_detail(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            test_user: User,
+    ):
+        token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_user)
+        access_token: JWTSchema = token_pair.access.token
+
+        response = await async_client.get(
+            app.url_path_for("auth:profile-detail"),
+            headers={"Authorization": f"Bearer {access_token}"}
+
+        )
+        assert response.status_code == status.HTTP_200_OK
+        user_data: dict = response.json()
+        assert user_data["id"] == test_user.id
+        assert user_data["email"] == test_user.email
+        assert user_data["first_name"] == test_user.first_name
+        assert user_data["last_name"] == test_user.last_name
+        assert user_data["email_verified"] == test_user.email_verified
+        assert user_data["is_active"] == test_user.is_active
+        assert user_data["role"] == test_user.role
