@@ -1,3 +1,4 @@
+from fastapi import Query
 from typing import Optional
 from pydantic import EmailStr, constr
 
@@ -38,3 +39,8 @@ class UserPublicSchema(IDSchemaMixin, DateTimeSchemaMixin, UserBaseSchema):
 class UserPasswordUpdateSchema(CoreSchema):
     password: str
     salt: str
+
+
+class UserFilter(CoreSchema):
+    name: str | None = Query(None, description="Filter by user's name")
+    role: str | None = Query(None, description="Filter by user's role")

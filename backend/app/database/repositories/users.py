@@ -1,11 +1,12 @@
 from fastapi import HTTPException
 from pydantic import EmailStr
-from sqlalchemy import select, update
+from sqlalchemy import select, update, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
 from app.models.users import User
-from app.schemas.user import UserCreateSchema, UserCreateInDBSchema, UserUpdateSchema
+from app.schemas.pagination import PageParamsSchema
+from app.schemas.user import UserCreateSchema, UserCreateInDBSchema, UserUpdateSchema, UserFilter
 from app.services.auth import AuthService
 
 
@@ -28,6 +29,7 @@ class UsersRepository(BaseRepository):
         new_user = User(**new_user.model_dump())
         self.db.add(new_user)
         await self.db.commit()
+        await self.db.refresh(new_user)
         return new_user
 
     async def update(self, *, user: User, data: UserUpdateSchema) -> User:
@@ -39,11 +41,25 @@ class UsersRepository(BaseRepository):
         updated_user = await self.get_by_id(user_id=user.id)
         return updated_user
 
-    async def get_all(self) -> list[User]:
-        statement = select(User).order_by(User.id)
-        result = await self.db.execute(statement)
+    async def get_all(self, *, filters: UserFilter, page_params: PageParamsSchema):
+        statement = select(User)
+        if filters.name:
+            statement = statement.filter(
+                or_(
+                    User.first_name.ilike(f"%{filters.name}%"),
+                    User.last_name.ilike(f"%{filters.name}%"),
+                )
+            )
+        if filters.role:
+            statement = statement.filter(
+                User.role == filters.role
+            )
+
+        paginated_query = statement.offset((page_params.page - 1) * page_params.size).limit(page_params.size)
+        result = await self.db.execute(paginated_query)
         users = result.scalars().all()
-        return list(users)
+        return users
+
 
     async def get_by_id(self, *, user_id: int) -> User | None:
         statement = select(User).where(User.id == user_id)

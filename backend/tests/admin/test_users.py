@@ -13,6 +13,7 @@ pytestmark = pytest.mark.asyncio
 
 
 class TestUsers:
+    # todo: test pagination
     async def test_user_list(
             self,
             app: FastAPI,
@@ -28,9 +29,9 @@ class TestUsers:
             headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == status.HTTP_200_OK
-        results: list = response.json()
-        assert len(results) == 1
-        r_user = results[0]
+        result: dict = response.json()
+        assert result["total"] == 1
+        r_user = result["results"][0]
         assert r_user["id"] == test_admin.id
         assert r_user["email"] == test_admin.email
         assert r_user["first_name"] == test_admin.first_name
