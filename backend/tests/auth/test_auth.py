@@ -135,6 +135,32 @@ class TestLogin:
 
 
 class TestProfile:
+    async def test_user_profile_detail_login_required(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            test_user: User,
+    ):
+        response = await async_client.get(
+            app.url_path_for("auth:profile-detail")
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    async def test_user_profile_update_login_required(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            test_user: User,
+    ):
+        update_data = {
+            "first_name": "Updated fname",
+            "last_name": "Updated lname",
+        }
+        response = await async_client.put(
+            app.url_path_for("auth:profile-detail"),
+            json=update_data
+        )
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     async def test_user_profile_detail(
             self,
