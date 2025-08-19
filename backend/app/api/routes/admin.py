@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.get("/users", response_model=list[UserPublicSchema], name="admin:user-list")
-async def list(
+async def user_list(
         current_user: User = Depends(role_required(User.ROLE_ADMIN)),
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
@@ -22,7 +22,7 @@ async def list(
 
 
 @router.get("/users/{user_id}", response_model=UserPublicSchema, name="admin:user-detail")
-async def detail(
+async def user_detail(
         user_id: int,
         current_user: User = Depends(role_required(User.ROLE_ADMIN)),
         user_repo: UsersRepository = Depends(get_repository(UsersRepository))

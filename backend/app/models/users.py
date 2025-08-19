@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import ClassVar
 
 from sqlalchemy import String, Integer, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -12,8 +11,8 @@ from app.database.custom_types import ChoiceType
 class User(Base):
     __tablename__ = "users"
 
-    ROLE_USER: ClassVar[str] = "user"
-    ROLE_ADMIN: ClassVar[str] = "admin"
+    ROLE_USER: str = "user"
+    ROLE_ADMIN: str = "admin"
 
     ROLE_CHOICES = (
         (ROLE_USER, "user"),

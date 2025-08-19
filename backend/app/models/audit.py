@@ -17,7 +17,7 @@ class LogEntry(Base):
     ACTION_DELETE = "delete"
     ACTION_LOGIN = "login"
     ACTION_LOGOUT = "logout"
-    ACTION_SIGNUP = "signup"
+    ACTION_REGISTER = "register"
     ACTION_UPDATE = "update"
 
     ACTION_CHOICES = (
@@ -27,7 +27,7 @@ class LogEntry(Base):
         (ACTION_DELETE, "Delete"),
         (ACTION_LOGIN, "Login"),
         (ACTION_LOGOUT, "Logout"),
-        (ACTION_SIGNUP, "Signin"),
+        (ACTION_REGISTER, "Register"),
         (ACTION_UPDATE, "Update"),
     )
 
