@@ -7,6 +7,7 @@ class LogEntryBaseSchema(CoreSchema):
     user_id: Optional[int] = None
     action: Optional[str] = ""
     model_type: Optional[str] = ""
+    target_id: Optional[int] = None
 
 
 class LogEntryPublicSchema(IDSchemaMixin, CreatedAtSchemaMixin, LogEntryBaseSchema):

@@ -67,9 +67,15 @@ async def login(
 async def logout(
         current_user: User = Depends(get_current_active_user),
         token: str = Depends(get_current_user_token),
-        tokens_repo: TokensRepository = Depends(get_repository(TokensRepository))
+        tokens_repo: TokensRepository = Depends(get_repository(TokensRepository)),
+        audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
     await tokens_repo.blacklist_token(token=token)
+    entry_log: LogEntryCreateSchema = LogEntryCreateSchema(
+        user_id=current_user.id,
+        action=LogEntry.ACTION_LOGOUT
+    )
+    await audit_repo.create(new_entry=entry_log)
     return {
         "message": "Successfully logged out"
     }
@@ -87,8 +93,16 @@ async def profile_update(
         user_data: UserUpdateSchema,
         current_user: User = Depends(get_current_active_user),
         user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
+        audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
     updated_user = await user_repo.update(user=current_user, data=user_data)
+    entry_log: LogEntryCreateSchema = LogEntryCreateSchema(
+        user_id=updated_user.id,
+        action=LogEntry.ACTION_UPDATE,
+        model_type=User.get_model_type(),
+        target_id=updated_user.id
+    )
+    await audit_repo.create(new_entry=entry_log)
     return updated_user
 
 

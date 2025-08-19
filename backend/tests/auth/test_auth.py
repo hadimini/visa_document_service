@@ -192,8 +192,13 @@ class TestProfile:
             self,
             app: FastAPI,
             async_client: AsyncClient,
+            async_db: AsyncSession,
             test_user: User,
     ):
+        audit_repo = AuditRepository(async_db)
+        log_entries: Sequence = await audit_repo.get_for_user(user_id=test_user.id)
+        assert log_entries == []
+
         token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_user)
         access_token: JWTSchema = token_pair.access.token
         update_data = {
@@ -216,3 +221,13 @@ class TestProfile:
         assert user_data["role"] == test_user.role
         assert user_data["created_at"] == test_user.created_at.strftime(STRFTIME_FORMAT)
         assert user_data["updated_at"] == test_user.updated_at.strftime(STRFTIME_FORMAT)
+
+        # Check logs
+
+        log_entries: Sequence | None = await audit_repo.get_for_user(user_id=test_user.id)
+        assert len(log_entries) == 1
+        log_entry = log_entries[0]
+        assert log_entry.user_id == test_user.id
+        assert log_entry.action == LogEntry.ACTION_UPDATE
+        assert log_entry.model_type == User.get_model_type()
+        assert log_entry.target_id == test_user.id
