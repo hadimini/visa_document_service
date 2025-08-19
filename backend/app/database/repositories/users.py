@@ -6,7 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.repositories.base import BaseRepository
 from app.models.users import User
 from app.schemas.pagination import PageParamsSchema
-from app.schemas.user import UserCreateSchema, UserCreateInDBSchema, UserUpdateSchema, UserFilter
+from app.schemas.user import (
+    UserCreateSchema,
+    UserCreateInDBSchema,
+    UserUpdateSchema,
+    UserFilter
+)
 from app.services.auth import AuthService
 
 
