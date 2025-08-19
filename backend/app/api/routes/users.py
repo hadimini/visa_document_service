@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.dependencies.auth import get_current_active_user
@@ -7,6 +7,7 @@ from app.api.dependencies.token import get_current_user_token
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
+from app.exceptions import AuthFailedException, NotFoundException
 from app.models.audit import LogEntry
 from app.models.users import User
 from app.schemas.audit import LogEntryCreateSchema
@@ -19,15 +20,13 @@ from app.tasks import task_notify_on_email_confirm
 router = APIRouter()
 
 
-@router.get("/", response_model=list[UserPublicSchema], name="users:user-list")
-async def list(
-        users_repo: UsersRepository = Depends(get_repository(UsersRepository))
-):
-    users = await users_repo.get_all()
-    return users
-
-@router.post("/", response_model=UserPublicSchema, name="users:user-create", status_code=status.HTTP_201_CREATED)
-async def create(
+@router.post(
+    path="/signup",
+    response_model=UserPublicSchema,
+    name="users:user-signup",
+    status_code=status.HTTP_201_CREATED
+)
+async def register(
         new_user: UserCreateSchema,
         bg_tasks: BackgroundTasks,
         user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
@@ -41,18 +40,6 @@ async def create(
     return created_user
 
 
-@router.get("/get/{user_id}", response_model=UserPublicSchema, name="users:user-detail")
-async def get(
-        user_id: int,
-        user_repo: UsersRepository = Depends(get_repository(UsersRepository))
-):
-    user = await user_repo.get_by_id(user_id=user_id)
-
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return user
-
-
 @router.post("/login", name="users:user-login")
 async def login(
         form_data: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
@@ -62,7 +49,7 @@ async def login(
     user: User = await user_repo.authenticate(email=form_data.username, password=form_data.password)
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password")
+        raise AuthFailedException()
 
     entry_log: LogEntryCreateSchema = LogEntryCreateSchema(
         user_id=user.id,
@@ -104,7 +91,7 @@ async def verify_token(
     user = await user_repo.get_by_id(user_id=int(payload.sub))
 
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise NotFoundException(detail="User not found")
 
     return {
         "msg": "success"

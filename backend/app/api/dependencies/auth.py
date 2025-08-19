@@ -5,7 +5,11 @@ from jwt.exceptions import ExpiredSignatureError
 from app.api.dependencies.db import get_repository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
-from app.exceptions import AuthTokenBlacklistedException, AuthTokenExpiredException
+from app.exceptions import (
+    AuthTokenBlacklistedException,
+    AuthTokenExpiredException,
+    ForbiddenException
+)
 from app.models.users import User
 from app.schemas.token import JWTPayloadSchema
 from app.services import jwt_service
@@ -45,3 +49,13 @@ async def get_current_active_user(current_user: User = Depends(get_user_from_tok
         )
 
     return current_user
+
+
+def role_required(role: str):
+    async def role_checker(
+            current_user: User = Depends(get_current_active_user),
+    ) -> User | None:
+        if current_user.role != role:
+            raise ForbiddenException("You are not authorized to perform this action.")
+        return current_user
+    return role_checker
