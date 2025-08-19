@@ -1,11 +1,11 @@
 from fastapi import HTTPException
 from pydantic import EmailStr
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
 from app.models.users import User
-from app.schemas.user import UserCreateSchema, UserCreateInDBSchema
+from app.schemas.user import UserCreateSchema, UserCreateInDBSchema, UserUpdateSchema
 from app.services.auth import AuthService
 
 
@@ -29,6 +29,16 @@ class UsersRepository(BaseRepository):
         self.db.add(new_user)
         await self.db.commit()
         return new_user
+
+    async def update(self, *, user: User, data: UserUpdateSchema) -> User:
+        print("\n\ngot data?", user, "\n\n")
+        statement = update(User).where(User.id == user.id).values(
+            **data.model_dump()
+        )
+        await self.db.execute(statement)
+        await self.db.commit()
+        updated_user = await self.get_by_id(user_id=user.id)
+        return updated_user
 
     async def get_all(self) -> list[User]:
         statement = select(User).order_by(User.id)

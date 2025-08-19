@@ -26,6 +26,11 @@ class UserCreateInDBSchema(UserCreateSchema):
     salt: str
 
 
+class UserUpdateSchema(CoreSchema):
+    first_name: str
+    last_name: str
+
+
 class UserPublicSchema(IDSchemaMixin, DateTimeSchemaMixin, UserBaseSchema):
     pass
 

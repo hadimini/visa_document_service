@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, status
+from fastapi import APIRouter, BackgroundTasks, Depends, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.dependencies.auth import get_current_active_user
@@ -13,7 +13,7 @@ from app.models.users import User
 from app.schemas.audit import LogEntryCreateSchema
 from app.schemas.core import SuccessResponseScheme
 from app.schemas.token import TokenPairSchema, TokenVerifySchema
-from app.schemas.user import UserPublicSchema, UserCreateSchema
+from app.schemas.user import UserPublicSchema, UserCreateSchema, UserUpdateSchema
 from app.services import jwt_service
 from app.tasks import task_notify_on_email_confirm
 
@@ -75,11 +75,21 @@ async def logout(
     }
 
 
-@router.get("/me", response_model=UserPublicSchema, name="auth:me")
-async def profile(
+@router.get("/profile", response_model=UserPublicSchema, name="auth:profile-detail")
+async def profile_detail(
         current_user: User = Depends(get_current_active_user),
 ):
     return current_user
+
+
+@router.put("/profile", response_model=UserPublicSchema, name="auth:profile-update")
+async def profile_update(
+        user_data: UserUpdateSchema,
+        current_user: User = Depends(get_current_active_user),
+        user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
+):
+    updated_user = await user_repo.update(user=current_user, data=user_data)
+    return updated_user
 
 
 @router.post("/verify_token", name="auth:token-verify")
