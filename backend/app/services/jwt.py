@@ -26,7 +26,7 @@ class JWTService:
             minutes=minutes or JWT_ACCESS_TOKEN_EXPIRES_MINUTES
         )
         expire = int(expire.timestamp())
-        payload: JWTPayloadSchema = payload.copy(update={"exp": expire})
+        payload: JWTPayloadSchema = payload.model_copy(update={"exp": expire})
         token = JWTSchema(
             token=jwt.encode(payload=payload.model_dump(), key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM)),
             payload=payload,
@@ -37,7 +37,7 @@ class JWTService:
     def _create_refresh_token(self, *, payload: JWTPayloadSchema) -> JWTSchema:
         expire = datetime.now() + timedelta(minutes=JWT_REFRESH_TOKEN_EXPIRES_MINUTES)
         expire = int(expire.timestamp())
-        payload: JWTPayloadSchema = payload.copy(update={"exp": expire})
+        payload: JWTPayloadSchema = payload.model_copy(update={"exp": expire})
         token = JWTSchema(
             token=jwt.encode(payload=payload.model_dump(), key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM)),
             payload=payload,
