@@ -20,7 +20,7 @@ class UsersRepository(BaseRepository):
         super().__init__(db)
         self.auth_service = AuthService()
 
-    async def create(self, *, new_user: UserCreateSchema) -> User:
+    async def create(self, *, new_user: UserCreateSchema, **kwargs) -> User:
         if await self.get_by_email(email=new_user.email):
             raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -31,7 +31,7 @@ class UsersRepository(BaseRepository):
             **new_user.model_dump(exclude={"password"}),
             **user_password_update.model_dump()
         )
-        new_user = User(**new_user.model_dump())
+        new_user = User(**new_user.model_dump(), **kwargs)
         self.db.add(new_user)
         await self.db.commit()
         await self.db.refresh(new_user)

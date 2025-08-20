@@ -110,7 +110,6 @@ async def test_admin(
         first_name="Max",
         last_name="Smith",
         password="Samplepassword",
-        role=User.ROLE_ADMIN
     )
     user_repo = UsersRepository(async_db)
-    return await user_repo.create(new_user=new_user)
+    return await user_repo.create(new_user=new_user, **{"role": User.ROLE_ADMIN})
