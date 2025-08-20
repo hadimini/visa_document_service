@@ -10,7 +10,7 @@ from app.schemas.user import (
     UserCreateSchema,
     UserCreateInDBSchema,
     UserUpdateSchema,
-    UserFilter
+    UserFilterSchema
 )
 from app.services.auth import AuthService
 
@@ -46,7 +46,7 @@ class UsersRepository(BaseRepository):
         updated_user = await self.get_by_id(user_id=user.id)
         return updated_user
 
-    async def get_all(self, *, filters: UserFilter, page_params: PageParamsSchema):
+    async def get_all(self, *, filters: UserFilterSchema, page_params: PageParamsSchema):
         statement = select(User)
         if filters.name:
             statement = statement.filter(

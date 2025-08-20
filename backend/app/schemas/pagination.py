@@ -1,10 +1,10 @@
-from typing import TypeVar
+from typing import Generic, TypeVar
 from pydantic import conint
 from pydantic.generics import GenericModel
 
 from app.schemas.core import CoreSchema
 
-T = TypeVar("T")
+TypeT = TypeVar("T")
 
 
 class PageParamsSchema(CoreSchema):
@@ -12,8 +12,8 @@ class PageParamsSchema(CoreSchema):
     size: conint(ge=1, le=100) = 10
 
 
-class PagedResponseSchema(CoreSchema):
+class PagedResponseSchema(CoreSchema, Generic[TypeT]):
     total: int
     page: int
     size: int
-    results: list[T]
+    results: list[TypeT]

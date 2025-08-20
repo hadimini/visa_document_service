@@ -8,7 +8,7 @@ from app.database.repositories.users import UsersRepository
 from app.exceptions import NotFoundException
 from app.models.users import User
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
-from app.schemas.user import UserPublicSchema, UserFilter
+from app.schemas.user import UserPublicSchema, UserFilterSchema
 
 
 router = APIRouter()
@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.get("/users", response_model=PagedResponseSchema, name="admin:user-list")
 async def user_list(
-        filters: UserFilter = Depends(),
+        filters: UserFilterSchema = Depends(),
         page_params: PageParamsSchema = Depends(),
         current_user: User = Depends(role_required(User.ROLE_ADMIN)),
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
