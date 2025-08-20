@@ -1,5 +1,5 @@
 from fastapi import Query
-from typing import Annotated, Optional
+from typing import Annotated, Literal, Optional
 from pydantic import EmailStr, StringConstraints
 
 from app.models.users import User
@@ -42,5 +42,5 @@ class UserPasswordUpdateSchema(CoreSchema):
 
 
 class UserFilterSchema(CoreSchema):
-    name: str | None = Query(None, description="Filter by user's name")
-    role: str | None = Query(None, description="Filter by user's role")
+    name: Annotated[str | None, Query(max_length=50, description="Filter by user's name")] = None
+    role: Literal["admin", "user"] | None = None
