@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from app.schemas.core import CoreSchema
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
 
@@ -5,8 +6,8 @@ from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
 def paginate(
         page_params: PageParamsSchema,
         results: list,
-        ResponseSchema: CoreSchema
-) -> PageParamsSchema:
+        ResponseSchema: BaseModel
+) -> PagedResponseSchema:
     """Paginate the query"""
 
     return PagedResponseSchema(
