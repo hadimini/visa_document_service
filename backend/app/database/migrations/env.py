@@ -28,6 +28,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 from app.models.audit import LogEntry
+from app.models.tariffs import Tariff
 from app.models.tokens import BlackListToken
 from app.models.users import User
 
