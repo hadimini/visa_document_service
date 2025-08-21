@@ -11,12 +11,18 @@ from app.database.custom_types import ChoiceType
 class User(Base):
     __tablename__ = "users"
 
-    ROLE_USER: str = "user"
     ROLE_ADMIN: str = "admin"
+    ROLE_EMPLOYEE: str = "employee"
+    ROLE_INDIVIDUAL: str = "individual"
+    ROLE_MANAGER: str = "manager"
+    ROLE_OPERATOR: str = "operator"
 
     ROLE_CHOICES = (
-        (ROLE_USER, "user"),
-        (ROLE_ADMIN, "admin")
+        (ROLE_ADMIN, "admin"),
+        (ROLE_EMPLOYEE, "Employee"),
+        (ROLE_INDIVIDUAL, "Individual"),
+        (ROLE_MANAGER, "Manager"),
+        (ROLE_OPERATOR, "Operator"),
     )
 
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
@@ -25,7 +31,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     password: Mapped[str] = mapped_column(String(100), nullable=False)
-    role: Mapped[str] = mapped_column(ChoiceType(ROLE_CHOICES), nullable=False, server_default=ROLE_USER)
+    role: Mapped[str] = mapped_column(ChoiceType(ROLE_CHOICES), nullable=True, server_default=ROLE_INDIVIDUAL)
     salt: Mapped[str] = mapped_column(String(100), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

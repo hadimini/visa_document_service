@@ -12,7 +12,7 @@ class UserBaseSchema(CoreSchema):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     is_active: bool = True
-    role: Optional[str] = User.ROLE_USER
+    role: Optional[str] = User.ROLE_INDIVIDUAL
 
 
 class UserCreateSchema(CoreSchema):
@@ -42,4 +42,4 @@ class UserPasswordUpdateSchema(CoreSchema):
 
 class UserFilterSchema(CoreSchema):
     name: Annotated[str | None, Query(max_length=50, description="Filter by user's name")] = None
-    role: Literal["admin", "user"] | None = None
+    role: Literal["admin", "employee", "individual", "manager", "operator"] | None = None

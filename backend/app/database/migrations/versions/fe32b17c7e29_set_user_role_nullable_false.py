@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.alter_column('users', 'role',
                existing_type=sa.VARCHAR(),
                nullable=False,
-               existing_server_default=sa.text("'user'::character varying"))
+               existing_server_default=sa.text("'individual'::character varying"))
     # ### end Alembic commands ###
 
 
