@@ -50,6 +50,7 @@ class TestRegister:
             assert user_in_db is not None
             assert user_in_db.first_name == user_data["first_name"]
             assert user_in_db.last_name == user_data["last_name"]
+            assert user_in_db.role == User.ROLE_INDIVIDUAL
 
             log_entries = await audit_repo.get_for_user(user_id=user_in_db.id)
             assert len(log_entries) == 1
