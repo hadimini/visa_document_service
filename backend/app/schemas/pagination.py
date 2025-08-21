@@ -4,7 +4,7 @@ from pydantic.generics import GenericModel
 
 from app.schemas.core import CoreSchema
 
-TypeT = TypeVar("T")
+TypeT = TypeVar("TypeT")
 
 
 class PageParamsSchema(CoreSchema):
