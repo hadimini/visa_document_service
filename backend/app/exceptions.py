@@ -38,7 +38,7 @@ class AuthTokenBlacklistedException(HTTPException):
 
 
 class ForbiddenException(HTTPException):
-    def __init__(self, detail: str = None) -> None:
+    def __init__(self, detail: str = '') -> None:
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=detail if detail else "Forbidden",
@@ -46,7 +46,7 @@ class ForbiddenException(HTTPException):
 
 
 class NotFoundException(HTTPException):
-    def __init__(self, detail: str = None) -> None:
+    def __init__(self, detail: str = '') -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=detail if detail else "Not found"
