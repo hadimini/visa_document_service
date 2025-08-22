@@ -1,12 +1,11 @@
-from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import String, Integer, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql import func
 
 from app.database.custom_types import ChoiceType
 from app.database.db import Base
+from app.models.mixins import CreatedAtMixin, UpdatedAtMixin
 
 
 if TYPE_CHECKING:
@@ -14,7 +13,7 @@ if TYPE_CHECKING:
     from app.models.clients import Client
 
 
-class User(Base):
+class User(CreatedAtMixin, UpdatedAtMixin, Base):
     __tablename__ = "users"
 
     ROLE_ADMIN: str = "admin"
@@ -40,8 +39,6 @@ class User(Base):
     role: Mapped[str] = mapped_column(ChoiceType(ROLE_CHOICES), nullable=False, server_default=ROLE_INDIVIDUAL)
     salt: Mapped[str] = mapped_column(String(100), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
     employee_client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=True)
     manager_client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=True)
     individual_client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=True)

@@ -5,13 +5,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
 from app.database.db import Base
+from app.models.mixins import CreatedAtMixin, UpdatedAtMixin
 
 if TYPE_CHECKING:
     from app.models.tariffs import Tariff
     from app.models.users import User
 
 
-class Client(Base):
+class Client(CreatedAtMixin, UpdatedAtMixin, Base):
     __tablename__ = "clients"
 
     TYPE_INDIVIDUAL = 'individual'
