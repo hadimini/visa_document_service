@@ -45,3 +45,7 @@ class Client(Base):
         uselist=False,
         foreign_keys="User.individual_client_id"
     )
+
+    @staticmethod
+    def get_model_type() -> str:
+        return "client"
