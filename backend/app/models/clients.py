@@ -1,8 +1,14 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
 from app.database.db import Base
+
+if TYPE_CHECKING:
+    from app.models.tariffs import Tariff
+    from app.models.users import User
 
 
 class Client(Base):

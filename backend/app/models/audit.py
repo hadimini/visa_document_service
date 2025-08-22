@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -6,6 +7,10 @@ from sqlalchemy.sql import func
 
 from app.database.custom_types import ChoiceType
 from app.database.db import Base
+
+
+if TYPE_CHECKING:
+    from app.models.users import User
 
 
 class LogEntry(Base):

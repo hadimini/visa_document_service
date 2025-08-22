@@ -11,7 +11,7 @@ class TariffsRepository(BaseRepository):
         super().__init__(db)
 
     async def get_default(self) -> Tariff | None:
-        statement = select(Tariff).where(Tariff.is_default == True)
+        statement = select(Tariff).where(Tariff.is_default.is_(True))
         result = await self.db.execute(statement)
         tariff = result.one_or_none()
         return tariff[0] if tariff else None
