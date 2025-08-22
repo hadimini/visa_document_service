@@ -11,6 +11,7 @@ from app.models.mixins import CreatedAtMixin, UpdatedAtMixin
 if TYPE_CHECKING:
     from app.models.audit import LogEntry
     from app.models.clients import Client
+    from app.models.confirm import EmailConfirm, PasswordResetConfirm
 
 
 class User(CreatedAtMixin, UpdatedAtMixin, Base):
@@ -42,8 +43,8 @@ class User(CreatedAtMixin, UpdatedAtMixin, Base):
     employee_client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=True)
     manager_client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=True)
     individual_client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=True)
-    entry_logs: Mapped[list["LogEntry"]] = relationship(back_populates="user")
 
+    entry_logs: Mapped[list["LogEntry"]] = relationship(back_populates="user")
     employee_client: Mapped["Client"] = relationship(
         "Client", back_populates="employees", foreign_keys=employee_client_id
     )
@@ -55,6 +56,9 @@ class User(CreatedAtMixin, UpdatedAtMixin, Base):
         back_populates="individual",
         foreign_keys=individual_client_id
     )
+    email_confirms: Mapped["EmailConfirm"] = relationship(back_populates="user")
+    password_reset_confirms: Mapped["PasswordResetConfirm"] = relationship(back_populates="user")
+
 
     def __repr__(self):
         return f"<User {self.id}>"
