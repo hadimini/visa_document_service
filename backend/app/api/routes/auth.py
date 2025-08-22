@@ -6,6 +6,7 @@ from app.api.dependencies.db import get_repository
 from app.api.dependencies.token import get_current_user_token
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.clients import ClientRepository
+from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
 from app.exceptions import AuthFailedException, NotFoundException
@@ -35,10 +36,12 @@ async def register(
         users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
         audit_rep: AuditRepository = Depends(get_repository(AuditRepository)),
         clients_repo: ClientRepository = Depends(get_repository(ClientRepository)),
+        tariffs_repo: TariffsRepository = Depends(get_repository(TariffsRepository)),
 ):
     # Register creates individual clients
+    default_tariff = await tariffs_repo.get_default()
     new_client = ClientCreateSchema(
-        tariff_id=1,
+        tariff_id=default_tariff.id,
         name=f"{new_user.first_name} {new_user.last_name}",
         type=Client.TYPE_INDIVIDUAL
     )
