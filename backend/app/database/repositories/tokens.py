@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from mypyc.ir.ops import Sequence
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +14,11 @@ class TokensRepository(BaseRepository):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(db)
         self.jwt_service = JWTService()
+
+    async def get_all_blacklisted(self) -> Sequence[BlackListToken]:
+        statement = select(BlackListToken)
+        results = await self.db.execute(statement)
+        return results.scalars().all()
 
     async def get_by_id(self, *, token_id: str) -> BlackListToken | None:
         statement = select(BlackListToken).where(BlackListToken.id == token_id)

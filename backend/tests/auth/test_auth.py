@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import MAILGUN_API_URL
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.clients import ClientRepository
+from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
 from app.models import Tariff
 from app.models.audit import LogEntry
@@ -153,6 +154,56 @@ class TestLogin:
         assert access_token is not None
         payload: JWTPayloadSchema = jwt_service.decode_token(token=access_token)
         assert payload.sub == str(test_user.id)
+
+
+class TestLogout:
+    async def test_user_logout_success(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+            test_user: User,
+    ):
+        audit_repo = AuditRepository(async_db)
+        log_entries = await audit_repo.get_for_user(user_id=test_user.id)
+        assert log_entries == []
+
+        tokens_repo = TokensRepository(async_db)
+        blacklisted_tokens = await tokens_repo.get_all_blacklisted()
+        assert blacklisted_tokens == []
+
+        # Login
+
+        async_client.headers["content-type"] = "application/x-www-form-urlencoded"
+        login_data = {
+            "username": test_user.email,
+            "password": "samplepassword",
+        }
+        response = await async_client.post(
+            app.url_path_for("auth:login"),
+            data=login_data
+        )
+        assert response.status_code == status.HTTP_200_OK
+        access_token = response.json().get("token")
+
+        # Logout
+
+        response = await async_client.get(
+            url=app.url_path_for("auth:logout"),
+            headers={"Authorization": f"Bearer {access_token}"}
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["message"] == "Successfully logged out"
+
+        log_entries = await audit_repo.get_for_user(user_id=test_user.id)
+        assert len(log_entries) == 2
+        assert log_entries[0].user_id == test_user.id
+        assert log_entries[0].action == LogEntry.ACTION_LOGOUT
+
+        blacklisted_tokens = await tokens_repo.get_all_blacklisted()
+        assert len(blacklisted_tokens) == 1
+        access_token_jti = jwt_service.decode_token(token=access_token).jti
+        assert str(blacklisted_tokens[0].id) == access_token_jti
 
 
 class TestProfile:
