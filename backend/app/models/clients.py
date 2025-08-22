@@ -7,10 +7,7 @@ from app.database.db import Base
 
 class Client(Base):
     __tablename__ = "clients"
-    __mapper_args__ = {
-        "polymorphic_identity": "client",
-        "polymorphic_on": "type",
-    }
+
     TYPE_INDIVIDUAL = 'individual'
     TYPE_LEGAL = 'legal'
 

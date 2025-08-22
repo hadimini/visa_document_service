@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import MAILGUN_API_URL
 from app.database.repositories.audit import AuditRepository
+from app.database.repositories.clients import ClientRepository
 from app.database.repositories.users import UsersRepository
 from app.models import Tariff
 from app.models.audit import LogEntry
@@ -28,8 +29,8 @@ class TestRegister:
             test_tariff: Tariff,
     ):
         audit_repo = AuditRepository(async_db)
-
-        user_rpo = UsersRepository(async_db)
+        clients_repo = ClientRepository(async_db)
+        users_rpo = UsersRepository(async_db)
         user_data = {
             "email": "user@example.com",
             "first_name": "James",
@@ -48,11 +49,14 @@ class TestRegister:
             )
             assert response.status_code == status.HTTP_201_CREATED
 
-            user_in_db = await user_rpo.get_by_email(email=user_data["email"])
+            user_in_db = await users_rpo.get_by_email(email=user_data["email"])
             assert user_in_db is not None
             assert user_in_db.first_name == user_data["first_name"]
             assert user_in_db.last_name == user_data["last_name"]
             assert user_in_db.role == User.ROLE_INDIVIDUAL
+            assert user_in_db.individual_client_id is not None
+            created_client = await clients_repo.get_by_id(client_id=user_in_db.individual_client_id)
+            assert created_client.name == user_in_db.full_name
 
             log_entries = await audit_repo.get_for_user(user_id=user_in_db.id)
             assert len(log_entries) == 1

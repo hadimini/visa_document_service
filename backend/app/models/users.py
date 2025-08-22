@@ -59,3 +59,7 @@ class User(Base):
     @staticmethod
     def get_model_type() -> str:
         return "user"
+
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
