@@ -1,6 +1,5 @@
 from typing import Annotated, Generic, TypeVar
 from pydantic import conint
-from pydantic.generics import GenericModel
 
 from app.schemas.core import CoreSchema
 

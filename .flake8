@@ -1,0 +1,10 @@
+[flake8]
+max-line-length = 120
+ignore = E501, E126
+exclude =
+    migrations,
+    tests,
+    lib,
+    bin,
+    src,
+    __init__.py

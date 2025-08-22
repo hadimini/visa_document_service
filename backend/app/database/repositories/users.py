@@ -65,7 +65,6 @@ class UsersRepository(BaseRepository):
         users = result.scalars().all()
         return users
 
-
     async def get_by_id(self, *, user_id: int) -> User | None:
         statement = select(User).where(User.id == user_id)
         result = await self.db.execute(statement)

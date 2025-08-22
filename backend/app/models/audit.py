@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from sqlalchemy import String, Integer, DateTime, ForeignKey, Enum as SQLEnum
-from sqlalchemy.sql import func
+from sqlalchemy import String, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
 
-from app.database.db import Base
 from app.database.custom_types import ChoiceType
+from app.database.db import Base
 
 
 class LogEntry(Base):

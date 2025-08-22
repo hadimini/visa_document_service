@@ -17,6 +17,7 @@ async def lifespan(app: FastAPI):
     # await engine.dispose()
     print("🛑 Application shutting down!")
 
+
 def get_application() -> FastAPI:
     app = FastAPI(
         title=config.PROJECT_NAME,
@@ -35,5 +36,6 @@ def get_application() -> FastAPI:
     app.include_router(api_router, prefix=config.API_PREFIX)
 
     return app
+
 
 app = get_application()

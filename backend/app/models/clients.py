@@ -16,7 +16,7 @@ class Client(Base):
         (TYPE_LEGAL, 'Legal'),
     )
 
-    id : Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tariff_id: Mapped[int] = mapped_column(Integer, ForeignKey("tariffs.id", ondelete="RESTRICT"))
     name: Mapped[str] = mapped_column(String(100))
     type: Mapped[str] = mapped_column(ChoiceType(TYPE_CHOICES))

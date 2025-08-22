@@ -1,7 +1,6 @@
 from app.database.repositories.users import UsersRepository
-from app.models.users import User
-from app.services.recipient import RecipientService
 from app.services.email import EmailService
+from app.services.recipient import RecipientService
 
 
 class NotificationService:

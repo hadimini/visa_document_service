@@ -13,6 +13,7 @@ class JWTMetaSchema(CoreSchema):
 class JWTCredsSchema(CoreSchema):
     sub: str  # SUBJECT MUST BE A STRING
 
+
 class JWTPayloadSchema(JWTMetaSchema, JWTCredsSchema):
     pass
 

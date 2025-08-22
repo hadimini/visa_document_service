@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from app.schemas.core import CoreSchema
+
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
 
 
