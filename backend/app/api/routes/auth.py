@@ -9,7 +9,7 @@ from app.database.repositories.clients import ClientRepository
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
-from app.exceptions import AuthFailedException, NotFoundException
+from app.exceptions import AuthFailedException, NotFoundException, NoDefaultTariffException
 from app.models.audit import LogEntry
 from app.models.clients import Client
 from app.models.users import User
@@ -40,6 +40,10 @@ async def register(
 ):
     # Register creates individual clients
     default_tariff = await tariffs_repo.get_default()
+
+    if not default_tariff:
+        raise NoDefaultTariffException()
+
     new_client = ClientCreateSchema(
         tariff_id=default_tariff.id,
         name=f"{new_user.first_name} {new_user.last_name}",
