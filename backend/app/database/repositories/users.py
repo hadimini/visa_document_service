@@ -1,9 +1,9 @@
-from fastapi import HTTPException
 from pydantic import EmailStr
 from sqlalchemy import select, update, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
+from app.exceptions import AuthEmailAlreadyRegisteredException
 from app.models.users import User
 from app.schemas.pagination import PageParamsSchema
 from app.schemas.user import (
@@ -20,9 +20,9 @@ class UsersRepository(BaseRepository):
         super().__init__(db)
         self.auth_service = AuthService()
 
-    async def create(self, *, new_user: UserCreateSchema, **kwargs) -> User:
+    async def create(self, *, new_user: UserCreateSchema) -> User:
         if await self.get_by_email(email=new_user.email):
-            raise HTTPException(status_code=400, detail="Email already registered")
+            raise AuthEmailAlreadyRegisteredException(email=new_user.email)
 
         user_password_update = self.auth_service.create_salt_and_hashed_password(
             plaintext_password=new_user.password
@@ -31,7 +31,7 @@ class UsersRepository(BaseRepository):
             **new_user.model_dump(exclude={"password"}),
             **user_password_update.model_dump()
         )
-        new_user = User(**new_user.model_dump(), **kwargs)
+        new_user = User(**new_user.model_dump())
         self.db.add(new_user)
         await self.db.commit()
         await self.db.refresh(new_user)
@@ -84,7 +84,11 @@ class UsersRepository(BaseRepository):
         if not user:
             return None
 
-        if not self.auth_service.verify_password(password=password, salt=user.salt, hashed_password=user.password):
+        if not self.auth_service.verify_password(
+                password=password,
+                salt=user.salt,
+                hashed_password=user.password
+        ):
             return None
 
         return user

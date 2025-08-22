@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from sqlalchemy import String, Integer, Boolean, DateTime
+from sqlalchemy import String, Integer, Boolean, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
-from app.database.db import Base
 from app.database.custom_types import ChoiceType
+from app.database.db import Base
 
 
 class User(Base):
@@ -36,8 +36,22 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
-
+    employee_client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=True)
+    manager_client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=True)
+    individual_client_id: Mapped[int] = mapped_column(Integer, ForeignKey("clients.id"), nullable=True)
     entry_logs: Mapped[list["LogEntry"]] = relationship(back_populates="user")
+
+    employee_client: Mapped["Client"] = relationship(
+        "Client", back_populates="employees", foreign_keys=employee_client_id
+    )
+    manager_client: Mapped["Client"] = relationship(
+        "Client", back_populates="managers", foreign_keys=manager_client_id
+    )
+    individual_client: Mapped["Client"] = relationship(
+        "Client",
+        back_populates="individual",
+        foreign_keys=individual_client_id
+    )
 
     def __repr__(self):
         return f"<User {self.id}>"

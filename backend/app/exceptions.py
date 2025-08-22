@@ -1,6 +1,15 @@
 from fastapi import HTTPException, status
 
 
+class AuthEmailAlreadyRegisteredException(HTTPException):
+    def __init__(self, email: str):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Email {email} is already registered",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+
 class AuthFailedException(HTTPException):
     def __int__(self):
         super().__init__(

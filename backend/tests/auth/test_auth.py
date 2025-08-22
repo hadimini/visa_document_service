@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import MAILGUN_API_URL
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.users import UsersRepository
+from app.models import Tariff
 from app.models.audit import LogEntry
 from app.models.users import User
 from app.schemas.core import STRFTIME_FORMAT
@@ -24,6 +25,7 @@ class TestRegister:
             app: FastAPI,
             async_client: AsyncClient,
             async_db: AsyncSession,
+            test_tariff: Tariff,
     ):
         audit_repo = AuditRepository(async_db)
 
@@ -62,8 +64,9 @@ class TestRegister:
             app: FastAPI,
             async_client: AsyncClient,
             async_db: AsyncSession,
+            test_tariff: Tariff,
     ):
-        user_repo = UsersRepository(async_db)
+        users_repo = UsersRepository(async_db)
         user_data = {
             "email": "test_user@example.io",
             "first_name": "James",
@@ -82,7 +85,7 @@ class TestRegister:
             )
             assert response.status_code == status.HTTP_201_CREATED
 
-            db_user = await user_repo.get_by_email(email=user_data["email"])
+            db_user = await users_repo.get_by_email(email=user_data["email"])
             assert db_user is not None
             assert db_user.password is not None and db_user.password != user_data["password"]
             assert db_user.salt is not None
@@ -97,6 +100,7 @@ class TestRegister:
             app: FastAPI,
             async_client: AsyncClient,
             test_user: User,
+            test_tariff: Tariff,
     ) -> None:
         user_data = {
             "email": "testuser@example.com",

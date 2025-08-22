@@ -12,7 +12,7 @@ class UserBaseSchema(CoreSchema):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     is_active: bool = True
-    role: Optional[str] = User.ROLE_INDIVIDUAL
+    role: Literal["admin", "employee", "individual", "manager", "operator"] | None = User.ROLE_INDIVIDUAL
 
 
 class UserCreateSchema(CoreSchema):
@@ -20,6 +20,10 @@ class UserCreateSchema(CoreSchema):
     first_name: Annotated[str, StringConstraints(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9 ]+$")]
     last_name: Annotated[str, StringConstraints(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9 ]+$")]
     password: Annotated[str, StringConstraints(min_length=5, max_length=100)]
+    role: Literal["admin", "employee", "individual", "manager", "operator"] | None = None
+    employee_client_id: Optional[int] = None
+    individual_client_id: Optional[int] = None
+    manager_client_id: Optional[int] = None
 
 
 class UserCreateInDBSchema(UserCreateSchema):

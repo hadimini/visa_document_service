@@ -1,16 +1,19 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, status, Body
+from fastapi import APIRouter, BackgroundTasks, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
 from app.api.dependencies.token import get_current_user_token
 from app.database.repositories.audit import AuditRepository
+from app.database.repositories.clients import ClientRepository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
 from app.exceptions import AuthFailedException, NotFoundException
 from app.models.audit import LogEntry
+from app.models.clients import Client
 from app.models.users import User
 from app.schemas.audit import LogEntryCreateSchema
+from app.schemas.client import ClientCreateSchema
 from app.schemas.core import SuccessResponseScheme
 from app.schemas.token import TokenPairSchema, TokenVerifySchema
 from app.schemas.user import UserPublicSchema, UserCreateSchema, UserUpdateSchema
@@ -29,24 +32,37 @@ router = APIRouter()
 async def register(
         new_user: UserCreateSchema,
         bg_tasks: BackgroundTasks,
-        user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
+        users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
         audit_rep: AuditRepository = Depends(get_repository(AuditRepository)),
+        clients_repo: ClientRepository = Depends(get_repository(ClientRepository)),
 ):
-    created_user = await user_repo.create(new_user=new_user)
-    await audit_rep.create(
-        new_entry=LogEntryCreateSchema(user_id=created_user.id, action=LogEntry.ACTION_REGISTER)
+    # Register creates individual clients
+    new_client = ClientCreateSchema(
+        tariff_id=1,
+        name=f"{new_user.first_name} {new_user.last_name}",
+        type=Client.TYPE_INDIVIDUAL
     )
-    bg_tasks.add_task(task_notify_on_email_confirm, created_user.id, user_repo)
+    new_client = await clients_repo.create(new_client=new_client)
+    new_user = new_user.model_copy(update={"individual_client_id": new_client.id})
+    created_user = await users_repo.create(new_user=new_user)
+
+    await audit_rep.create(
+        new_entry=LogEntryCreateSchema(
+            user_id=created_user.id,
+            action=LogEntry.ACTION_REGISTER
+        )
+    )
+    bg_tasks.add_task(task_notify_on_email_confirm, created_user.id, users_repo)
     return created_user
 
 
 @router.post("/login", name="auth:login")
 async def login(
         form_data: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
-        user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
+        users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
         audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
-    user: User = await user_repo.authenticate(email=form_data.username, password=form_data.password)
+    user: User = await users_repo.authenticate(email=form_data.username, password=form_data.password)
 
     if not user:
         raise AuthFailedException()
@@ -92,10 +108,10 @@ async def profile_detail(
 async def profile_update(
         user_data: UserUpdateSchema,
         current_user: User = Depends(get_current_active_user),
-        user_repo: UsersRepository = Depends(get_repository(UsersRepository)),
+        users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
         audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
-    updated_user = await user_repo.update(user=current_user, data=user_data)
+    updated_user = await users_repo.update(user=current_user, data=user_data)
     entry_log: LogEntryCreateSchema = LogEntryCreateSchema(
         user_id=updated_user.id,
         action=LogEntry.ACTION_UPDATE,
@@ -109,10 +125,10 @@ async def profile_update(
 @router.post("/verify_token", name="auth:token-verify")
 async def token_verify(
         token_data: TokenVerifySchema,
-        user_repo: UsersRepository = Depends(get_repository(UsersRepository))
+        users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
     payload = jwt_service.decode_token(token=token_data.token)
-    user = await user_repo.get_by_id(user_id=int(payload.sub))
+    user = await users_repo.get_by_id(user_id=int(payload.sub))
 
     if not user:
         raise NotFoundException(detail="User not found")
@@ -120,3 +136,4 @@ async def token_verify(
     return {
         "msg": "success"
     }
+

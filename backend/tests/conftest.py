@@ -8,8 +8,11 @@ from sqlalchemy.pool import NullPool
 
 from app.api.server import get_application
 from app.config import DATABASE_URL
+from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.users import UsersRepository
+from app.models.tariffs import Tariff
 from app.models.users import User
+from app.schemas.tariff import TariffCreateSchema
 from app.schemas.user import UserCreateSchema
 
 
@@ -90,6 +93,20 @@ async def async_client(async_db, app: FastAPI):
 
 
 @pytest_asyncio.fixture
+async def test_tariff(
+        async_db: AsyncSession,
+) -> Tariff:
+    new_tariff = TariffCreateSchema(
+        name="Test Tariff",
+        is_default=True
+    )
+    tariffs_repo = TariffsRepository(async_db)
+    return await tariffs_repo.create(new_tariff=new_tariff)
+
+
+# TODO: This may need update to create individual
+
+@pytest_asyncio.fixture
 async def test_user(async_db: AsyncSession) -> User:
     new_user = UserCreateSchema(
         email=EmailStr("testuser@example.com"),
@@ -97,8 +114,8 @@ async def test_user(async_db: AsyncSession) -> User:
         last_name="Smith",
         password="samplepassword",
     )
-    user_repo = UsersRepository(async_db)
-    return await user_repo.create(new_user=new_user)
+    users_repo = UsersRepository(async_db)
+    return await users_repo.create(new_user=new_user)
 
 
 @pytest_asyncio.fixture
@@ -110,6 +127,7 @@ async def test_admin(
         first_name="Max",
         last_name="Smith",
         password="Samplepassword",
+        role=User.ROLE_ADMIN
     )
-    user_repo = UsersRepository(async_db)
-    return await user_repo.create(new_user=new_user, **{"role": User.ROLE_ADMIN})
+    users_repo = UsersRepository(async_db)
+    return await users_repo.create(new_user=new_user)

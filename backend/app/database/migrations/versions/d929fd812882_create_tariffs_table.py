@@ -24,6 +24,7 @@ def upgrade() -> None:
     sa.Column('is_default', sa.Boolean(), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
+    op.execute("INSERT INTO tariffs (name, is_default) VALUES ('Basic Tariff', TRUE)")
     # ### end Alembic commands ###
 
 
