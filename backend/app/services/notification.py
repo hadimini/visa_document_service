@@ -15,6 +15,6 @@ class NotificationService:
             user_id: int,
             users_repo: UsersRepository
     ) -> None:
-        user: User = await users_repo.get_by_id(user_id=user_id)
+        user = await users_repo.get_by_id(user_id=user_id)
         recipient = self.recipient_service.get_notified_by_email_confirm(user=user)
         # self.email_service.send([recipient])
