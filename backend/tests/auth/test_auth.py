@@ -15,7 +15,7 @@ from app.models import Tariff
 from app.models.audit import LogEntry
 from app.models.users import User
 from app.schemas.core import STRFTIME_FORMAT
-from app.schemas.token import JWTPayloadSchema, TokenPairSchema, JWTSchema
+from app.schemas.token import JWTPayloadSchema, TokenPairSchema
 from app.services import auth_service, jwt_service
 
 pytestmark = pytest.mark.asyncio
@@ -241,7 +241,7 @@ class TestProfile:
             test_user: User,
     ):
         token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_user)
-        access_token: JWTSchema = token_pair.access.token
+        access_token: str = token_pair.access
 
         response = await async_client.get(
             app.url_path_for("auth:profile-detail"),
@@ -272,7 +272,7 @@ class TestProfile:
         assert log_entries == []
 
         token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_user)
-        access_token: JWTSchema = token_pair.access.token
+        access_token: str = token_pair.access
         update_data = {
             "first_name": "Updated fname",
             "last_name": "Updated lname",

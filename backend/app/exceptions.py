@@ -18,6 +18,24 @@ class AuthEmailAlreadyRegisteredException(HTTPException):
         )
 
 
+class AuthEmailAlreadyVerifiedException(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email is already confirmed",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+
+class AuthEmailNotFoundException(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email not found",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+
 class AuthFailedException(HTTPException):
     def __int__(self):
         super().__init__(
@@ -58,4 +76,22 @@ class NotFoundException(HTTPException):
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=detail if detail else "Not found"
+        )
+
+
+class InvalidOrExpiredConfirmationTokenException(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired confirmation token",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+
+
+class InvalidTokenException(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token payload",
+            headers={"WWW-Authenticate": "Bearer"}
         )

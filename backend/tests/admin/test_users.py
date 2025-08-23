@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.users import User
 from app.schemas.core import STRFTIME_FORMAT
-from app.schemas.token import TokenPairSchema, JWTSchema
+from app.schemas.token import TokenPairSchema
 from app.services import jwt_service
 
 
@@ -22,7 +22,7 @@ class TestUsers:
             test_admin: User
     ):
         token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_admin)
-        access_token: JWTSchema = token_pair.access.token
+        access_token: str = token_pair.access
 
         response = await async_client.get(
             app.url_path_for("admin:user-list"),
@@ -50,7 +50,7 @@ class TestUsers:
             test_admin: User
     ):
         token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_admin)
-        access_token: JWTSchema = token_pair.access.token
+        access_token: str = token_pair.access
 
         response = await async_client.get(
             app.url_path_for("admin:user-detail", user_id=test_admin.id),

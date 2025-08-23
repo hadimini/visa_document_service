@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String, Integer, Boolean, DateTime, ForeignKey
+from pydantic import EmailStr
+from sqlalchemy import String, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
@@ -11,7 +12,6 @@ from app.models.mixins import CreatedAtMixin, UpdatedAtMixin
 if TYPE_CHECKING:
     from app.models.audit import LogEntry
     from app.models.clients import Client
-    from app.models.confirm import EmailConfirm, PasswordResetConfirm
 
 
 class User(CreatedAtMixin, UpdatedAtMixin, Base):
@@ -34,7 +34,7 @@ class User(CreatedAtMixin, UpdatedAtMixin, Base):
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50))
-    email: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
+    email: Mapped[EmailStr] = mapped_column(String(100), unique=True, nullable=False, index=True)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     password: Mapped[str] = mapped_column(String(100), nullable=False)
     role: Mapped[str] = mapped_column(ChoiceType(ROLE_CHOICES), nullable=False, server_default=ROLE_INDIVIDUAL)
@@ -56,9 +56,6 @@ class User(CreatedAtMixin, UpdatedAtMixin, Base):
         back_populates="individual",
         foreign_keys=individual_client_id
     )
-    email_confirms: Mapped["EmailConfirm"] = relationship(back_populates="user")
-    password_reset_confirms: Mapped["PasswordResetConfirm"] = relationship(back_populates="user")
-
 
     def __repr__(self):
         return f"<User {self.id}>"

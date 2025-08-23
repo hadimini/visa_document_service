@@ -3,7 +3,7 @@ from sqlalchemy import select, update, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
-from app.exceptions import AuthEmailAlreadyRegisteredException
+from app.exceptions import AuthEmailAlreadyRegisteredException, AuthEmailAlreadyVerifiedException
 from app.models.users import User
 from app.schemas.pagination import PageParamsSchema
 from app.schemas.user import (
@@ -91,3 +91,12 @@ class UsersRepository(BaseRepository):
             return None
 
         return user
+
+    async def verify_email(self, *, user_id: int):
+        user: User = await self.get_by_id(user_id=user_id)
+
+        if user.email_verified:
+            raise AuthEmailAlreadyVerifiedException()
+
+        user.email_verified = True
+        await self.db.commit()

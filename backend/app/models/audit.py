@@ -24,6 +24,7 @@ class LogEntry(Base):
     ACTION_LOGOUT = "logout"
     ACTION_REGISTER = "register"
     ACTION_UPDATE = "update"
+    ACTION_VERIFY = "verify"
 
     ACTION_CHOICES = (
         (ACTION_ACCESS, "Access"),
@@ -34,6 +35,7 @@ class LogEntry(Base):
         (ACTION_LOGOUT, "Logout"),
         (ACTION_REGISTER, "Register"),
         (ACTION_UPDATE, "Update"),
+        (ACTION_VERIFY, "Verify"),
     )
 
     id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)

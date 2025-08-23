@@ -12,21 +12,17 @@ class JWTMetaSchema(CoreSchema):
 
 class JWTCredsSchema(CoreSchema):
     sub: str  # SUBJECT MUST BE A STRING
+    type: str | None = None
+    role: str | None = None
 
 
 class JWTPayloadSchema(JWTMetaSchema, JWTCredsSchema):
     pass
 
 
-class JWTSchema(CoreSchema):
-    token: str
-    payload: JWTPayloadSchema
-    expire: datetime
-
-
 class TokenPairSchema(CoreSchema):
-    access: JWTSchema
-    refresh: JWTSchema
+    access: str
+    refresh: str
 
 
 class TokenVerifySchema(CoreSchema):

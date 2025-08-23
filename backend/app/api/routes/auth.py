@@ -1,5 +1,6 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, status
+from fastapi import APIRouter, BackgroundTasks, Depends, status, Body
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import EmailStr
 
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
@@ -9,7 +10,14 @@ from app.database.repositories.clients import ClientRepository
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
-from app.exceptions import AuthFailedException, NotFoundException, NoDefaultTariffException
+from app.exceptions import (
+    AuthFailedException,
+    NotFoundException,
+    NoDefaultTariffException,
+    InvalidOrExpiredConfirmationTokenException,
+    InvalidTokenException,
+    AuthEmailNotFoundException
+)
 from app.models.audit import LogEntry
 from app.models.clients import Client
 from app.models.users import User
@@ -47,7 +55,7 @@ async def register(
     new_client = ClientCreateSchema(
         tariff_id=default_tariff.id,
         name=f"{new_user.first_name} {new_user.last_name}",
-        type=Client.TYPE_INDIVIDUAL
+        type=Client.TYPE_INDIVIDUAL  # noqa
     )
     new_client = await clients_repo.create(new_client=new_client)
     new_user = new_user.model_copy(update={"individual_client_id": new_client.id})
@@ -59,8 +67,57 @@ async def register(
             action=LogEntry.ACTION_REGISTER
         )
     )
-    bg_tasks.add_task(task_notify_on_email_confirm, created_user.id, users_repo)
+    bg_tasks.add_task(task_notify_on_email_confirm, created_user)
     return created_user
+
+
+@router.get(
+    path="/confirm-email",
+    name="auth:confirm-email",
+    response_model=SuccessResponseScheme,
+)
+async def confirm_email(
+        token: str,
+        users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
+        audit_rep: AuditRepository = Depends(get_repository(AuditRepository))
+):
+    payload = jwt_service.verify_email_confirmation_token(token=token)
+
+    if not payload:
+        raise InvalidOrExpiredConfirmationTokenException()
+
+    user_id = payload.sub
+
+    if not user_id:
+        raise InvalidTokenException()
+
+    await users_repo.verify_email(user_id=int(user_id))
+    await audit_rep.create(
+        new_entry=LogEntryCreateSchema(
+            user_id=int(user_id),
+            action=LogEntry.ACTION_VERIFY
+        )
+    )
+    return {"message": "Email successfully confirmed"}
+
+
+@router.post(
+    path="/confirm-email-resend",
+    name="auth:confirm-email-resend",
+    response_model=SuccessResponseScheme,
+)
+async def confirm_email_resend(
+        bg_tasks: BackgroundTasks,
+        email: EmailStr = Body(..., embed=True),
+        users_repo: UsersRepository = Depends(get_repository(UsersRepository))
+) -> SuccessResponseScheme:
+    user = await users_repo.get_by_email(email=email)
+
+    if not user:
+        raise AuthEmailNotFoundException()
+
+    bg_tasks.add_task(task_notify_on_email_confirm, user)
+    return {"message": "Confirmation email sent"}
 
 
 @router.post("/login", name="auth:login")
@@ -82,7 +139,7 @@ async def login(
 
     token_pair: TokenPairSchema = jwt_service.create_token_pair(user=user)
     return {
-        "token": token_pair.access.token
+        "token": token_pair.access
     }
 
 

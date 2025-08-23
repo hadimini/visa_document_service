@@ -40,6 +40,18 @@ class UpdatedAtSchemaMixin(BaseModel):
         return value or datetime.now()
 
 
+class CompletedAtSchemaMixin(BaseModel):
+    completed_at: datetime
+
+    @field_validator("completed_at")
+    def parse_completed_at(cls, value: datetime) -> str:
+        return value.strftime(STRFTIME_FORMAT)
+
+    @field_validator('completed_at')
+    def default_completed_at(cls, value: datetime) -> datetime:
+        return value or datetime.now()
+
+
 class DateTimeSchemaMixin(CreatedAtSchemaMixin, UpdatedAtSchemaMixin):
     pass
 

@@ -1,5 +1,7 @@
 from typing import Optional
 
+from pydantic import EmailStr
+
 from app.schemas.core import CoreSchema
 
 
@@ -10,7 +12,7 @@ class PdfFileSchema(CoreSchema):
 
 
 class RecipientSchema(CoreSchema):
-    email: str
+    email: EmailStr
     subject: str
     html: str
     cc_email: Optional[list[str]] = None
