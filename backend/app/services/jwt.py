@@ -46,7 +46,7 @@ class JWTService:
             iat=int(datetime.now().timestamp())
         )
         token_creds: JWTCredsSchema = JWTCredsSchema(sub=str(user.id), type=self.TYPE_AUTH_TOKEN, role=user.role)
-        payload: JWTPayloadSchema = JWTPayloadSchema(
+        payload = JWTPayloadSchema(
             **token_meta.model_dump(),
             **token_creds.model_dump()
         )

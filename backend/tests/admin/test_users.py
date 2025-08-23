@@ -21,9 +21,10 @@ class TestUsers:
             async_db: AsyncSession,
             test_admin: User
     ):
-        token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_admin)
-        access_token: str = token_pair.access
+        token_pair = jwt_service.create_token_pair(user=test_admin)
+        assert token_pair is not None
 
+        access_token: str = token_pair.access
         response = await async_client.get(
             app.url_path_for("admin:user-list"),
             headers={"Authorization": f"Bearer {access_token}"}
@@ -49,9 +50,10 @@ class TestUsers:
             async_db: AsyncSession,
             test_admin: User
     ):
-        token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_admin)
-        access_token: str = token_pair.access
+        token_pair = jwt_service.create_token_pair(user=test_admin)
+        assert token_pair is not None
 
+        access_token: str = token_pair.access
         response = await async_client.get(
             app.url_path_for("admin:user-detail", user_id=test_admin.id),
             headers={"Authorization": f"Bearer {access_token}"}

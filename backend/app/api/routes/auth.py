@@ -55,7 +55,7 @@ async def register(
     new_client = ClientCreateSchema(
         tariff_id=default_tariff.id,
         name=f"{new_user.first_name} {new_user.last_name}",
-        type=Client.TYPE_INDIVIDUAL  # noqa
+        type=Client.TYPE_INDIVIDUAL  # type: ignore[arg-type]
     )
     new_client = await clients_repo.create(new_client=new_client)
     new_user = new_user.model_copy(update={"individual_client_id": new_client.id})
@@ -110,7 +110,7 @@ async def confirm_email_resend(
         bg_tasks: BackgroundTasks,
         email: EmailStr = Body(..., embed=True),
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
-) -> SuccessResponseScheme:
+):
     user = await users_repo.get_by_email(email=email)
 
     if not user:
@@ -126,7 +126,7 @@ async def login(
         users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
         audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
-    user: User = await users_repo.authenticate(email=form_data.username, password=form_data.password)
+    user = await users_repo.authenticate(email=form_data.username, password=form_data.password)
 
     if not user:
         raise AuthFailedException()
@@ -137,10 +137,12 @@ async def login(
     )
     await audit_repo.create(new_entry=entry_log)
 
-    token_pair: TokenPairSchema = jwt_service.create_token_pair(user=user)
-    return {
-        "token": token_pair.access
-    }
+    token_pair = jwt_service.create_token_pair(user=user)
+    # Todo: Check if needs else
+    if token_pair:
+        return {
+            "token": token_pair.access
+        }
 
 
 @router.get("/logout", response_model=SuccessResponseScheme, name="auth:logout")

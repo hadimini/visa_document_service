@@ -12,7 +12,7 @@ class UserBaseSchema(CoreSchema):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     is_active: bool = True
-    role: Literal["admin", "employee", "individual", "manager", "operator"] | None = User.ROLE_INDIVIDUAL
+    role: Literal["admin", "employee", "individual", "manager", "operator"] | None = None  # type: ignore[arg-type]
 
 
 class UserCreateSchema(CoreSchema):

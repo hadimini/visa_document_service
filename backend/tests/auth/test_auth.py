@@ -56,6 +56,7 @@ class TestRegister:
             assert user_in_db.last_name == user_data["last_name"]
             assert user_in_db.role == User.ROLE_INDIVIDUAL
             assert user_in_db.individual_client_id is not None
+
             created_client = await clients_repo.get_by_id(client_id=user_in_db.individual_client_id)
             assert created_client.name == user_in_db.full_name
 
@@ -240,9 +241,10 @@ class TestProfile:
             async_client: AsyncClient,
             test_user: User,
     ):
-        token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_user)
-        access_token: str = token_pair.access
+        token_pair = jwt_service.create_token_pair(user=test_user)
+        assert token_pair is not None
 
+        access_token: str = token_pair.access
         response = await async_client.get(
             app.url_path_for("auth:profile-detail"),
             headers={"Authorization": f"Bearer {access_token}"}
@@ -271,7 +273,9 @@ class TestProfile:
         log_entries: Sequence = await audit_repo.get_for_user(user_id=test_user.id)
         assert log_entries == []
 
-        token_pair: TokenPairSchema = jwt_service.create_token_pair(user=test_user)
+        token_pair = jwt_service.create_token_pair(user=test_user)
+        assert token_pair is not None
+
         access_token: str = token_pair.access
         update_data = {
             "first_name": "Updated fname",

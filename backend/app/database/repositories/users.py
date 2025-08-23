@@ -92,8 +92,8 @@ class UsersRepository(BaseRepository):
 
         return user
 
-    async def verify_email(self, *, user_id: int):
-        user: User = await self.get_by_id(user_id=user_id)
+    async def verify_email(self, *, user_id: int) -> None:
+        user = await self.get_by_id(user_id=user_id)
 
         if user.email_verified:
             raise AuthEmailAlreadyVerifiedException()
