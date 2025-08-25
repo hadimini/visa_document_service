@@ -1,3 +1,5 @@
+from fastapi_mail import ConnectionConfig
+from pydantic import SecretStr, EmailStr
 from starlette.config import Config
 from starlette.datastructures import Secret
 
@@ -18,6 +20,19 @@ JWT_TOKEN_PREFIX = config("JWT_TOKEN_PREFIX", cast=str, default="Bearer")
 MAILGUN_API_KEY = config("MAILGUN_API_KEY", cast=Secret)
 MAILGUN_DOMAIN = config("MAILGUN_DOMAIN", cast=str)
 MAILGUN_API_URL = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
+
+mail_config = ConnectionConfig(
+    MAIL_USERNAME=config("MAIL_USERNAME", cast=str),
+    MAIL_PASSWORD=config("MAIL_PASSWORD", cast=SecretStr),
+    MAIL_FROM=config("MAIL_FROM", cast=str),
+    MAIL_PORT=config("MAIL_PORT", cast=int, default=1025),
+    MAIL_SERVER=config("MAIL_SERVER", cast=str, default="localhost"),
+    MAIL_STARTTLS=config("MAIL_STARTTLS", cast=bool, default=False),
+    MAIL_SSL_TLS=config("MAIL_SSL_TLS", cast=bool, default=False),
+    USE_CREDENTIALS=config("USE_CREDENTIALS", cast=bool, default=False),
+    VALIDATE_CERTS=config("VALIDATE_CERTS", cast=bool, default=False),
+)
+
 POSTGRES_USER = config("POSTGRES_USER", cast=str)
 POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", cast=Secret)
 POSTGRES_SERVER = config("POSTGRES_SERVER", cast=str, default="db")

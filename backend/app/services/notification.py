@@ -15,4 +15,4 @@ class NotificationService:
             user: User,
     ) -> None:
         recipient = self.recipient_service.get_notified_by_email_confirm(user=user)
-        # self.email_service.send([recipient])
+        await self.email_service.send([recipient])

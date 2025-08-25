@@ -54,7 +54,3 @@ class CompletedAtSchemaMixin(BaseModel):
 
 class DateTimeSchemaMixin(CreatedAtSchemaMixin, UpdatedAtSchemaMixin):
     pass
-
-
-class SuccessResponseScheme(BaseModel):
-    message: str

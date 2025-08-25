@@ -1,4 +1,5 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, status, Body
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import EmailStr
 
@@ -23,8 +24,7 @@ from app.models.clients import Client
 from app.models.users import User
 from app.schemas.audit import LogEntryCreateSchema
 from app.schemas.client import ClientCreateSchema
-from app.schemas.core import SuccessResponseScheme
-from app.schemas.token import TokenPairSchema, TokenVerifySchema
+from app.schemas.token import TokenVerifySchema
 from app.schemas.user import UserPublicSchema, UserCreateSchema, UserUpdateSchema
 from app.services import jwt_service
 from app.tasks import task_notify_on_email_confirm
@@ -74,13 +74,12 @@ async def register(
 @router.get(
     path="/confirm-email",
     name="auth:confirm-email",
-    response_model=SuccessResponseScheme,
 )
 async def confirm_email(
         token: str,
         users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
         audit_rep: AuditRepository = Depends(get_repository(AuditRepository))
-):
+) -> JSONResponse:
     payload = jwt_service.verify_email_confirmation_token(token=token)
 
     if not payload:
@@ -98,26 +97,31 @@ async def confirm_email(
             action=LogEntry.ACTION_VERIFY
         )
     )
-    return {"message": "Email successfully confirmed"}
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "Email successfully confirmed"}
+    )
 
 
 @router.post(
     path="/confirm-email-resend",
     name="auth:confirm-email-resend",
-    response_model=SuccessResponseScheme,
 )
 async def confirm_email_resend(
         bg_tasks: BackgroundTasks,
         email: EmailStr = Body(..., embed=True),
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
-):
+) -> JSONResponse:
     user = await users_repo.get_by_email(email=email)
 
     if not user:
         raise AuthEmailNotFoundException()
 
     bg_tasks.add_task(task_notify_on_email_confirm, user)
-    return {"message": "Confirmation email sent"}
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "Confirmation email sent"}
+    )
 
 
 @router.post("/login", name="auth:login")
@@ -140,27 +144,29 @@ async def login(
     token_pair = jwt_service.create_token_pair(user=user)
     # Todo: Check if needs else
     if token_pair:
-        return {
-            "token": token_pair.access
-        }
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"token": token_pair.access}
+        )
 
 
-@router.get("/logout", response_model=SuccessResponseScheme, name="auth:logout")
+@router.get("/logout", name="auth:logout")
 async def logout(
         current_user: User = Depends(get_current_active_user),
         token: str = Depends(get_current_user_token),
         tokens_repo: TokensRepository = Depends(get_repository(TokensRepository)),
         audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
-):
+) -> JSONResponse:
     await tokens_repo.blacklist_token(token=token)
     entry_log: LogEntryCreateSchema = LogEntryCreateSchema(
         user_id=current_user.id,
         action=LogEntry.ACTION_LOGOUT
     )
     await audit_repo.create(new_entry=entry_log)
-    return {
-        "message": "Successfully logged out"
-    }
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "Successfully logged out"}
+    )
 
 
 @router.get("/profile", response_model=UserPublicSchema, name="auth:profile-detail")
@@ -192,13 +198,14 @@ async def profile_update(
 async def token_verify(
         token_data: TokenVerifySchema,
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
-):
+) -> JSONResponse:
     payload = jwt_service.decode_token(token=token_data.token)
     user = await users_repo.get_by_id(user_id=int(payload.sub))
 
     if not user:
         raise NotFoundException(detail="User not found")
 
-    return {
-        "msg": "success"
-    }
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": "Success"}
+    )
