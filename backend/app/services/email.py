@@ -12,7 +12,7 @@ class EmailService:
             message = MessageSchema(
                 subject=recipient.subject,
                 recipients=[recipient.email],
-                body=recipient.html,
+                template_body=recipient.body.model_dump(),
                 subtype=MessageType.html,
             )
-            await fm_mail.send_message(message)
+            await fm_mail.send_message(message, template_name="email_confirm.html")

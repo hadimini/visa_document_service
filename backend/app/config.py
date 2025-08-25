@@ -1,3 +1,6 @@
+from pathlib import Path
+
+# from fastapi.templating import Jinja2Templates
 from fastapi_mail import ConnectionConfig, FastMail
 from pydantic import SecretStr
 from starlette.config import Config
@@ -13,10 +16,11 @@ SECRET_KEY = config("SECRET_KEY", cast=Secret)
 
 JWT_ACCESS_TOKEN_EXPIRES_MINUTES = 30
 JWT_REFRESH_TOKEN_EXPIRES_MINUTES = 15 * 24 * 60  # 15 days
-JWT_EMAIL_CONFIRMATION_TOKEN_EXPIRES_MINUTES = 15 * 24 * 60  # 7 days
+JWT_EMAIL_CONFIRMATION_TOKEN_EXPIRES_DAYS = 3
+JWT_EMAIL_CONFIRMATION_TOKEN_EXPIRES_MINUTES = JWT_EMAIL_CONFIRMATION_TOKEN_EXPIRES_DAYS * 24 * 60  # 3 days
 JWT_ALGORITHM = config("JWT_ALGORITHM", cast=str, default="HS256")
 JWT_TOKEN_PREFIX = config("JWT_TOKEN_PREFIX", cast=str, default="Bearer")
-# 
+
 mail_config = ConnectionConfig(
     MAIL_USERNAME=config("MAIL_USERNAME", cast=str),
     MAIL_PASSWORD=config("MAIL_PASSWORD", cast=SecretStr),
@@ -27,8 +31,12 @@ mail_config = ConnectionConfig(
     MAIL_SSL_TLS=config("MAIL_SSL_TLS", cast=bool, default=False),
     USE_CREDENTIALS=config("USE_CREDENTIALS", cast=bool, default=False),
     VALIDATE_CERTS=config("VALIDATE_CERTS", cast=bool, default=False),
+    TEMPLATE_FOLDER=Path(__file__).parent / 'templates/email'
 )
 fm_mail = FastMail(mail_config)
+
+FRONTEND_URL = "http://127.0.0.1:8000/"
+BACKEND_URL = "http://127.0.0.1:8000/api/"
 
 POSTGRES_USER = config("POSTGRES_USER", cast=str)
 POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", cast=Secret)

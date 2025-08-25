@@ -1,4 +1,3 @@
-import base64
 from collections.abc import Sequence
 
 import pytest
@@ -69,17 +68,18 @@ class TestRegister:
             captured_email = outbox[0]
             assert captured_email["from"] == mail_config.MAIL_FROM
             assert captured_email["to"] == user_in_db.email
-            assert captured_email["subject"] == "Confirm your email"
+            assert captured_email["subject"] == "Action Required: Verify Your Email"
             assert captured_email.is_multipart() is True
 
             for part in captured_email.walk():
                 ctype = part.get_content_type()
                 cdisp = part.get("Content-Disposition")
 
-                if ctype == "text/html" and not cdisp:
-                    body = part.get_payload(decode=True).decode()
-                    assert "Confirm your email" in body
+                if ctype == "multipart/mixed" and not cdisp:
+                    body = part.get_payload()[0].get_payload(decode=True)
+                    assert b"Please confirm your email address by clicking the link below" in body
                     break
+
 
     async def test_saved_password_is_hashed_and_has_salt(
             self,
