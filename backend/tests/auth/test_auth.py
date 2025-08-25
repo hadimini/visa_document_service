@@ -154,6 +154,25 @@ class TestRegister:
         )
         assert response.status_code == status_code
 
+    async def test_register_email_exists_error(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            test_user: User,
+            test_tariff: Tariff,
+    ) -> None:
+        user_data = {
+            "email": "testuser@example.com",
+            "first_name": "Joe",
+            "last_name": "Doe",
+            "password": "PasswordSample"
+        }
+        response = await async_client.post(
+            app.url_path_for("auth:register"),
+            json=user_data,
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
     async def test_email_confirm_success(
             self,
             app: FastAPI,
@@ -205,29 +224,57 @@ class TestRegister:
         assert response.status_code == status.HTTP_200_OK
         assert response.json().get("message") == "Email successfully confirmed"
 
+        assert user_in_db.email_verified is True
+
         log_entries = await audit_repo.get_for_user(user_id=user_in_db.id)
         assert len(log_entries) == 2
         assert log_entries[0].user_id == user_in_db.id
         assert log_entries[0].action == LogEntry.ACTION_VERIFY
 
-    async def test_register_email_exists_error(
+    async def test_email_already_confirmed(
             self,
             app: FastAPI,
             async_client: AsyncClient,
-            test_user: User,
-            test_tariff: Tariff,
-    ) -> None:
+            async_db: AsyncSession,
+            fastapi_mail: FastMail,
+            test_tariff: Tariff
+    ):
+        token = None
+        users_rpo = UsersRepository(async_db)
         user_data = {
-            "email": "testuser@example.com",
-            "first_name": "Joe",
+            "email": "user1@example.com",
+            "first_name": "James",
             "last_name": "Doe",
-            "password": "PasswordSample"
+            "password": "samplepassword"
         }
-        response = await async_client.post(
-            app.url_path_for("auth:register"),
-            json=user_data,
-        )
+
+        with fastapi_mail.record_messages() as outbox:
+            await async_client.post(
+                app.url_path_for("auth:register"),
+                json=user_data,
+            )
+            await users_rpo.get_by_email(email=user_data["email"])
+            captured_email = outbox[0]
+
+            for part in captured_email.walk():
+                ctype = part.get_content_type()
+                cdisp = part.get("Content-Disposition")
+
+                if ctype == "multipart/mixed" and not cdisp:
+                    body = part.get_payload()[0].get_payload(decode=True).decode("utf-8")
+                    assert "Please confirm your email address by clicking the link below" in body
+                    urls = fetch_urls_from_text(body)
+                    token = fetch_url_param_value(url=urls[0], param="token")
+                    break
+
+        confirm_url = urljoin(BACKEND_URL, "auth/confirm-email?token=" + token)
+        response = await async_client.get(confirm_url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json().get("message") == "Email successfully confirmed"
+
+        response = await async_client.get(confirm_url)
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json().get("detail") == "Email is already confirmed"
 
 
 class TestLogin:
