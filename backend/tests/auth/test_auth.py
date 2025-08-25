@@ -76,8 +76,8 @@ class TestRegister:
                 cdisp = part.get("Content-Disposition")
 
                 if ctype == "multipart/mixed" and not cdisp:
-                    body = part.get_payload()[0].get_payload(decode=True)
-                    assert b"Please confirm your email address by clicking the link below" in body
+                    body = part.get_payload()[0].get_payload(decode=True).decode("utf-8")
+                    assert "Please confirm your email address by clicking the link below" in body
                     break
 
 
