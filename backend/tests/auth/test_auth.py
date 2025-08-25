@@ -164,7 +164,6 @@ class TestRegister:
     ):
         token = None
         audit_repo = AuditRepository(async_db)
-        clients_repo = ClientRepository(async_db)
         users_rpo = UsersRepository(async_db)
         user_data = {
             "email": "user1@example.com",
