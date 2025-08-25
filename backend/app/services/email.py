@@ -1,11 +1,10 @@
-from fastapi_mail import FastMail, MessageSchema, MessageType
+from fastapi_mail import MessageSchema, MessageType
 
-from app.config import mail_config
+from app.config import fm_mail
 from app.schemas.recipient import RecipientSchema
 
 
 class EmailService:
-    fm: FastMail = FastMail(mail_config)
 
     @staticmethod
     async def send(recipients: list[RecipientSchema]):
@@ -16,5 +15,4 @@ class EmailService:
                 body=recipient.html,
                 subtype=MessageType.html,
             )
-
-            await EmailService.fm.send_message(message)
+            await fm_mail.send_message(message)

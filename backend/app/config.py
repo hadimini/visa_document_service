@@ -1,5 +1,5 @@
-from fastapi_mail import ConnectionConfig
-from pydantic import SecretStr, EmailStr
+from fastapi_mail import ConnectionConfig, FastMail
+from pydantic import SecretStr
 from starlette.config import Config
 from starlette.datastructures import Secret
 
@@ -32,6 +32,7 @@ mail_config = ConnectionConfig(
     USE_CREDENTIALS=config("USE_CREDENTIALS", cast=bool, default=False),
     VALIDATE_CERTS=config("VALIDATE_CERTS", cast=bool, default=False),
 )
+fm_mail =  FastMail(mail_config)
 
 POSTGRES_USER = config("POSTGRES_USER", cast=str)
 POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", cast=Secret)
