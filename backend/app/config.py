@@ -17,10 +17,6 @@ JWT_EMAIL_CONFIRMATION_TOKEN_EXPIRES_MINUTES = 15 * 24 * 60  # 7 days
 JWT_ALGORITHM = config("JWT_ALGORITHM", cast=str, default="HS256")
 JWT_TOKEN_PREFIX = config("JWT_TOKEN_PREFIX", cast=str, default="Bearer")
 
-MAILGUN_API_KEY = config("MAILGUN_API_KEY", cast=Secret)
-MAILGUN_DOMAIN = config("MAILGUN_DOMAIN", cast=str)
-MAILGUN_API_URL = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
-
 mail_config = ConnectionConfig(
     MAIL_USERNAME=config("MAIL_USERNAME", cast=str),
     MAIL_PASSWORD=config("MAIL_PASSWORD", cast=SecretStr),

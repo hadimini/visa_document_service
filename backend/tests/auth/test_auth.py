@@ -192,6 +192,34 @@ class TestLogin:
         payload: JWTPayloadSchema = jwt_service.decode_token(token=access_token)
         assert payload.sub == str(test_user.id)
 
+    @pytest.mark.parametrize(
+        "email, password, status_code",
+        [
+            ("", "password", 401),
+            ("user@example.com", "", 401),
+            ("notfound@example.com", "password", 401),
+        ]
+    )
+    async def test_user_login_error(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+            email: str,
+            password: str,
+            status_code: int,
+    ):
+        async_client.headers["content-type"] = "application/x-www-form-urlencoded"
+        login_data = {
+            "username": email,
+            "password": password,
+        }
+        response = await async_client.post(
+            app.url_path_for("auth:login"),
+            data=login_data
+        )
+        assert response.status_code == status_code
+
 
 class TestLogout:
     async def test_user_logout_success(

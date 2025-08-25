@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 
 
 class NoDefaultTariffException(HTTPException):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="No default tariff is found"
@@ -10,7 +10,7 @@ class NoDefaultTariffException(HTTPException):
 
 
 class AuthEmailAlreadyRegisteredException(HTTPException):
-    def __init__(self, email: str):
+    def __init__(self, email: str) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Email {email} is already registered",
@@ -19,7 +19,7 @@ class AuthEmailAlreadyRegisteredException(HTTPException):
 
 
 class AuthEmailAlreadyVerifiedException(HTTPException):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email is already confirmed",
@@ -28,7 +28,7 @@ class AuthEmailAlreadyVerifiedException(HTTPException):
 
 
 class AuthEmailNotFoundException(HTTPException):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email not found",
@@ -37,7 +37,7 @@ class AuthEmailNotFoundException(HTTPException):
 
 
 class AuthFailedException(HTTPException):
-    def __int__(self):
+    def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authorization failed",
