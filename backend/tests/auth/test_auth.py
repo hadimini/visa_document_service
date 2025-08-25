@@ -86,7 +86,6 @@ class TestRegister:
                     assert confirm_url in body
                     break
 
-
     async def test_saved_password_is_hashed_and_has_salt(
             self,
             app: FastAPI,

@@ -12,7 +12,7 @@ class RecipientService:
     def get_notified_by_email_confirm(self, *, user: User) -> RecipientSchema:
         token = jwt_service.create_email_confirmation_token(user=user)
         message = "Please confirm your email address by clicking the link below. This verification " \
-                   "must be completed within the next {} days.".format(JWT_EMAIL_CONFIRMATION_TOKEN_EXPIRES_DAYS)
+                  "must be completed within the next {} days.".format(JWT_EMAIL_CONFIRMATION_TOKEN_EXPIRES_DAYS)
         return RecipientSchema(
             email=user.email,
             subject="Action Required: Verify Your Email",
