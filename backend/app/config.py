@@ -32,7 +32,7 @@ mail_config = ConnectionConfig(
     USE_CREDENTIALS=config("USE_CREDENTIALS", cast=bool, default=False),
     VALIDATE_CERTS=config("VALIDATE_CERTS", cast=bool, default=False),
 )
-fm_mail =  FastMail(mail_config)
+fm_mail = FastMail(mail_config)
 
 POSTGRES_USER = config("POSTGRES_USER", cast=str)
 POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", cast=Secret)

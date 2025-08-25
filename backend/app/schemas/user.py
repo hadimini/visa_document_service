@@ -2,7 +2,6 @@ from fastapi import Query
 from typing import Annotated, Literal, Optional
 from pydantic import EmailStr, StringConstraints
 
-from app.models.users import User
 from app.schemas.core import CoreSchema, IDSchemaMixin, DateTimeSchemaMixin
 
 

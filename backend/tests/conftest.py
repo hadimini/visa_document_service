@@ -1,5 +1,6 @@
 import pytest_asyncio
 from fastapi import FastAPI
+from fastapi_mail import FastMail
 from httpx import AsyncClient, ASGITransport
 from pydantic.v1 import EmailStr
 from sqlalchemy import text
@@ -7,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy.pool import NullPool
 
 from app.api.server import get_application
-from app.config import DATABASE_URL
+from app.config import DATABASE_URL, mail_config
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.users import UsersRepository
 from app.models.tariffs import Tariff
@@ -90,6 +91,13 @@ async def async_client(async_db, app: FastAPI):
 
     app.dependency_overrides[get_session] = override_get_db
     return AsyncClient(transport=ASGITransport(app=app), base_url="http://localhost")
+
+
+@pytest_asyncio.fixture
+async def fastapi_mail():
+    mail_config.SUPPRESS_SEND = 1
+    fm = FastMail(mail_config)
+    return fm
 
 
 @pytest_asyncio.fixture

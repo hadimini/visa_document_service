@@ -1,12 +1,12 @@
 from collections.abc import Sequence
 
 import pytest
-import requests_mock
 from fastapi import FastAPI, status
+from fastapi_mail import FastMail
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import MAILGUN_API_URL
+from app.config import mail_config
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.clients import ClientRepository
 from app.database.repositories.tokens import TokensRepository
@@ -15,18 +15,20 @@ from app.models import Tariff
 from app.models.audit import LogEntry
 from app.models.users import User
 from app.schemas.core import STRFTIME_FORMAT
-from app.schemas.token import JWTPayloadSchema, TokenPairSchema
+from app.schemas.token import JWTPayloadSchema
 from app.services import auth_service, jwt_service
 
 pytestmark = pytest.mark.asyncio
 
 
 class TestRegister:
+
     async def test_register_success(
             self,
             app: FastAPI,
             async_client: AsyncClient,
             async_db: AsyncSession,
+            fastapi_mail: FastMail,
             test_tariff: Tariff,
     ):
         audit_repo = AuditRepository(async_db)
@@ -38,12 +40,8 @@ class TestRegister:
             "last_name": "Doe",
             "password": "samplepassword"
         }
-        with requests_mock.Mocker() as mock:
-            mock.register_uri(
-                method="GET",
-                url=MAILGUN_API_URL,
-                status_code=200,
-            )
+
+        with fastapi_mail.record_messages() as outbox:
             response = await async_client.post(
                 app.url_path_for("auth:register"),
                 json=user_data,
@@ -65,11 +63,19 @@ class TestRegister:
             assert log_entries[0].user_id == user_in_db.id
             assert log_entries[0].action == LogEntry.ACTION_REGISTER
 
+            # Email
+            assert len(outbox) == 1
+            captured_email = outbox[0]
+            assert captured_email["from"] == mail_config.MAIL_FROM
+            assert captured_email["to"] == user_in_db.email
+            assert captured_email["subject"] == "Confirm your email"
+
     async def test_saved_password_is_hashed_and_has_salt(
             self,
             app: FastAPI,
             async_client: AsyncClient,
             async_db: AsyncSession,
+            fastapi_mail: FastMail,
             test_tariff: Tariff,
     ):
         users_repo = UsersRepository(async_db)
@@ -79,12 +85,7 @@ class TestRegister:
             "last_name": "Doe",
             "password": "Password"
         }
-        with requests_mock.Mocker() as mock:
-            mock.register_uri(
-                method="GET",
-                url=MAILGUN_API_URL,
-                status_code=200,
-            )
+        with fastapi_mail.record_messages() as outbox:
             response = await async_client.post(
                 app.url_path_for("auth:register"),
                 json=user_data,
