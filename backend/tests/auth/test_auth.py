@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from urllib.parse import urljoin
 
 import pytest
 from fastapi import FastAPI, status
@@ -6,11 +7,12 @@ from fastapi_mail import FastMail
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import mail_config
+from app.config import mail_config, BACKEND_URL
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.clients import ClientRepository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
+from app.helpers import fetch_urls_from_text, fetch_url_param_value
 from app.models import Tariff
 from app.models.audit import LogEntry
 from app.models.users import User
@@ -78,6 +80,10 @@ class TestRegister:
                 if ctype == "multipart/mixed" and not cdisp:
                     body = part.get_payload()[0].get_payload(decode=True).decode("utf-8")
                     assert "Please confirm your email address by clicking the link below" in body
+                    urls = fetch_urls_from_text(body)
+                    token = fetch_url_param_value(url=urls[0], param="token")
+                    confirm_url = urljoin(BACKEND_URL, "auth/confirm-email?token=" + token)
+                    assert confirm_url in body
                     break
 
 
@@ -148,14 +154,62 @@ class TestRegister:
         )
         assert response.status_code == status_code
 
-    async def test_email_confirm(
+    async def test_email_confirm_success(
             self,
             app: FastAPI,
             async_client: AsyncClient,
             async_db: AsyncSession,
             fastapi_mail: FastMail,
+            test_tariff: Tariff
     ):
-        pass
+        token = None
+        audit_repo = AuditRepository(async_db)
+        clients_repo = ClientRepository(async_db)
+        users_rpo = UsersRepository(async_db)
+        user_data = {
+            "email": "user1@example.com",
+            "first_name": "James",
+            "last_name": "Doe",
+            "password": "samplepassword"
+        }
+
+        with fastapi_mail.record_messages() as outbox:
+            await async_client.post(
+                app.url_path_for("auth:register"),
+                json=user_data,
+            )
+            user_in_db = await users_rpo.get_by_email(email=user_data["email"])
+            assert user_in_db is not None
+            assert user_in_db.individual_client_id is not None
+
+            # Email
+            assert len(outbox) == 1
+            captured_email = outbox[0]
+            assert captured_email["from"] == mail_config.MAIL_FROM
+            assert captured_email["to"] == user_in_db.email
+            assert captured_email["subject"] == "Action Required: Verify Your Email"
+            assert captured_email.is_multipart() is True
+
+            for part in captured_email.walk():
+                ctype = part.get_content_type()
+                cdisp = part.get("Content-Disposition")
+
+                if ctype == "multipart/mixed" and not cdisp:
+                    body = part.get_payload()[0].get_payload(decode=True).decode("utf-8")
+                    assert "Please confirm your email address by clicking the link below" in body
+                    urls = fetch_urls_from_text(body)
+                    token = fetch_url_param_value(url=urls[0], param="token")
+                    break
+        assert token is not None
+        confirm_url = urljoin(BACKEND_URL, "auth/confirm-email?token=" + token)
+        response = await async_client.get(confirm_url)
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json().get("message") == "Email successfully confirmed"
+
+        log_entries = await audit_repo.get_for_user(user_id=user_in_db.id)
+        assert len(log_entries) == 2
+        assert log_entries[0].user_id == user_in_db.id
+        assert log_entries[0].action == LogEntry.ACTION_VERIFY
 
     async def test_register_email_exists_error(
             self,

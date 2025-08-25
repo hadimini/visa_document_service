@@ -1,6 +1,5 @@
 from pathlib import Path
 
-# from fastapi.templating import Jinja2Templates
 from fastapi_mail import ConnectionConfig, FastMail
 from pydantic import SecretStr
 from starlette.config import Config
