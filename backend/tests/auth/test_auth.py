@@ -1,3 +1,4 @@
+import base64
 from collections.abc import Sequence
 
 import pytest
@@ -69,6 +70,16 @@ class TestRegister:
             assert captured_email["from"] == mail_config.MAIL_FROM
             assert captured_email["to"] == user_in_db.email
             assert captured_email["subject"] == "Confirm your email"
+            assert captured_email.is_multipart() is True
+
+            for part in captured_email.walk():
+                ctype = part.get_content_type()
+                cdisp = part.get("Content-Disposition")
+
+                if ctype == "text/html" and not cdisp:
+                    body = part.get_payload(decode=True).decode()
+                    assert "Confirm your email" in body
+                    break
 
     async def test_saved_password_is_hashed_and_has_salt(
             self,
@@ -136,6 +147,15 @@ class TestRegister:
             json=user_data,
         )
         assert response.status_code == status_code
+
+    async def test_email_confirm(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+            fastapi_mail: FastMail,
+    ):
+        pass
 
     async def test_register_email_exists_error(
             self,
