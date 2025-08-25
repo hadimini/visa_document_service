@@ -102,6 +102,41 @@ class TestRegister:
                 hashed_password=db_user.password,
             )
 
+    @pytest.mark.parametrize(
+        "email, first_name, last_name, password, status_code",
+        [
+            ("", "James", "Doe", "password", 422),
+            ("james_doe@exmaple.com", "", "Doe", "password", 422),
+            ("james_doe@exmaple.com", "James", "", "password", 422),
+            ("james_doe@exmaple.com", "James", "Doe", "", 422),
+        ]
+    )
+    async def test_registration_error(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+            fastapi_mail: FastMail,
+            test_tariff: Tariff,
+            email: str,
+            first_name: str,
+            last_name: str,
+            password: str,
+            status_code: int,
+    ):
+        user_data = {
+            "email": email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "password": password
+        }
+
+        response = await async_client.post(
+            app.url_path_for("auth:register"),
+            json=user_data,
+        )
+        assert response.status_code == status_code
+
     async def test_register_email_exists_error(
             self,
             app: FastAPI,
