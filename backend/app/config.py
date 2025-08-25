@@ -16,7 +16,7 @@ JWT_REFRESH_TOKEN_EXPIRES_MINUTES = 15 * 24 * 60  # 15 days
 JWT_EMAIL_CONFIRMATION_TOKEN_EXPIRES_MINUTES = 15 * 24 * 60  # 7 days
 JWT_ALGORITHM = config("JWT_ALGORITHM", cast=str, default="HS256")
 JWT_TOKEN_PREFIX = config("JWT_TOKEN_PREFIX", cast=str, default="Bearer")
-
+# 
 mail_config = ConnectionConfig(
     MAIL_USERNAME=config("MAIL_USERNAME", cast=str),
     MAIL_PASSWORD=config("MAIL_PASSWORD", cast=SecretStr),
