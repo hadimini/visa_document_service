@@ -21,6 +21,7 @@ class TestCountries:
             load_countries
     ):
         token_pair = jwt_service.create_token_pair(user=test_individual)
+        assert token_pair is not None
         token = token_pair.access
 
         response = await async_client.get(
@@ -38,6 +39,7 @@ class TestCountries:
             load_countries
     ):
         token_pair = jwt_service.create_token_pair(user=test_individual)
+        assert token_pair is not None
         token = token_pair.access
 
         response = await async_client.get(
@@ -68,6 +70,7 @@ class TestCountries:
             load_countries
     ):
         token_pair = jwt_service.create_token_pair(user=test_individual)
+        assert token_pair is not None
         token = token_pair.access
         response = await async_client.get(
             app.url_path_for("individual:country-detail", country_id=1),

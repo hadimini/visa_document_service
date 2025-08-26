@@ -12,11 +12,16 @@ from sqlalchemy.pool import NullPool
 
 from app.api.server import get_application
 from app.config import DATABASE_URL, mail_config
+
+from app.database.repositories.clients import ClientRepository
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.users import UsersRepository
+
+from app.models.clients import Client
 from app.models.countries import Country
 from app.models.tariffs import Tariff
 from app.models.users import User
+from app.schemas.client import ClientCreateSchema
 from app.schemas.tariff import TariffCreateSchema
 from app.schemas.user import UserCreateSchema
 
@@ -148,7 +153,10 @@ async def test_admin(
 @pytest_asyncio.fixture
 async def test_individual(
         async_db: AsyncSession,
+        test_tariff: Tariff,
 ) -> User:
+    clients_repo = ClientRepository(async_db)
+
     new_user = UserCreateSchema(
         email=EmailStr("admin@example.com"),
         first_name="Max",
@@ -156,6 +164,14 @@ async def test_individual(
         password="Samplepassword",
         role=User.ROLE_INDIVIDUAL  # type: ignore[arg-type]
     )
+    client = await clients_repo.create(
+        new_client=ClientCreateSchema(
+            tariff_id=test_tariff.id,
+            name=new_user.get_full_name(),
+            type=Client.TYPE_INDIVIDUAL  # type: ignore[arg-type]
+        )
+    )
+    new_user = new_user.model_copy(update={"individual_client_id": client.id})
     users_repo = UsersRepository(async_db)
     return await users_repo.create(new_user=new_user)
 

@@ -24,6 +24,9 @@ class UserCreateSchema(CoreSchema):
     individual_client_id: Optional[int] = None
     manager_client_id: Optional[int] = None
 
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
 
 class UserCreateInDBSchema(UserCreateSchema):
     salt: str
