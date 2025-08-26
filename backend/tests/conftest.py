@@ -145,6 +145,21 @@ async def test_admin(
     return await users_repo.create(new_user=new_user)
 
 
+@pytest_asyncio.fixture
+async def test_individual(
+        async_db: AsyncSession,
+) -> User:
+    new_user = UserCreateSchema(
+        email=EmailStr("admin@example.com"),
+        first_name="Max",
+        last_name="Smith",
+        password="Samplepassword",
+        role=User.ROLE_INDIVIDUAL  # type: ignore[arg-type]
+    )
+    users_repo = UsersRepository(async_db)
+    return await users_repo.create(new_user=new_user)
+
+
 @pytest_asyncio.fixture(scope="function")
 async def load_countries(async_db: AsyncSession) -> None:
     countries_json = Path(__file__).parent / "../fixtures/countries.json"

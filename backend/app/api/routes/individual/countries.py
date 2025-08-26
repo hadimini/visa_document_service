@@ -10,11 +10,11 @@ router = APIRouter()
 country_list = router.get(
     path="/",
     response_model=PagedResponseSchema,
-    name="admin:country-list"
+    name="individual:country-list"
 )(country_list)
 
 country_detail = router.get(
     path="/{country_id}",
     response_model=CountryPublicSchema,
-    name="admin:country-detail"
+    name="individual:country-detail"
 )(country_detail)
