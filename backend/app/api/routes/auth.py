@@ -17,7 +17,8 @@ from app.exceptions import (
     NoDefaultTariffException,
     InvalidOrExpiredConfirmationTokenException,
     InvalidTokenException,
-    AuthEmailNotFoundException
+    AuthEmailNotFoundException,
+    AuthEmailAlreadyVerifiedException
 )
 from app.models.audit import LogEntry
 from app.models.clients import Client
@@ -116,6 +117,9 @@ async def confirm_email_resend(
 
     if not user:
         raise AuthEmailNotFoundException()
+
+    if user.email_verified:
+        raise AuthEmailAlreadyVerifiedException()
 
     bg_tasks.add_task(task_notify_on_email_confirm, user)
     return JSONResponse(

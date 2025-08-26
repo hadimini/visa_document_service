@@ -275,6 +275,84 @@ class TestRegister:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json().get("detail") == "Email is already confirmed"
 
+    async def test_email_confirm_resend_success(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            test_user: User,
+            fastapi_mail: FastMail,
+    ):
+        user_data = {
+            "email": test_user.email
+        }
+
+        with fastapi_mail.record_messages() as outbox:
+            response = await async_client.post(
+                app.url_path_for("auth:confirm-email-resend"),
+                json=user_data,
+            )
+            assert response.status_code == status.HTTP_200_OK
+            assert response.json().get("message") == "Confirmation email sent"
+
+            # Email
+            assert len(outbox) == 1
+            captured_email = outbox[0]
+            assert captured_email["from"] == mail_config.MAIL_FROM
+            assert captured_email["to"] == user_data["email"]
+            assert captured_email["subject"] == "Action Required: Verify Your Email"
+            assert captured_email.is_multipart() is True
+
+            for part in captured_email.walk():
+                ctype = part.get_content_type()
+                cdisp = part.get("Content-Disposition")
+
+                if ctype == "multipart/mixed" and not cdisp:
+                    body = part.get_payload()[0].get_payload(decode=True).decode("utf-8")
+                    assert "Please confirm your email address by clicking the link below" in body
+                    urls = fetch_urls_from_text(body)
+                    token = fetch_url_param_value(url=urls[0], param="token")
+                    assert token is not None
+                    confirm_url = urljoin(BACKEND_URL, "auth/confirm-email?token=" + token)
+                    assert confirm_url in body
+                    break
+
+    async def test_email_confirm_resend_error_already_verified(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+            test_user: User
+    ):
+        user_data = {
+            "email": test_user.email
+        }
+        users_rpo = UsersRepository(async_db)
+        user_in_db = await users_rpo.get_by_email(email=user_data["email"])
+        user_in_db.email_verified = True
+        await async_db.commit()
+
+        response = await async_client.post(
+            app.url_path_for("auth:confirm-email-resend"),
+            json=user_data,
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json().get("detail") == "Email is already confirmed"
+
+    async def test_email_confirm_resend_error_email_not_found(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient
+    ):
+        user_data = {
+            "email": "wrongemail@example.com"
+        }
+        response = await async_client.post(
+            app.url_path_for("auth:confirm-email-resend"),
+            json=user_data,
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json().get("detail") == "Email not found"
+
 
 class TestLogin:
 
