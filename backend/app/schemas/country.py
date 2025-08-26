@@ -1,4 +1,6 @@
-from typing import Optional
+from typing import Optional, Annotated
+
+from fastapi import Query
 
 from app.schemas.core import CoreSchema, IDSchemaMixin
 
@@ -11,3 +13,7 @@ class CountryBaseSchema(CoreSchema):
 
 class CountryPublicSchema(IDSchemaMixin, CountryBaseSchema):
     pass
+
+
+class CountryFilterSchema(CoreSchema):
+    name: Annotated[str | None, Query(max_length=50, description="Filter by country's name")] = None

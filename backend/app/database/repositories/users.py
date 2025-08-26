@@ -48,6 +48,7 @@ class UsersRepository(BaseRepository):
 
     async def get_all(self, *, filters: UserFilterSchema, page_params: PageParamsSchema):
         statement = select(User)
+
         if filters.name:
             statement = statement.filter(
                 or_(

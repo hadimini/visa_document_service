@@ -3,7 +3,6 @@ from fastapi import FastAPI, status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# from app.models.countries import Country
 from app.models.users import User
 from app.services import jwt_service
 
