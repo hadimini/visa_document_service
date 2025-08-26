@@ -4,4 +4,4 @@ __pycache__/
 .env
 .idea
 log.txt
-*.coverage*
+*.coverage
