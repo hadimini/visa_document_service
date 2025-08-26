@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.users import User
 from app.schemas.core import STRFTIME_FORMAT
-from app.schemas.token import TokenPairSchema
 from app.services import jwt_service
 
 
