@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from app.api.dependencies.auth import role_required
 from app.api.dependencies.db import get_repository
 from app.api.helpers import paginate
 from app.database.repositories.users import UsersRepository
