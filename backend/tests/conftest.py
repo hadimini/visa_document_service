@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import pytest_asyncio
 from fastapi import FastAPI
 from fastapi_mail import FastMail
@@ -11,6 +14,7 @@ from app.api.server import get_application
 from app.config import DATABASE_URL, mail_config
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.users import UsersRepository
+from app.models.countries import Country
 from app.models.tariffs import Tariff
 from app.models.users import User
 from app.schemas.tariff import TariffCreateSchema
@@ -139,3 +143,17 @@ async def test_admin(
     )
     users_repo = UsersRepository(async_db)
     return await users_repo.create(new_user=new_user)
+
+
+@pytest_asyncio.fixture(scope="function")
+async def load_countries(async_db: AsyncSession) -> None:
+    countries_json = Path(__file__).parent / "../fixtures/countries.json"
+
+    with open(countries_json, "r") as f:
+        data = json.load(f)
+
+    for item in data:
+        item.update({ "available_for_order": False })
+        country = Country(**item)
+        async_db.add(country)
+    await async_db.commit()

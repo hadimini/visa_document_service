@@ -1,5 +1,4 @@
-from fastapi import Depends
-from fastapi.routing import APIRouter
+from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import role_required
 from app.api.dependencies.db import get_repository
@@ -10,11 +9,10 @@ from app.models.users import User
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
 from app.schemas.user import UserPublicSchema, UserFilterSchema
 
-
 router = APIRouter()
 
 
-@router.get("/users", response_model=PagedResponseSchema, name="admin:user-list")
+@router.get("/", response_model=PagedResponseSchema, name="admin:user-list")
 async def user_list(
         filters: UserFilterSchema = Depends(),
         page_params: PageParamsSchema = Depends(),
@@ -29,7 +27,7 @@ async def user_list(
     )
 
 
-@router.get("/users/{user_id}", response_model=UserPublicSchema, name="admin:user-detail")
+@router.get("/{user_id}", response_model=UserPublicSchema, name="admin:user-detail")
 async def user_detail(
         user_id: int,
         current_user: User = Depends(role_required(User.ROLE_ADMIN)),
