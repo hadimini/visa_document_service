@@ -16,7 +16,6 @@ router = APIRouter()
 async def user_list(
         filters: UserFilterSchema = Depends(),
         page_params: PageParamsSchema = Depends(),
-        current_user: User = Depends(role_required(User.ROLE_ADMIN)),
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
     results: list[User] = await users_repo.get_all(filters=filters, page_params=page_params)
@@ -30,7 +29,6 @@ async def user_list(
 @router.get("/{user_id}", response_model=UserPublicSchema, name="admin:user-detail")
 async def user_detail(
         user_id: int,
-        current_user: User = Depends(role_required(User.ROLE_ADMIN)),
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
     user = await users_repo.get_by_id(user_id=user_id)
