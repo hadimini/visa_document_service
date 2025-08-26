@@ -3,6 +3,10 @@ from fastapi import FastAPI, status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.repositories.audit import AuditRepository
+from app.database.repositories.countries import CountriesRepository
+from app.models.audit import LogEntry
+from app.models.countries import Country
 from app.models.users import User
 from app.services import jwt_service
 
@@ -79,3 +83,60 @@ class TestCountries:
         assert response.json().get("alpha2") == "AF"
         assert response.json().get("alpha3") == "AFG"
         assert response.json().get("available_for_order") == False
+
+    async def test_country_update_success(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+            test_admin: User,
+            load_countries,
+    ):
+        audit_repo = AuditRepository(async_db)
+        countries_repo = CountriesRepository(async_db)
+        country = await countries_repo.get_by_id(country_id=1)
+        assert country.available_for_order is False
+
+        token_pair = jwt_service.create_token_pair(user=test_admin)
+        assert token_pair is not None
+
+        update_data = {
+            "available_for_order": True
+        }
+        response = await async_client.put(
+            app.url_path_for("admin:country-update", country_id=country.id),
+            json=update_data,
+            headers={"Authorization": f"Bearer {token_pair.access}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json().get("id") == 1
+        assert response.json().get("available_for_order") is True
+
+        log_entries = await audit_repo.get_for_user(user_id=test_admin.id)
+        assert len(log_entries) == 1
+        assert log_entries[0].user_id == test_admin.id
+        assert log_entries[0].action == LogEntry.ACTION_UPDATE
+        assert log_entries[0].model_type == Country.get_model_type()
+        assert log_entries[0].target_id == country.id
+
+    async def test_country_update_error_not_found(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+            test_admin: User,
+            load_countries,
+    ):
+        token_pair = jwt_service.create_token_pair(user=test_admin)
+        assert token_pair is not None
+
+        update_data = {
+            "available_for_order": True
+        }
+        response = await async_client.put(
+            app.url_path_for("admin:country-update", country_id=1000),
+            json=update_data,
+            headers={"Authorization": f"Bearer {token_pair.access}"},
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json().get("detail") == "Not found"

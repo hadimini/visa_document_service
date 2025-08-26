@@ -16,5 +16,9 @@ class CountryPublicSchema(IDSchemaMixin, CountryBaseSchema):
     pass
 
 
+class CountryUpdateSchema(CoreSchema):
+    available_for_order: bool
+
+
 class CountryFilterSchema(CoreSchema):
     name: Annotated[str | None, Query(max_length=50, description="Filter by country's name")] = None

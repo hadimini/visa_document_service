@@ -12,3 +12,10 @@ class Country(Base):
     alpha2: Mapped[str] = mapped_column(String)
     alpha3: Mapped[str] = mapped_column(String)
     available_for_order: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    def __repr__(self):
+        return f"<Country {self.id}>"
+
+    @staticmethod
+    def get_model_type() -> str:
+        return "country"

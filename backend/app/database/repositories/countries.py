@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
 from app.models.countries import Country
-from app.schemas.country import CountryFilterSchema
+from app.schemas.country import CountryFilterSchema, CountryUpdateSchema
 from app.schemas.pagination import PageParamsSchema
 
 
@@ -27,3 +27,12 @@ class CountriesRepository(BaseRepository):
         result = await self.db.execute(statement)
         country = result.one_or_none()
         return country[0] if country else None
+
+    async def update(self, *, country_id: int, data: CountryUpdateSchema) -> Country | None:
+        country = await self.get_by_id(country_id=country_id)
+
+        if country:
+            for key, item in data.model_dump().items():
+                setattr(country, key, item)
+            await self.db.commit()
+            return country
