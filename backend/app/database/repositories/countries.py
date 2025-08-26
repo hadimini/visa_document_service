@@ -12,13 +12,18 @@ class CountriesRepository(BaseRepository):
         super().__init__(db)
         self.db = db
 
-    async def get_all(self, *, filters: CountryFilterSchema, page_params: PageParamsSchema):
+    async def get_list(self, *, filters: CountryFilterSchema, page_params: PageParamsSchema):
         statement = select(Country).order_by(Country.id)
 
         if filters.name:
             statement = statement.filter(Country.name.ilike(f"%{filters.name}%"))
 
         paginated_query = statement.offset((page_params.page - 1) * page_params.size).limit(page_params.size)
-
         results = await self.db.execute(paginated_query)
         return results.scalars().all()
+
+    async def get_by_id(self, *, country_id: int):
+        statement = select(Country).where(Country.id == country_id)
+        result = await self.db.execute(statement)
+        country = result.one_or_none()
+        return country[0] if country else None

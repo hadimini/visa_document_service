@@ -9,6 +9,7 @@ class CountryBaseSchema(CoreSchema):
     name: Optional[str] = None
     alpha2: Optional[str] = None
     alpha3: Optional[str] = None
+    available_for_order: Optional[bool] = False
 
 
 class CountryPublicSchema(IDSchemaMixin, CountryBaseSchema):
