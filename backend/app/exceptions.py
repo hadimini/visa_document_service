@@ -95,3 +95,11 @@ class InvalidTokenException(HTTPException):
             detail="Invalid token payload",
             headers={"WWW-Authenticate": "Bearer"}
         )
+
+
+class NameExistsException(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Name already exists",
+        )

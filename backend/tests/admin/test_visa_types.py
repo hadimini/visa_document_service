@@ -94,6 +94,29 @@ class TestVisaTypes:
         visa_types_in_db = await visa_types_repo.get_by_id(visa_type_id=response.json().get("id"))
         assert visa_types_in_db.name == "Business"
 
+    async def test_create_name_already_exists_error(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+            test_admin: User,
+            visa_type_maker: VisaTypeMakerProtocol,
+    ) -> None:
+        await visa_type_maker(name="Business")
+
+        token_pair = jwt_service.create_token_pair(user=test_admin)
+        assert token_pair is not None
+
+        response = await async_client.post(
+            url=app.url_path_for("admin:visa_type-create"),
+            headers={"Authorization": f"Bearer {token_pair.access}"},
+            json={
+                "name": "Business",
+            }
+        )
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+        assert response.json()["detail"] == "Name already exists"
+
     async def test_update(
             self,
             app: FastAPI,
