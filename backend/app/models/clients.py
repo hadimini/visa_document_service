@@ -47,6 +47,9 @@ class Client(CreatedAtMixin, UpdatedAtMixin, Base):
         foreign_keys="User.individual_client_id"
     )
 
+    def __repr__(self) -> str:
+        return f"<Client {self.id}>"
+
     @staticmethod
     def get_model_type() -> str:
         return "client"
