@@ -79,7 +79,6 @@ class TestUrgencies:
             async_db: AsyncSession,
             test_admin: User,
     ) -> None:
-        audit_repo = AuditRepository(async_db)
         token_pair = jwt_service.create_token_pair(user=test_admin)
         assert token_pair is not None
 
@@ -96,6 +95,7 @@ class TestUrgencies:
         urgency_in_db = await urgencies_repo.get_by_id(urgency_id=response.json().get("id"))
         assert urgency_in_db.name == "Express 3 days"
 
+        audit_repo = AuditRepository(async_db)
         log_entries = await audit_repo.get_for_user(user_id=test_admin.id)
         assert len(log_entries) == 1
         assert log_entries[0].user_id == test_admin.id
@@ -134,7 +134,6 @@ class TestUrgencies:
             test_admin: User,
             urgency_maker: UrgencyMakerProtocol
     ) -> None:
-        audit_repo = AuditRepository(async_db)
         urgency = await urgency_maker(name="Express 3 days")
         token_pair = jwt_service.create_token_pair(user=test_admin)
         assert token_pair is not None
@@ -148,6 +147,7 @@ class TestUrgencies:
         assert response.json()["id"] == urgency.id
         assert response.json()["name"] == "New Name" == urgency.name
 
+        audit_repo = AuditRepository(async_db)
         log_entries = await audit_repo.get_for_user(user_id=test_admin.id)
         assert len(log_entries) == 1
         assert log_entries[0].user_id == test_admin.id
