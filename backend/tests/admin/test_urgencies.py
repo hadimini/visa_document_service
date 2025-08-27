@@ -33,7 +33,6 @@ class TestUrgencies:
             headers={"Authorization": f"Bearer {token_pair.access}"},
         )
         assert response.status_code == 200
-        print("\n\nresponse:", response.json())
 
     async def test_detail(
             self,
