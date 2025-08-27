@@ -1,5 +1,5 @@
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -51,3 +51,20 @@ class TestVisaTypes:
         assert response.status_code == 200
         assert response.json()["id"] == visa_type.id
         assert response.json()["name"] == visa_type.name
+
+    async def test_detail_error_not_found(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+            test_admin: User
+    ):
+        token_pair = jwt_service.create_token_pair(user=test_admin)
+        assert token_pair is not None
+
+        response = await async_client.get(
+            url=app.url_path_for("admin:visa_type-detail", visa_type_id=1000),
+            headers={"Authorization": f"Bearer {token_pair.access}"},
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json().get("detail") == "Not found"
