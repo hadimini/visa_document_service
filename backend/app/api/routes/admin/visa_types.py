@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 
 from app.api.dependencies.db import get_repository
 from app.api.helpers import paginate
+from app.database.repositories.audit import AuditRepository
 from app.database.repositories.visa_types import VisaTypesRepository
 from app.exceptions import NotFoundException
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
-from app.schemas.visa_type import VisaTypePublicSchema, VisaTypeFilterSchema, VisaTypeUpdateSchema
-
+from app.schemas.visa_type import VisaTypePublicSchema, VisaTypeFilterSchema, VisaTypeUpdateSchema, VisaTypeCreateSchema
 
 router = APIRouter()
 
@@ -21,7 +21,7 @@ async def visa_type_list(
         page_params: PageParamsSchema = Depends(),
         visa_types_repo: VisaTypesRepository = Depends(get_repository(VisaTypesRepository))
 ):
-    results = await visa_types_repo.get_list()
+    results = await visa_types_repo.get_list()  # todo: apply filters and pagination
     return paginate(
         page_params,
         results,
@@ -41,6 +41,20 @@ async def visa_type_detail(
     visa_type = await visa_types_repo.get_by_id(visa_type_id=visa_type_id)
     if not visa_type:
         raise NotFoundException()
+    return visa_type
+
+
+@router.post(
+    path="/",
+    response_model=VisaTypePublicSchema,
+    name="admin:visa_type-create",
+    status_code=status.HTTP_201_CREATED
+)
+async def visa_type_create(
+        data: VisaTypeCreateSchema,
+        visa_types_repo: VisaTypesRepository = Depends(get_repository(VisaTypesRepository))
+):
+    visa_type = await visa_types_repo.create(data=data)
     return visa_type
 
 

@@ -211,7 +211,7 @@ async def visa_type_maker(async_db: AsyncSession) -> VisaTypeMakerProtocol:
     async def inner(*, name: str | None = None) -> VisaType:
         nonlocal n
         visa_type = await visa_types_repo.create(
-            visa_type=VisaTypeCreateSchema(
+            data=VisaTypeCreateSchema(
                 name=name or f"Test Visa Type {n}",
             )
         )

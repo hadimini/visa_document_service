@@ -24,8 +24,8 @@ class VisaTypesRepository(BaseRepository):
         visa_type = result.scalars().one_or_none()
         return visa_type
 
-    async def create(self, *, visa_type: VisaTypeCreateSchema) -> VisaType:
-        visa_type = VisaType(**visa_type.model_dump())
+    async def create(self, *, data: VisaTypeCreateSchema) -> VisaType:
+        visa_type = VisaType(**data.model_dump())
         self.db.add(visa_type)
         await self.db.commit()
         return visa_type
