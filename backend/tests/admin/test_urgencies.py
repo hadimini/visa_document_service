@@ -3,7 +3,10 @@ from fastapi import FastAPI, status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.repositories.audit import AuditRepository
 from app.database.repositories.urgencies import UrgenciesRepository
+from app.models.audit import LogEntry
+from app.models.urgencies import Urgency
 from app.models.users import User
 from app.services import jwt_service
 from tests.conftest import UrgencyMakerProtocol
@@ -21,7 +24,7 @@ class TestUrgencies:
             test_admin: User,
             urgency_maker: UrgencyMakerProtocol,
     ) -> None:
-        urgency = await urgency_maker(name="Express 3 days")
+        await urgency_maker(name="Express 3 days")
         token_pair = jwt_service.create_token_pair(user=test_admin)
         assert token_pair is not None
 
@@ -69,13 +72,14 @@ class TestUrgencies:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json().get("detail") == "Not found"
 
-    async def test_create(
+    async def test_create_success(
             self,
             app: FastAPI,
             async_client: AsyncClient,
             async_db: AsyncSession,
             test_admin: User,
     ) -> None:
+        audit_repo = AuditRepository(async_db)
         token_pair = jwt_service.create_token_pair(user=test_admin)
         assert token_pair is not None
 
@@ -91,6 +95,13 @@ class TestUrgencies:
         assert response.json()["name"] == "Express 3 days"
         urgency_in_db = await urgencies_repo.get_by_id(urgency_id=response.json().get("id"))
         assert urgency_in_db.name == "Express 3 days"
+
+        log_entries = await audit_repo.get_for_user(user_id=test_admin.id)
+        assert len(log_entries) == 1
+        assert log_entries[0].user_id == test_admin.id
+        assert log_entries[0].action == LogEntry.ACTION_CREATE
+        assert log_entries[0].model_type == Urgency.get_model_type()
+        assert log_entries[0].target_id == urgency_in_db.id
 
     async def test_create_name_already_exists_error(
             self,
@@ -115,7 +126,7 @@ class TestUrgencies:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["detail"] == "Name already exists"
 
-    async def test_update(
+    async def test_update_success(
             self,
             app: FastAPI,
             async_client: AsyncClient,
@@ -123,6 +134,7 @@ class TestUrgencies:
             test_admin: User,
             urgency_maker: UrgencyMakerProtocol
     ) -> None:
+        audit_repo = AuditRepository(async_db)
         urgency = await urgency_maker(name="Express 3 days")
         token_pair = jwt_service.create_token_pair(user=test_admin)
         assert token_pair is not None
@@ -135,6 +147,13 @@ class TestUrgencies:
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["id"] == urgency.id
         assert response.json()["name"] == "New Name" == urgency.name
+
+        log_entries = await audit_repo.get_for_user(user_id=test_admin.id)
+        assert len(log_entries) == 1
+        assert log_entries[0].user_id == test_admin.id
+        assert log_entries[0].action == LogEntry.ACTION_UPDATE
+        assert log_entries[0].model_type == Urgency.get_model_type()
+        assert log_entries[0].target_id == urgency.id
 
     async def test_update_error_not_found(
             self,

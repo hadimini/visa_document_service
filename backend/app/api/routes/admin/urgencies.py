@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends, status
 
+from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
-from app.api.helpers import paginate
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.urgencies import UrgenciesRepository
 from app.exceptions import NotFoundException
+from app.models.audit import LogEntry
+from app.models.urgencies import Urgency
+from app.models.users import User
+from app.schemas.audit import LogEntryCreateSchema
 from app.schemas.urgencies import UrgencyPublicSchema, UrgencyCreateSchema, UrgencyUpdateSchema
 
 router = APIRouter()
@@ -43,14 +47,23 @@ async def urgency_detail(
 @router.post(
     path="/",
     response_model=UrgencyPublicSchema,
-        name="admin:urgency-create",
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
+    name="admin:urgency-create",
 )
 async def urgency_create(
         data: UrgencyCreateSchema,
-        urgencies_repo: UrgenciesRepository = Depends(get_repository(UrgenciesRepository))
+        current_user: User = Depends(get_current_active_user),
+        urgencies_repo: UrgenciesRepository = Depends(get_repository(UrgenciesRepository)),
+        audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
     urgency = await urgencies_repo.create(data=data)
+    new_entry = LogEntryCreateSchema(
+        user_id=current_user.id,
+        action=LogEntry.ACTION_CREATE,
+        model_type=Urgency.get_model_type(),
+        target_id=urgency.id,
+    )
+    await audit_repo.create(new_entry=new_entry)
     return urgency
 
 
@@ -62,7 +75,9 @@ async def urgency_create(
 async def urgency_update(
         urgency_id: int,
         data: UrgencyUpdateSchema,
-        urgencies_repo: UrgenciesRepository = Depends(get_repository(UrgenciesRepository))
+        current_user: User = Depends(get_current_active_user),
+        urgencies_repo: UrgenciesRepository = Depends(get_repository(UrgenciesRepository)),
+        audit_repo: AuditRepository = Depends(get_repository(AuditRepository))
 ):
     urgency = await urgencies_repo.update(
         urgency_id=urgency_id,
@@ -72,4 +87,11 @@ async def urgency_update(
     if not urgency:
         raise NotFoundException()
 
+    new_entry = LogEntryCreateSchema(
+        user_id=current_user.id,
+        action=LogEntry.ACTION_UPDATE,
+        model_type=Urgency.get_model_type(),
+        target_id=urgency.id,
+    )
+    await audit_repo.create(new_entry=new_entry)
     return urgency
