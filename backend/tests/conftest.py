@@ -16,14 +16,17 @@ from app.config import DATABASE_URL, mail_config
 from app.database.repositories.clients import ClientRepository
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.users import UsersRepository
+from app.database.repositories.visa_types import VisaTypesRepository
 
 from app.models.clients import Client
 from app.models.countries import Country
 from app.models.tariffs import Tariff
 from app.models.users import User
+from app.models.visa_types import VisaType
 from app.schemas.client import ClientCreateSchema
 from app.schemas.tariff import TariffCreateSchema
 from app.schemas.user import UserCreateSchema
+from app.schemas.visa_type import VisaTypeCreateSchema
 
 
 @pytest_asyncio.fixture
@@ -188,3 +191,32 @@ async def load_countries(async_db: AsyncSession) -> None:
         country = Country(**item)
         async_db.add(country)
     await async_db.commit()
+
+
+@pytest_asyncio.fixture
+async def visa_type_maker(async_db: AsyncSession):
+    visa_types_repo = VisaTypesRepository(async_db)
+    created_visa_types = []
+    n = 1
+
+    print("SETUP: Fixture initialization")
+    # The fixture function runs up to the yield statement
+
+    async def inner(*, name: str | None = None):
+        nonlocal n
+        visa_type = await visa_types_repo.create(
+            visa_type=VisaTypeCreateSchema(
+                name=name or f"Test Visa Type {n}",
+            )
+        )
+        created_visa_types.append(visa_type)
+        n += 1
+        return visa_type
+
+    yield inner
+
+    print("TEARDOWN: Starting cleanup")
+    # This runs AFTER the test completes
+    # Consider cleanup
+    # for visa_type in created_visa_types:
+    #     await visa_types_repo.delete(visa_type.id)

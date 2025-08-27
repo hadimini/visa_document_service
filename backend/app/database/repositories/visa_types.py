@@ -1,0 +1,31 @@
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database.repositories.base import BaseRepository
+from app.models.visa_types import VisaType
+from app.schemas.visa_type import VisaTypeCreateSchema
+
+
+class VisaTypesRepository(BaseRepository):
+
+    def __init__(self, db: AsyncSession) -> None:
+        super().__init__(db)
+        self.db = db
+
+    async def get_list(self):
+        statement = select(VisaType).order_by(VisaType.id)
+        result = await self.db.execute(statement)
+        visa_types = result.scalars().all()
+        return visa_types
+
+    async def get_by_id(self,*, visa_type_id: int) -> VisaType:
+        statement = select(VisaType).where(VisaType.id == visa_type_id)
+        result = await self.db.execute(statement)
+        visa_type = result.scalars().one_or_none()
+        return visa_type
+
+    async def create(self, *, visa_type: VisaTypeCreateSchema) -> VisaType:
+        visa_type = VisaType(**visa_type.model_dump())
+        self.db.add(visa_type)
+        await self.db.commit()
+        return visa_type

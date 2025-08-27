@@ -34,7 +34,7 @@ country_detail = router.get(
     response_model=CountryPublicSchema,
     name="admin:country-update"
 )
-async def update_country(
+async def country_update(
         country_id: int,
         data: CountryUpdateSchema,
         current_user: User = Depends(get_current_active_user),
