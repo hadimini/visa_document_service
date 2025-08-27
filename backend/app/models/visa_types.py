@@ -16,6 +16,6 @@ class VisaType(Base):
     name: Mapped[str] = mapped_column(String)
 
     country_visas: Mapped[list["CountryVisa"]] = relationship(
-        back_populates="country_visas",
-        foreign_keys="CountryVisa.visa_id"
+        back_populates="visa_type",
+        foreign_keys="CountryVisa.visa_type_id"
     )

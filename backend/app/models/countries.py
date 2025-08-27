@@ -20,7 +20,7 @@ class Country(Base):
     available_for_order: Mapped[bool] = mapped_column(Boolean, default=False)
 
     country_visas: Mapped[list["CountryVisa"]] = relationship(
-        back_populates="country_visas",
+        back_populates="country",
         foreign_keys="CountryVisa.country_id",
     )
 
