@@ -13,6 +13,10 @@ class VisaTypeCreateSchema(CoreSchema):
     name: str
 
 
+class VisaTypeUpdateSchema(CoreSchema):
+    name: str
+
+
 class VisaTypePublicSchema(IDSchemaMixin, VisaTypeBaseSchema):
     pass
 

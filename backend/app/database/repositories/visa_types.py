@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
 from app.models.visa_types import VisaType
-from app.schemas.visa_type import VisaTypeCreateSchema
+from app.schemas.visa_type import VisaTypeCreateSchema, VisaTypeUpdateSchema
 
 
 class VisaTypesRepository(BaseRepository):
@@ -29,3 +29,11 @@ class VisaTypesRepository(BaseRepository):
         self.db.add(visa_type)
         await self.db.commit()
         return visa_type
+
+    async def update(self, *, visa_type_id: int, data: VisaTypeUpdateSchema) -> VisaType:
+        visa_type = await self.get_by_id(visa_type_id=visa_type_id)
+
+        if visa_type:
+            for attr, value in data.model_dump().items():
+                setattr(visa_type, attr, value)
+            return visa_type
