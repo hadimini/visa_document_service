@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
-from app.api.routes.base import country_list, country_detail
+from app.api.routes.base.countries import country_list, country_detail
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.countries import CountriesRepository
 from app.exceptions import NotFoundException
