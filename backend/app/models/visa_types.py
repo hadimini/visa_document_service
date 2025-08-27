@@ -19,3 +19,10 @@ class VisaType(Base):
         back_populates="visa_type",
         foreign_keys="CountryVisa.visa_type_id"
     )
+
+    def __repr__(self):
+        return f"<VisaType: {self.name}>"
+
+    @staticmethod
+    def get_model_type() -> str:
+        return "visa_type"
