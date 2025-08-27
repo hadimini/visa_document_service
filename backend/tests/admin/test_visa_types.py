@@ -3,8 +3,11 @@ from fastapi import FastAPI, status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.database.repositories.audit import AuditRepository
 from app.database.repositories.visa_types import VisaTypesRepository
+from app.models.audit import LogEntry
 from app.models.users import User
+from app.models.visa_types import VisaType
 from app.services import jwt_service
 from tests.conftest import VisaTypeMakerProtocol
 
@@ -71,7 +74,7 @@ class TestVisaTypes:
         assert response.status_code == status.HTTP_404_NOT_FOUND
         assert response.json().get("detail") == "Not found"
 
-    async def test_create(
+    async def test_create_success(
             self,
             app: FastAPI,
             async_client: AsyncClient,
@@ -93,6 +96,14 @@ class TestVisaTypes:
         assert response.json()["name"] == "Business"
         visa_types_in_db = await visa_types_repo.get_by_id(visa_type_id=response.json().get("id"))
         assert visa_types_in_db.name == "Business"
+
+        audit_repo = AuditRepository(async_db)
+        log_entries = await audit_repo.get_for_user(user_id=test_admin.id)
+        assert len(log_entries) == 1
+        assert log_entries[0].user_id == test_admin.id
+        assert log_entries[0].action == LogEntry.ACTION_CREATE
+        assert log_entries[0].model_type == VisaType.get_model_type()
+        assert log_entries[0].target_id == visa_types_in_db.id
 
     async def test_create_name_already_exists_error(
             self,
@@ -117,7 +128,7 @@ class TestVisaTypes:
         assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert response.json()["detail"] == "Name already exists"
 
-    async def test_update(
+    async def test_update_success(
             self,
             app: FastAPI,
             async_client: AsyncClient,
@@ -137,6 +148,14 @@ class TestVisaTypes:
         assert response.status_code == status.HTTP_200_OK
         assert response.json()["id"] == visa_type.id
         assert response.json()["name"] == "New Name" == visa_type.name
+
+        audit_repo = AuditRepository(async_db)
+        log_entries = await audit_repo.get_for_user(user_id=test_admin.id)
+        assert len(log_entries) == 1
+        assert log_entries[0].user_id == test_admin.id
+        assert log_entries[0].action == LogEntry.ACTION_UPDATE
+        assert log_entries[0].model_type == VisaType.get_model_type()
+        assert log_entries[0].target_id == visa_type.id
 
     async def test_update_error_not_found(
             self,
