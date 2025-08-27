@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import role_required
 from app.api.routes.admin.countries import router as admin_countries_router
+from app.api.routes.admin.urgencies import router as admin_urgencies_router
 from app.api.routes.admin.users import router as admin_users_router
 from app.api.routes.admin.visa_types import router as admin_visa_types_router
 from app.models.users import User
@@ -24,6 +25,15 @@ router.include_router(
     ],
     prefix="/users",
     tags=["admin-users"]
+)
+
+router.include_router(
+    router=admin_urgencies_router,
+    dependencies=[
+        Depends(role_required(User.ROLE_ADMIN))
+    ],
+    prefix="/urgencies",
+    tags=["admin-urgencies"]
 )
 
 router.include_router(

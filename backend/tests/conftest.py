@@ -16,16 +16,19 @@ from app.config import DATABASE_URL, mail_config
 
 from app.database.repositories.clients import ClientRepository
 from app.database.repositories.tariffs import TariffsRepository
+from app.database.repositories.urgencies import UrgenciesRepository
 from app.database.repositories.users import UsersRepository
 from app.database.repositories.visa_types import VisaTypesRepository
 
 from app.models.clients import Client
 from app.models.countries import Country
 from app.models.tariffs import Tariff
+from app.models.urgencies import Urgency
 from app.models.users import User
 from app.models.visa_types import VisaType
 from app.schemas.client import ClientCreateSchema
 from app.schemas.tariff import TariffCreateSchema
+from app.schemas.urgencies import UrgencyCreateSchema
 from app.schemas.user import UserCreateSchema
 from app.schemas.visa_type import VisaTypeCreateSchema
 
@@ -226,3 +229,28 @@ async def visa_type_maker(async_db: AsyncSession) -> VisaTypeMakerProtocol:
     # Consider cleanup
     # for visa_type in created_visa_types:
     #     await visa_types_repo.delete(visa_type.id)
+
+
+class UrgencyMakerProtocol(Protocol):
+    async def __call__(self, *, name: Optional[str] = None) -> VisaType:
+        ...
+
+
+@pytest_asyncio.fixture
+async def urgency_maker(async_db: AsyncSession):
+    urgencies_repo = UrgenciesRepository(async_db)
+    created_urgencies = []
+
+    n = 1
+
+    async def inner(*, name: str | None = None) -> Urgency:
+        nonlocal n
+        urgency = await urgencies_repo.create(
+            data=UrgencyCreateSchema(
+                name=name or f"Test Urgency {n}",
+            )
+        )
+        created_urgencies.append(urgency)
+        n += 1
+        return urgency
+    yield inner

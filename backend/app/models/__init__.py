@@ -6,4 +6,4 @@ from app.models.tariffs import Tariff
 from app.models.tokens import BlackListToken
 from app.models.users import User
 from app.models.visa_types import VisaType
-from app.models.visa_urgencies import VisaUrgency
+from app.models.urgencies import Urgency
