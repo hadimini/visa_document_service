@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status
 
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
+from app.api.routes.base.urgencies import urgency_list
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.urgencies import UrgenciesRepository
 from app.exceptions import NotFoundException
@@ -14,16 +15,11 @@ from app.schemas.urgencies import UrgencyPublicSchema, UrgencyCreateSchema, Urge
 router = APIRouter()
 
 
-@router.get(
+urgency_list = router.get(
     path="/",
     response_model=list[UrgencyPublicSchema],
     name="admin:urgency-list"
-)
-async def urgency_list(
-        urgencies_repo: UrgenciesRepository = Depends(get_repository(UrgenciesRepository))
-):
-    results = await urgencies_repo.get_list()
-    return results
+)(urgency_list)
 
 
 @router.get(

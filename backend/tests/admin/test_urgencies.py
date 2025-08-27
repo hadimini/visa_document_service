@@ -24,7 +24,7 @@ class TestUrgencies:
             test_admin: User,
             urgency_maker: UrgencyMakerProtocol,
     ) -> None:
-        await urgency_maker(name="Express 3 days")
+        urgency = await urgency_maker(name="Express 3 days")
         token_pair = jwt_service.create_token_pair(user=test_admin)
         assert token_pair is not None
 
@@ -33,6 +33,10 @@ class TestUrgencies:
             headers={"Authorization": f"Bearer {token_pair.access}"},
         )
         assert response.status_code == 200
+        assert len(response.json()) == 1
+        assert response.json()[0]["id"] == urgency.id
+        assert response.json()[0]["name"] == urgency.name
+
 
     async def test_detail(
             self,
