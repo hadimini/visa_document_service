@@ -13,20 +13,21 @@ from sqlalchemy.pool import NullPool
 
 from app.api.server import get_application
 from app.config import DATABASE_URL, mail_config
-
 from app.database.repositories.clients import ClientRepository
+from app.database.repositories.country_visas import CountryVisasRepository
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.urgencies import UrgenciesRepository
 from app.database.repositories.users import UsersRepository
 from app.database.repositories.visa_types import VisaTypesRepository
-
 from app.models.clients import Client
 from app.models.countries import Country
+from app.models.country_visas import CountryVisa
 from app.models.tariffs import Tariff
 from app.models.urgencies import Urgency
 from app.models.users import User
 from app.models.visa_types import VisaType
 from app.schemas.client import ClientCreateSchema
+from app.schemas.country_visa import CountryVisaCreateSchema
 from app.schemas.tariff import TariffCreateSchema
 from app.schemas.urgencies import UrgencyCreateSchema
 from app.schemas.user import UserCreateSchema
@@ -254,3 +255,48 @@ async def urgency_maker(async_db: AsyncSession):
         n += 1
         return urgency
     yield inner
+
+
+class CountryMakerProtocol(Protocol):
+    async def __call__(
+            self,
+            *,
+            name: str,
+            alpha2: str,
+            alpha3: str,
+            available_for_order: bool = False,
+    ) -> Country:
+        ...
+
+
+@pytest_asyncio.fixture
+async def country_maker(async_db: AsyncSession) -> CountryMakerProtocol:
+
+    async def inner(*, name: str, alpha2: str, alpha3: str, available_for_order: bool = False) -> Country:
+        country = Country(
+            name=name,
+            alpha2=alpha2,
+            alpha3=alpha3,
+            available_for_order=available_for_order,
+        )
+        async_db.add(country)
+        await async_db.commit()
+        return country
+
+    return inner
+
+
+@pytest_asyncio.fixture()
+async def country_visa_maker(async_db: AsyncSession):
+    country_visas_repo = CountryVisasRepository(async_db)
+
+    async def inner(*, country_id: int, visa_type_id: int, is_active: bool = True) -> CountryVisa:
+        country_visa = await country_visas_repo.create(
+            data=CountryVisaCreateSchema(
+                country_id=country_id,
+                visa_type_id=visa_type_id,
+                is_active=is_active
+            )
+        )
+        return country_visa
+    return inner

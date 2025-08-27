@@ -103,3 +103,11 @@ class NameExistsException(HTTPException):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Name already exists",
         )
+
+
+class ObjectExistsException(HTTPException):
+    def __init__(self) -> None:
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Object already exists"
+        )
