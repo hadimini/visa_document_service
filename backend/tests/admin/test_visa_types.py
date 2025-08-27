@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.users import User
 from app.services import jwt_service
+from tests.conftest import VisaTypeMakerProtocol
 
 pytestmark = pytest.mark.asyncio
 
@@ -38,7 +39,7 @@ class TestVisaTypes:
             async_client: AsyncClient,
             async_db: AsyncSession,
             test_admin: User,
-            visa_type_maker,
+            visa_type_maker: VisaTypeMakerProtocol,
     ) -> None:
         visa_type = await visa_type_maker(name="Business")
         token_pair = jwt_service.create_token_pair(user=test_admin)
@@ -75,7 +76,7 @@ class TestVisaTypes:
             async_client: AsyncClient,
             async_db: AsyncSession,
             test_admin: User,
-            visa_type_maker
+            visa_type_maker: VisaTypeMakerProtocol
     ) -> None:
         visa_type = await visa_type_maker(name="Business")
         token_pair = jwt_service.create_token_pair(user=test_admin)

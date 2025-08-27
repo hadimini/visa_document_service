@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Protocol, Optional
 
 import pytest_asyncio
 from fastapi import FastAPI
@@ -193,8 +194,13 @@ async def load_countries(async_db: AsyncSession) -> None:
     await async_db.commit()
 
 
+class VisaTypeMakerProtocol(Protocol):
+    async def __call__(self, *, name: Optional[str] = None) -> VisaType:
+        ...
+
+
 @pytest_asyncio.fixture
-async def visa_type_maker(async_db: AsyncSession):
+async def visa_type_maker(async_db: AsyncSession) -> VisaTypeMakerProtocol:
     visa_types_repo = VisaTypesRepository(async_db)
     created_visa_types = []
     n = 1
@@ -202,7 +208,7 @@ async def visa_type_maker(async_db: AsyncSession):
     print("SETUP: Fixture initialization")
     # The fixture function runs up to the yield statement
 
-    async def inner(*, name: str | None = None):
+    async def inner(*, name: str | None = None) -> VisaType:
         nonlocal n
         visa_type = await visa_types_repo.create(
             visa_type=VisaTypeCreateSchema(
