@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy import Boolean, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
@@ -27,6 +27,7 @@ class Client(CreatedAtMixin, UpdatedAtMixin, Base):
     tariff_id: Mapped[int] = mapped_column(Integer, ForeignKey("tariffs.id", ondelete="RESTRICT"))
     name: Mapped[str] = mapped_column(String(100))
     type: Mapped[str] = mapped_column(ChoiceType(TYPE_CHOICES))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
 
     tariff: Mapped["Tariff"] = relationship(back_populates="clients")
 
