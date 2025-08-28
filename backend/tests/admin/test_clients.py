@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.clients import Client
 from app.models.users import User
 from app.services import jwt_service
 
@@ -27,4 +28,11 @@ class TestClients:
         )
         assert response.status_code == 200
         assert len(response.json()["results"]) == 1
-        print("\n\n\n", response.json()["results"][0])
+
+        assert response.json()["results"][0]["id"] == test_individual.individual_client_id
+        assert response.json()["results"][0]["name"] == test_individual.full_name
+        assert response.json()["results"][0]["type"] == Client.TYPE_INDIVIDUAL
+        assert response.json()["results"][0]["tariff"]["is_default"] is True
+        client = await test_individual.awaitable_attrs.individual_client
+        assert response.json()["results"][0]["tariff"]["id"] == client.tariff.id
+        assert response.json()["results"][0]["tariff"]["name"] == client.tariff.name
