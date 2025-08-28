@@ -1,4 +1,7 @@
+from typing import Sequence
+
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
@@ -13,8 +16,8 @@ class ClientRepository(BaseRepository):
         super().__init__(db)
         self.users_repo = UsersRepository(db)
 
-    async def get_list(self, *, filters: ClientFilterSchema, page_params: PageParamsSchema):
-        statement = select(Client)
+    async def get_list(self, *, filters: ClientFilterSchema, page_params: PageParamsSchema) -> Sequence[Client]:
+        statement = select(Client).options(selectinload(Client.tariff))
 
         if filters.name:
             statement = statement.where(Client.name.ilike(f"%{filters.name}%"))
@@ -33,7 +36,7 @@ class ClientRepository(BaseRepository):
         client = result.one_or_none()
         return client[0] if client else None
 
-    async def create(self, *, new_client: ClientCreateSchema):
+    async def create(self, *, new_client: ClientCreateSchema) -> Client:
         data: dict = {
             "name": new_client.name,
             "tariff_id": new_client.tariff_id,
