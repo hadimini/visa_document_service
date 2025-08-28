@@ -4,7 +4,7 @@ from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
-from app.database.db import Base
+from app.models.base import AbstractBaseModel
 from app.models.mixins import CreatedAtMixin, UpdatedAtMixin, IsActiveMixin
 
 if TYPE_CHECKING:
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from app.models.users import User
 
 
-class Client(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
+class Client(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, AbstractBaseModel):
     __tablename__ = "clients"
 
     TYPE_INDIVIDUAL = 'individual'

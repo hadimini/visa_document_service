@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.database.db import Base
+from app.models.base import AbstractBaseModel
 from app.models.mixins import IsActiveMixin
 
 if TYPE_CHECKING:
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from app.models.visa_types import VisaType
 
 
-class CountryVisa(IsActiveMixin, Base):
+class CountryVisa(IsActiveMixin, AbstractBaseModel):
     __tablename__ = "country_visas"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

@@ -6,14 +6,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
 from app.database.custom_types import ChoiceType
-from app.database.db import Base
+from app.models.base import AbstractBaseModel
 
 
 if TYPE_CHECKING:
     from app.models.users import User
 
 
-class LogEntry(Base):
+class LogEntry(AbstractBaseModel):
     __tablename__ = "log_entries"
 
     ACTION_ACCESS = "access"
