@@ -13,6 +13,7 @@ from sqlalchemy.pool import NullPool
 
 from app.api.server import get_application
 from app.config import DATABASE_URL, mail_config
+from app.database.db import Base, get_session
 from app.database.repositories.clients import ClientRepository
 from app.database.repositories.country_visas import CountryVisasRepository
 from app.database.repositories.tariffs import TariffsRepository
@@ -60,7 +61,6 @@ async def handle_test_db(db_url: str):
     await temp_engine.dispose()
 
 
-from app.database.db import Base, get_session
 @pytest_asyncio.fixture(scope="function")
 async def async_db_engine():
 
