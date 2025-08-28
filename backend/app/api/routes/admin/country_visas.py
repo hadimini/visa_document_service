@@ -13,6 +13,7 @@ from app.schemas.country_visa import CountryVisaCreateSchema, CountryVisaPublicS
 
 router = APIRouter()
 
+
 @router.get(
     "/",
     response_model=list[CountryVisaPublicSchema],
