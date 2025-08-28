@@ -36,3 +36,28 @@ class TestClients:
         client = await test_individual.awaitable_attrs.individual_client
         assert response.json()["results"][0]["tariff"]["id"] == client.tariff.id
         assert response.json()["results"][0]["tariff"]["name"] == client.tariff.name
+
+    async def test_detail_sucess(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            test_admin: User,
+            test_individual
+    ):
+        token_pair = jwt_service.create_token_pair(user=test_admin)
+        assert token_pair is not None
+
+        response = await async_client.get(
+            url=app.url_path_for("admin:client-detail", client_id=test_individual.individual_client_id),
+            headers={"Authorization": f"Bearer {token_pair.access}"}
+        )
+        assert response.status_code == 200
+
+        result: dict = response.json()
+        assert result["id"] == test_individual.individual_client_id
+        assert result["name"] == test_individual.full_name
+        assert result["type"] == Client.TYPE_INDIVIDUAL
+        assert result["tariff"]["is_default"] is True
+        client: Client = await test_individual.awaitable_attrs.individual_client
+        assert result["tariff"]["id"] == client.tariff.id
+        assert result["tariff"]["name"] == client.tariff.name

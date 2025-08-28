@@ -31,10 +31,10 @@ class ClientRepository(BaseRepository):
         return clients
 
     async def get_by_id(self, *, client_id: int) -> Client:
-        statement = select(Client).where(Client.id == client_id)
+        statement = select(Client).options(selectinload(Client.tariff)).where(Client.id == client_id)
         result = await self.db.execute(statement)
-        client = result.one_or_none()
-        return client[0] if client else None
+        client = result.scalars().one_or_none()
+        return client
 
     async def create(self, *, new_client: ClientCreateSchema) -> Client:
         data: dict = {
