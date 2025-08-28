@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import EmailStr
 from sqlalchemy import String, Integer, Boolean, ForeignKey
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
@@ -14,7 +15,7 @@ if TYPE_CHECKING:
     from app.models.clients import Client
 
 
-class User(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
+class User(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base, AsyncAttrs):
     __tablename__ = "users"
 
     ROLE_ADMIN: str = "admin"

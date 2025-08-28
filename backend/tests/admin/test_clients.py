@@ -27,3 +27,4 @@ class TestClients:
         )
         assert response.status_code == 200
         assert len(response.json()["results"]) == 1
+        print("\n\n\n", response.json()["results"][0])
