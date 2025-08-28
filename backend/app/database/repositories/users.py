@@ -46,7 +46,7 @@ class UsersRepository(BaseRepository):
         updated_user = await self.get_by_id(user_id=user.id)
         return updated_user
 
-    async def get_all(self, *, filters: UserFilterSchema, page_params: PageParamsSchema):
+    async def get_list(self, *, filters: UserFilterSchema, page_params: PageParamsSchema):
         statement = select(User)
 
         if filters.name:

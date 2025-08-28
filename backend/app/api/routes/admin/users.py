@@ -17,7 +17,7 @@ async def user_list(
         page_params: PageParamsSchema = Depends(),
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
-    results: list[User] = await users_repo.get_all(filters=filters, page_params=page_params)
+    results: list[User] = await users_repo.get_list(filters=filters, page_params=page_params)
     return paginate(
         page_params,
         results,
