@@ -13,13 +13,14 @@ from sqlalchemy.pool import NullPool
 
 from app.api.server import get_application
 from app.config import DATABASE_URL, mail_config
-from app.database.db import Base, get_session
+from app.database.db import get_session
 from app.database.repositories.clients import ClientRepository
 from app.database.repositories.country_visas import CountryVisasRepository
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.urgencies import UrgenciesRepository
 from app.database.repositories.users import UsersRepository
 from app.database.repositories.visa_types import VisaTypesRepository
+from app.models.base import Base
 from app.models.clients import Client
 from app.models.countries import Country
 from app.models.country_visas import CountryVisa

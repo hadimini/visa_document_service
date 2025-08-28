@@ -5,7 +5,7 @@ from sqlalchemy import String, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
-from app.models.base import AbstractBaseModel
+from app.models.base import Base
 from app.models.mixins import CreatedAtMixin, UpdatedAtMixin, IsActiveMixin
 
 
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from app.models.clients import Client
 
 
-class User(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, AbstractBaseModel):
+class User(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
     __tablename__ = "users"
 
     ROLE_ADMIN: str = "admin"

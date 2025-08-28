@@ -3,13 +3,13 @@ from typing import TYPE_CHECKING
 from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import AbstractBaseModel
+from app.models.base import Base
 
 if TYPE_CHECKING:
     from app.models.country_visas import CountryVisa
 
 
-class VisaType(AbstractBaseModel):
+class VisaType(Base):
     __tablename__ = "visa_types"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)

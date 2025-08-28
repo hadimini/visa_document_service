@@ -1,11 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.orm import class_mapper
-
-from app.database.db import Base
+from sqlalchemy.orm import DeclarativeBase, class_mapper
 
 
-class AbstractBaseModel(Base, AsyncAttrs):
-    __abstract__ = True
+class Base(DeclarativeBase, AsyncAttrs):
 
     def to_dict(self) -> dict:
         """Converts SQLAlchemy object to dictionary"""

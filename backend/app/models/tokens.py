@@ -3,11 +3,11 @@ from datetime import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import AbstractBaseModel
+from app.models.base import Base
 from app.models.mixins import CreatedAtMixin
 
 
-class BlackListToken(CreatedAtMixin, AbstractBaseModel):
+class BlackListToken(CreatedAtMixin, Base):
     __tablename__ = "blacklist_tokens"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)

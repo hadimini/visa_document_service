@@ -2,11 +2,11 @@ from sqlalchemy import String, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.custom_types import ChoiceType
-from app.models.base import AbstractBaseModel
+from app.models.base import Base
 from app.models.mixins import CreatedAtMixin, UpdatedAtMixin
 
 
-class Service(CreatedAtMixin, UpdatedAtMixin, AbstractBaseModel):
+class Service(CreatedAtMixin, UpdatedAtMixin, Base):
     __tablename__ = "services"
 
     FEE_TYPE_CENTER = "center"

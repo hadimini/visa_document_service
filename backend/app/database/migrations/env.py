@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[3]))
 from app.config import DATABASE_URL
-from app.database.db import Base
+from app.models.base import Base
 
 database_url = DATABASE_URL
 

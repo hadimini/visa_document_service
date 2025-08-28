@@ -3,14 +3,14 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Boolean, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import AbstractBaseModel
+from app.models.base import Base
 
 
 if TYPE_CHECKING:
     from app.models.country_visas import CountryVisa
 
 
-class Country(AbstractBaseModel):
+class Country(Base):
     __tablename__ = 'countries'
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
