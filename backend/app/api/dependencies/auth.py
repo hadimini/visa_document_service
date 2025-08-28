@@ -8,6 +8,7 @@ from app.database.repositories.users import UsersRepository
 from app.exceptions import (
     AuthTokenBlacklistedException,
     AuthTokenExpiredException,
+    InvalidTokenException,
     ForbiddenException
 )
 from app.models.users import User
@@ -24,6 +25,9 @@ async def get_user_from_token(
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ) -> User | None:
     try:
+        if not token:  # TODO: Improve tests
+            raise InvalidTokenException()
+
         payload: JWTPayloadSchema = jwt_service.decode_token(token=token)
 
         if await tokens_repo.get_by_id(token_id=payload.jti):
