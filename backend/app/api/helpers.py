@@ -1,3 +1,4 @@
+from mypy.build import Sequence
 from pydantic import BaseModel
 
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
@@ -5,7 +6,7 @@ from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
 
 def paginate(
         page_params: PageParamsSchema,
-        results: list,
+        results: Sequence,
         ResponseSchema: BaseModel
 ) -> PagedResponseSchema:
     """Paginate the query"""
