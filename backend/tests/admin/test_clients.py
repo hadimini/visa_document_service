@@ -37,7 +37,7 @@ class TestClients:
         assert response.json()["results"][0]["tariff"]["id"] == client.tariff.id
         assert response.json()["results"][0]["tariff"]["name"] == client.tariff.name
 
-    async def test_detail_sucess(
+    async def test_detail_success(
             self,
             app: FastAPI,
             async_client: AsyncClient,
