@@ -1,17 +1,27 @@
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import role_required
-from app.api.routes.admin.countries import router as admin_countries_router
-from app.api.routes.admin.country_visas import router as admin_country_visas_router
-from app.api.routes.admin.urgencies import router as admin_urgencies_router
-from app.api.routes.admin.users import router as admin_users_router
-from app.api.routes.admin.visa_types import router as admin_visa_types_router
+from app.api.routes.admin.clients import router as client_router
+from app.api.routes.admin.countries import router as countries_router
+from app.api.routes.admin.country_visas import router as country_visas_router
+from app.api.routes.admin.urgencies import router as urgencies_router
+from app.api.routes.admin.users import router as users_router
+from app.api.routes.admin.visa_types import router as visa_types_router
 from app.models.users import User
 
 router = APIRouter()
 
 router.include_router(
-    router=admin_countries_router,
+    router=client_router,
+    dependencies=[
+        Depends(role_required(User.ROLE_ADMIN))
+    ],
+    prefix="/clients",
+    tags=["admin-clients"]
+)
+
+router.include_router(
+    router=countries_router,
     dependencies=[
         Depends(role_required(User.ROLE_ADMIN))
     ],
@@ -20,7 +30,7 @@ router.include_router(
 )
 
 router.include_router(
-    router=admin_country_visas_router,
+    router=country_visas_router,
     dependencies=[
         Depends(role_required(User.ROLE_ADMIN))
     ],
@@ -29,7 +39,7 @@ router.include_router(
 )
 
 router.include_router(
-    router=admin_users_router,
+    router=users_router,
     dependencies=[
         Depends(role_required(User.ROLE_ADMIN))
     ],
@@ -38,7 +48,7 @@ router.include_router(
 )
 
 router.include_router(
-    router=admin_urgencies_router,
+    router=urgencies_router,
     dependencies=[
         Depends(role_required(User.ROLE_ADMIN))
     ],
@@ -47,7 +57,7 @@ router.include_router(
 )
 
 router.include_router(
-    router=admin_visa_types_router,
+    router=visa_types_router,
     dependencies=[
         Depends(role_required(User.ROLE_ADMIN))
     ],

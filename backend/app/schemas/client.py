@@ -1,5 +1,6 @@
 from typing import Annotated, Literal, Optional
 
+from fastapi import Query
 from pydantic import StringConstraints
 
 from app.schemas.core import CoreSchema, IDSchemaMixin
@@ -23,3 +24,8 @@ class ClientInDBSchema(IDSchemaMixin):
 
 class ClientPublicSchema(IDSchemaMixin, ClientBaseSchema):
     pass
+
+
+class ClientFilterSchema(CoreSchema):
+    name: Annotated[str | None, Query(max_length=50, description="Filter by client's name")] = None
+    type: Literal["individual", "legal"] | None = None
