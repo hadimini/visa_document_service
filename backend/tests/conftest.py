@@ -166,7 +166,7 @@ async def test_individual(
     clients_repo = ClientRepository(async_db)
 
     new_user = UserCreateSchema(
-        email=EmailStr("admin@example.com"),
+        email=EmailStr("individual@example.com"),
         first_name="Max",
         last_name="Smith",
         password="Samplepassword",
