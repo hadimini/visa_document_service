@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime
+from sqlalchemy import Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
 
@@ -18,3 +18,7 @@ class CompletedAtMixin:
         DateTime,
         nullable=True,
     )
+
+
+class IsActiveMixin:
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
