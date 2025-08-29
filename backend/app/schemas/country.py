@@ -21,7 +21,7 @@ class CountryVisaSchema(CoreSchema):
 
 class CountryPublicSchema(IDSchemaMixin, CountryBaseSchema):
     country_visas: Optional[list[CountryVisaSchema]] = None
-    # pass
+
 
 class CountryUpdateSchema(CoreSchema):
     available_for_order: bool
