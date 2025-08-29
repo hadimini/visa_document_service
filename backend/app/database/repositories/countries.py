@@ -46,7 +46,6 @@ class CountriesRepository(BaseRepository):
             update(Country)
             .where(Country.id == country_id)
             .values(**data.model_dump())
-            .returning(Country)
         )
         await self.db.commit()
 
