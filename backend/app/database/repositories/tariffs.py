@@ -12,10 +12,9 @@ class TariffsRepository(BaseRepository):
 
     async def get_default(self) -> Tariff | None:
         statement = select(Tariff).where(Tariff.is_default.is_(True))
-        result = await self.db.execute(statement)
-        tariff = result.one_or_none()
-        return tariff[0] if tariff else None
-
+        result = await self.db.scalars(statement)
+        return result.one_or_none()
+        
     async def create(self, *, new_tariff: TariffCreateSchema) -> Tariff:
         new_tariff = Tariff(**new_tariff.model_dump())
         self.db.add(new_tariff)
