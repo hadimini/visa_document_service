@@ -24,7 +24,7 @@ class TokensRepository(BaseRepository):
         statement = select(BlackListToken).where(BlackListToken.id == token_id)
         result = await self.db.scalars(statement)
         return result.one_or_none()
-        
+
     async def blacklist_token(self, *, token: str) -> BlackListToken:
         payload: JWTPayloadSchema = self.jwt_service.decode_token(token=token)
         black_list_token = BlackListToken(

@@ -28,9 +28,8 @@ class UrgenciesRepository(BaseRepository):
 
     async def get_by_name(self, *, name: str) -> Urgency | None:
         statement = select(Urgency).where(Urgency.name == name)
-        result = await self.db.execute(statement)
-        urgency = result.scalars().one_or_none()
-        return urgency
+        result = await self.db.scalars(statement)
+        return result.one_or_none()
 
     async def create(self, *, data: UrgencyCreateSchema) -> Urgency:
         urgency = Urgency(**data.model_dump())
