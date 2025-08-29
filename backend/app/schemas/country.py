@@ -3,6 +3,7 @@ from typing import Optional, Annotated
 from fastapi import Query
 
 from app.schemas.core import CoreSchema, IDSchemaMixin
+from app.schemas.visa_type import VisaTypePublicSchema
 
 
 class CountryBaseSchema(CoreSchema):
@@ -12,9 +13,15 @@ class CountryBaseSchema(CoreSchema):
     available_for_order: Optional[bool] = False
 
 
-class CountryPublicSchema(IDSchemaMixin, CountryBaseSchema):
-    pass
+class CountryVisaSchema(CoreSchema):
+    id: int
+    is_active: bool
+    visa_type: VisaTypePublicSchema
 
+
+class CountryPublicSchema(IDSchemaMixin, CountryBaseSchema):
+    country_visas: Optional[list[CountryVisaSchema]] = None
+    # pass
 
 class CountryUpdateSchema(CoreSchema):
     available_for_order: bool
