@@ -26,9 +26,8 @@ class ClientRepository(BaseRepository):
             statement = statement.where(Client.type == filters.type)
         paginated_query = statement.offset((page_params.page - 1) * page_params.size).limit(page_params.size)
 
-        result = await self.db.execute(paginated_query)
-        clients = result.scalars().all()
-        return clients
+        result = await self.db.scalars(paginated_query)
+        return result.all()
 
     async def get_by_id(self, *, client_id: int) -> Client:
         statement = select(Client).options(selectinload(Client.tariff)).where(Client.id == client_id)
