@@ -22,7 +22,7 @@ class VisaTypesRepository(BaseRepository):
         statement = select(VisaType).where(VisaType.id == visa_type_id)
         result = await self.db.scalars(statement)
         return result.one_or_none()
-        
+
     async def get_by_name(self, *, name: str) -> VisaType | None:
         statement = select(VisaType).where(VisaType.name == name)
         result = await self.db.execute(statement)
