@@ -39,7 +39,7 @@ class CountriesRepository(BaseRepository):
         ).where(Country.id == country_id)
 
         result = await self.db.scalars(statement)
-        return result.one_or_none()
+        return result.unique().one_or_none()
 
     async def update(self, *, country_id: int, data: CountryUpdateSchema) -> Country | None:
         country = await self.get_by_id(country_id=country_id)

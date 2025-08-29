@@ -60,6 +60,7 @@ class TestCountries:
                 "alpha2": "RU",
                 "alpha3": "RUS",
                 "available_for_order": False,
+                "country_visas": []
             }
         ]
 
@@ -83,6 +84,7 @@ class TestCountries:
         assert response.json().get("alpha2") == "AF"
         assert response.json().get("alpha3") == "AFG"
         assert response.json().get("available_for_order") == False
+        assert response.json().get("country_visas") == []
 
     async def test_country_update_success(
             self,
