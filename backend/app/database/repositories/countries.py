@@ -19,8 +19,8 @@ class CountriesRepository(BaseRepository):
             statement = statement.filter(Country.name.ilike(f"%{filters.name}%"))
 
         paginated_query = statement.offset((page_params.page - 1) * page_params.size).limit(page_params.size)
-        results = await self.db.execute(paginated_query)
-        return results.scalars().all()
+        result = await self.db.scalars(paginated_query)
+        return result.all()
 
     async def get_by_id(self, *, country_id: int):
         statement = select(Country).where(Country.id == country_id)
