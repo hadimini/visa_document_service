@@ -42,12 +42,24 @@ class CountriesRepository(BaseRepository):
         return result.unique().one_or_none()
 
     async def update(self, *, country_id: int, data: CountryUpdateSchema) -> Country | None:
-        await self.db.execute(
+        # Update and return the country
+        result = await self.db.execute(
             update(Country)
             .where(Country.id == country_id)
-            .values(**data.model_dump())
+            .values(**data.model_dump(exclude_unset=True))
+            .returning(Country)
         )
+        country = result.scalar_one_or_none()
+
+        if not country:
+            await self.db.rollback()
+            return None
+
         await self.db.commit()
 
+        # Now refresh with relationships
+        await self.db.refresh(country, ["country_visas"])
+
+        # If you need nested relationships, use a separate query
         country = await self.get_by_id(country_id=country_id)
         return country
