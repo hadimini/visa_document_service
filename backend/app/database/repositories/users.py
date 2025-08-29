@@ -62,9 +62,8 @@ class UsersRepository(BaseRepository):
             )
 
         paginated_query = statement.offset((page_params.page - 1) * page_params.size).limit(page_params.size)
-        result = await self.db.execute(paginated_query)
-        users = result.scalars().all()
-        return users
+        result = await self.db.scalars(paginated_query)
+        return result.all()
 
     async def get_by_id(self, *, user_id: int) -> User | None:
         statement = select(User).where(User.id == user_id)

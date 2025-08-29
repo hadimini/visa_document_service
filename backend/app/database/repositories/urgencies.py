@@ -17,9 +17,8 @@ class UrgenciesRepository(BaseRepository):
 
     async def get_list(self) -> Sequence[Urgency]:
         statement = select(Urgency).order_by(Urgency.id)
-        result = await self.db.execute(statement)
-        urgencies = result.scalars().all()
-        return urgencies
+        result = await self.db.scalars(statement)
+        return result.all()
 
     async def get_by_id(self, *, urgency_id: int) -> Urgency:
         statement = select(Urgency).where(Urgency.id == urgency_id)

@@ -15,9 +15,8 @@ class VisaTypesRepository(BaseRepository):
 
     async def get_list(self):
         statement = select(VisaType).order_by(VisaType.id)
-        result = await self.db.execute(statement)
-        visa_types = result.scalars().all()
-        return visa_types
+        result = await self.db.scalars(statement)
+        return result.all()
 
     async def get_by_id(self, *, visa_type_id: int) -> VisaType:
         statement = select(VisaType).where(VisaType.id == visa_type_id)

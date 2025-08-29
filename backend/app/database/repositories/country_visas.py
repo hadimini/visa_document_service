@@ -17,9 +17,8 @@ class CountryVisasRepository(BaseRepository):
 
     async def get_list(self) -> Sequence[CountryVisa]:
         statement = select(CountryVisa).order_by(CountryVisa.id)
-        result = await self.db.execute(statement)
-        results = result.scalars().all()
-        return results
+        result = await self.db.scalars(statement)
+        return result.all()
 
     async def get_by_id(self, *, country_visa_id: int) -> CountryVisa:
         statement = select(CountryVisa).where(CountryVisa.id == country_visa_id)
