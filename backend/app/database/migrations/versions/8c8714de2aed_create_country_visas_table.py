@@ -1,8 +1,8 @@
-"""Creare country_visas table
+"""Create country_visas table
 
-Revision ID: 336c0f712670
-Revises: 5964b031d774
-Create Date: 2025-08-27 08:21:16.823803
+Revision ID: 8c8714de2aed
+Revises: 2127857ff9f2
+Create Date: 2025-08-29 09:26:58.061275
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic
-revision = '336c0f712670'
-down_revision = '5964b031d774'
+revision = '8c8714de2aed'
+down_revision = '2127857ff9f2'
 branch_labels = None
 depends_on = None
 

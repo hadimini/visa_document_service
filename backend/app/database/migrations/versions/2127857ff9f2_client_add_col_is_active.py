@@ -1,8 +1,8 @@
-"""Clients table add is_active
+"""Client add col is_active
 
-Revision ID: cfa6505cae1b
-Revises: 336c0f712670
-Create Date: 2025-08-28 10:29:17.697737
+Revision ID: 2127857ff9f2
+Revises: 5964b031d774
+Create Date: 2025-08-29 08:54:21.828635
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic
-revision = 'cfa6505cae1b'
-down_revision = '336c0f712670'
+revision = '2127857ff9f2'
+down_revision = '5964b031d774'
 branch_labels = None
 depends_on = None
 
