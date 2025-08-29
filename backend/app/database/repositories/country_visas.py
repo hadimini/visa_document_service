@@ -23,9 +23,8 @@ class CountryVisasRepository(BaseRepository):
     async def get_by_id(self, *, country_visa_id: int) -> CountryVisa:
         statement = select(CountryVisa).where(CountryVisa.id == country_visa_id)
         result = await self.db.execute(statement)
-        country_visa = result.scalars().one_or_none()
-        return country_visa
-
+        return result.scalars().one_or_none()
+        
     async def exists(self, country_id: int, visa_type_id: int) -> bool:
         statement = select(CountryVisa).where(
             CountryVisa.country_id == country_id,
