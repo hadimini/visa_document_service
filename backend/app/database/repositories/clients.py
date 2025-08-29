@@ -1,7 +1,7 @@
 from typing import Sequence
 
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
@@ -30,9 +30,11 @@ class ClientRepository(BaseRepository):
         return result.all()
 
     async def get_by_id(self, *, client_id: int) -> Client:
-        statement = select(Client).options(selectinload(Client.tariff)).where(Client.id == client_id)
-        result = await self.db.execute(statement)
-        return result.scalars().one_or_none()
+        statement = select(Client).options(
+            joinedload(Client.tariff)
+        ).where(Client.id == client_id)
+        result = await self.db.scalars(statement)
+        return result.unique().one_or_none()
 
     async def create(self, *, new_client: ClientCreateSchema) -> Client:
         data: dict = {
