@@ -45,4 +45,6 @@ class VisaTypesRepository(BaseRepository):
         if visa_type:
             for attr, value in data.model_dump().items():
                 setattr(visa_type, attr, value)
+                await self.db.commit()
+                await self.db.refresh(visa_type)
             return visa_type

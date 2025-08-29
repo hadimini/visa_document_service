@@ -48,4 +48,6 @@ class CountryVisasRepository(BaseRepository):
         if country_visa:
             for attr, value in data.model_dump().items():
                 setattr(country_visa, attr, value)
+                await self.db.commit()
+                await self.db.refresh(country_visa)
             return country_visa

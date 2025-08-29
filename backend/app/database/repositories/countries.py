@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 from app.database.repositories.base import BaseRepository
@@ -42,10 +42,13 @@ class CountriesRepository(BaseRepository):
         return result.unique().one_or_none()
 
     async def update(self, *, country_id: int, data: CountryUpdateSchema) -> Country | None:
-        country = await self.get_by_id(country_id=country_id)
+        await self.db.execute(
+            update(Country)
+            .where(Country.id == country_id)
+            .values(**data.model_dump())
+            .returning(Country)
+        )
+        await self.db.commit()
 
-        if country:
-            for key, item in data.model_dump().items():
-                setattr(country, key, item)
-            await self.db.commit()
-            return country
+        country = await self.get_by_id(country_id=country_id)
+        return country

@@ -47,4 +47,6 @@ class UrgenciesRepository(BaseRepository):
         if urgency:
             for attr, value in data.model_dump().items():
                 setattr(urgency, attr, value)
+                await self.db.commit()
+                await self.db.refresh(urgency)
             return urgency
