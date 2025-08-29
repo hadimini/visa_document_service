@@ -20,10 +20,9 @@ class VisaTypesRepository(BaseRepository):
 
     async def get_by_id(self, *, visa_type_id: int) -> VisaType:
         statement = select(VisaType).where(VisaType.id == visa_type_id)
-        result = await self.db.execute(statement)
-        visa_type = result.scalars().one_or_none()
-        return visa_type
-
+        result = await self.db.scalars(statement)
+        return result.one_or_none()
+        
     async def get_by_name(self, *, name: str) -> VisaType | None:
         statement = select(VisaType).where(VisaType.name == name)
         result = await self.db.execute(statement)

@@ -69,7 +69,7 @@ class UsersRepository(BaseRepository):
         statement = select(User).where(User.id == user_id)
         result = await self.db.scalars(statement)
         return result.one_or_none()
-    
+
     async def get_by_email(self, *, email: EmailStr) -> User | None:
         statement = select(User).where(User.email == email)
         result = await self.db.execute(statement)
