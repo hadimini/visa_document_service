@@ -15,8 +15,12 @@ class CountryVisasRepository(BaseRepository):
         super().__init__(db)
         self.db = db
 
-    async def get_list(self) -> Sequence[CountryVisa]:
+    async def get_list(self, *, country_id: int = None) -> Sequence[CountryVisa]:
         statement = select(CountryVisa).order_by(CountryVisa.id)
+
+        if country_id:
+            statement = statement.where(CountryVisa.country_id == country_id)
+
         result = await self.db.scalars(statement)
         return result.all()
 

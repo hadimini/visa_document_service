@@ -1,4 +1,5 @@
 from app.schemas.core import CoreSchema, IDSchemaMixin
+from app.schemas.visa_type import VisaTypePublicSchema
 
 
 class CountryVisaBaseSchema(CoreSchema):
@@ -21,3 +22,8 @@ class CountryVisaUpdateSchema(CoreSchema):
 
 class CountryVisaPublicSchema(IDSchemaMixin, CountryVisaBaseSchema):
     pass
+
+
+class CountryVisaReferencePublicSchema(IDSchemaMixin):
+    visa_type: VisaTypePublicSchema
+    is_active: bool
