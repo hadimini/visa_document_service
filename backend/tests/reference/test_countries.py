@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.countries import CountriesRepository
 from app.models.users import User
-from app.schemas.country import CountryFilterSchema
+from app.schemas.country import CountryFilterSchema, CountryUpdateSchema
 from app.services import jwt_service
 
 
@@ -44,7 +44,7 @@ class TestCountries:
         ]
         assert response.json() == results
 
-    async def test_country_list_filters(
+    async def test_country_list_name_filter(
             self,
             app: FastAPI,
             async_client: AsyncClient,
@@ -70,5 +70,36 @@ class TestCountries:
                 "alpha2": "RU",
                 "alpha3": "RUS",
                 "available_for_order": False,
+            }
+        ]
+
+    async def test_country_list_available_for_order_filter(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            async_db: AsyncSession,
+            test_user: User,
+            load_countries
+    ):
+        token_pair = jwt_service.create_token_pair(user=test_user)
+        assert token_pair is not None
+        token = token_pair.access
+
+        countries_repo = CountriesRepository(async_db)
+        await countries_repo.update(country_id=1, data=CountryUpdateSchema(available_for_order=True))
+        response = await async_client.get(
+            app.url_path_for("reference:country-list"),
+            params={"available_for_order": True},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.json()) == 1
+        assert response.json() == [
+            {
+                "id": 1,
+                "name": "Afghanistan",
+                "alpha2": "AF",
+                "alpha3": "AFG",
+                "available_for_order": True,
             }
         ]

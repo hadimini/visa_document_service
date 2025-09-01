@@ -16,9 +16,11 @@ class CountriesRepository(BaseRepository):
     async def get_paginated_list(self, *, filters: CountryFilterSchema, page_params: PageParamsSchema):
         # First, get paginated country IDs
         count_stmt = select(Country.id)
+
         if filters.name:
             count_stmt = count_stmt.filter(Country.name.ilike(f"%{filters.name}%"))
 
+        count_stmt = count_stmt.filter(Country.available_for_order == filters.available_for_order)
         count_stmt = count_stmt.offset((page_params.page - 1) * page_params.size).limit(page_params.size)
         country_ids = (await self.db.scalars(count_stmt)).all()
 
@@ -34,10 +36,17 @@ class CountriesRepository(BaseRepository):
             return []
 
     async def get_full_list(self, *, filters: CountryFilterSchema):
+        """
+        Retrieve all countries, only filters can be applied
+        :param filters:
+        :return:
+        """
         statement = select(Country).order_by(Country.id)
 
         if filters.name:
             statement = statement.filter(Country.name.ilike(f"%{filters.name}%"))
+
+        statement = statement.filter(Country.available_for_order == filters.available_for_order)
 
         result = (await self.db.scalars(statement)).all()
         return result

@@ -33,4 +33,4 @@ class CountryUpdateSchema(CoreSchema):
 
 class CountryFilterSchema(CoreSchema):
     name: Annotated[str | None, Query(max_length=50, description="Filter by country's name")] = None
-    # TODO: available for order
+    available_for_order: Optional[bool] = False
