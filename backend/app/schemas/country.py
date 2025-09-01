@@ -19,8 +19,12 @@ class CountryVisaSchema(CoreSchema):
     visa_type: VisaTypePublicSchema
 
 
-class CountryPublicSchema(IDSchemaMixin, CountryBaseSchema):
+class CountryAdminPublicSchema(IDSchemaMixin, CountryBaseSchema):
     country_visas: Optional[list[CountryVisaSchema]] = None
+
+
+class CountryReferencePublicSchema(IDSchemaMixin, CountryBaseSchema):
+    pass
 
 
 class CountryUpdateSchema(CoreSchema):
@@ -29,3 +33,4 @@ class CountryUpdateSchema(CoreSchema):
 
 class CountryFilterSchema(CoreSchema):
     name: Annotated[str | None, Query(max_length=50, description="Filter by country's name")] = None
+    # TODO: available for order

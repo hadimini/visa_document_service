@@ -52,7 +52,7 @@ class TestCountries:
         assert response.status_code == status.HTTP_200_OK
         assert response.json().get("total") == 1
         assert response.json().get("page") == 1
-        assert response.json().get("size") == 10
+        assert response.json().get("size") == 25
         assert response.json().get("results") == [
             {
                 "id": 160,

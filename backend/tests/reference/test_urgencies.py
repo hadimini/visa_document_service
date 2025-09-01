@@ -17,15 +17,15 @@ class TestUrgencies:
             app: FastAPI,
             async_client: AsyncClient,
             async_db: AsyncSession,
-            test_individual: User,
+            test_user: User,
             urgency_maker: UrgencyMakerProtocol,
     ) -> None:
         urgency = await urgency_maker(name="Express 3 days")
-        token_pair = jwt_service.create_token_pair(user=test_individual)
+        token_pair = jwt_service.create_token_pair(user=test_user)
         assert token_pair is not None
 
         response = await async_client.get(
-            url=app.url_path_for("individual:urgency-list"),
+            url=app.url_path_for("reference:urgency-list"),
             headers={"Authorization": f"Bearer {token_pair.access}"},
         )
         assert response.status_code == 200

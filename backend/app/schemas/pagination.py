@@ -8,7 +8,7 @@ TypeT = TypeVar("TypeT")
 
 class PageParamsSchema(CoreSchema):
     page: Annotated[int, conint(ge=1)] = 1
-    size: Annotated[int, conint(ge=1, le=500)] = 10
+    size: Annotated[int, conint(ge=1, le=100)] = 25
 
 
 class PagedResponseSchema(CoreSchema, Generic[TypeT]):

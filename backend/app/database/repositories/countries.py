@@ -13,7 +13,7 @@ class CountriesRepository(BaseRepository):
         super().__init__(db)
         self.db = db
 
-    async def get_list(self, *, filters: CountryFilterSchema, page_params: PageParamsSchema):
+    async def get_paginated_list(self, *, filters: CountryFilterSchema, page_params: PageParamsSchema):
         # First, get paginated country IDs
         count_stmt = select(Country.id)
         if filters.name:
@@ -32,6 +32,15 @@ class CountriesRepository(BaseRepository):
             return result.unique().all()
         else:
             return []
+
+    async def get_full_list(self, *, filters: CountryFilterSchema):
+        statement = select(Country).order_by(Country.id)
+
+        if filters.name:
+            statement = statement.filter(Country.name.ilike(f"%{filters.name}%"))
+
+        result = (await self.db.scalars(statement)).all()
+        return result
 
     async def get_by_id(self, *, country_id: int):
         statement = select(Country).options(
