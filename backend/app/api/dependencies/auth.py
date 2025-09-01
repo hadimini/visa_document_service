@@ -55,6 +55,10 @@ async def get_current_active_user(current_user: User = Depends(get_user_from_tok
     return current_user
 
 
+async def login_required(user: User = Depends(get_current_active_user)) -> bool:
+    return True if user else False
+
+
 def role_required(role: str):
     async def role_checker(
             current_user: User = Depends(get_current_active_user),
