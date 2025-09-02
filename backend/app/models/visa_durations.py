@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String
+from sqlalchemy import Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.custom_types import ChoiceType
@@ -7,6 +7,9 @@ from app.models.base import Base
 
 class VisaDuration(Base):
     __tablename__ = "visa_durations"
+    __table_args__ = (
+        UniqueConstraint("term", "entry", name="uq_visa_duration_term_entry"),
+    )
 
     TERM_1 = '1'
     TERM_3 = '3'
