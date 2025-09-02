@@ -46,7 +46,7 @@ async def country_detail(
         country_id: int,
         countries_repo: CountriesRepository = Depends(get_repository(CountriesRepository)),
 ):
-    country = await countries_repo.get_by_id(country_id=country_id)
+    country = await countries_repo.get_by_id(country_id=country_id, populate_visa_data=True)
 
     if not country:
         raise NotFoundException()

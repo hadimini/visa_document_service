@@ -19,8 +19,13 @@ class CountryVisaSchema(CoreSchema):
     visa_type: VisaTypePublicSchema
 
 
+class CountryVisaDataSchema(CoreSchema):
+    attached: Optional[list[CountryVisaSchema]] = None
+    available: Optional[list[VisaTypePublicSchema]] = None
+
+
 class CountryAdminPublicSchema(IDSchemaMixin, CountryBaseSchema):
-    country_visas: Optional[list[CountryVisaSchema]] = None
+    visa_data: CountryVisaDataSchema = None
 
 
 class CountryReferencePublicSchema(IDSchemaMixin, CountryBaseSchema):
@@ -29,6 +34,7 @@ class CountryReferencePublicSchema(IDSchemaMixin, CountryBaseSchema):
 
 class CountryUpdateSchema(CoreSchema):
     available_for_order: bool
+    visa_type_ids: Optional[list[int]] = None
 
 
 class CountryFilterSchema(CoreSchema):
