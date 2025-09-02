@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String, UniqueConstraint
+from sqlalchemy import Integer, String, UniqueConstraint, event
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.custom_types import ChoiceType
@@ -52,3 +52,11 @@ class VisaDuration(Base):
     @staticmethod
     def get_model_type() -> str:
         return 'visa_duration'
+
+
+@event.listens_for(VisaDuration, "before_insert")
+@event.listens_for(VisaDuration, "before_update")
+def generate_name_before_save(mapper, connection, target):
+    term_map = dict(target.TERM_CHOICES)
+    entry_map = dict(target.ENTRY_CHOICES)
+    target.name = f"{term_map[target.term]} {entry_map[target.entry]}"
