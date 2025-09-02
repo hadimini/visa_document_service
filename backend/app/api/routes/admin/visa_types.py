@@ -17,7 +17,7 @@ router = APIRouter()
 
 
 @router.get(
-    path="/",
+    path="",
     response_model=PagedResponseSchema,
     name="admin:visa_type-list"
 )
@@ -50,7 +50,7 @@ async def visa_type_detail(
 
 
 @router.post(
-    path="/",
+    path="",
     response_model=VisaTypePublicSchema,
     name="admin:visa_type-create",
     status_code=status.HTTP_201_CREATED
