@@ -110,6 +110,20 @@ class TestCountries:
             ]
         }
 
+    async def test_country_detail_not_found(
+            self,
+            app: FastAPI,
+            async_client: AsyncClient,
+            test_admin: User,
+    ):
+        token_pair = jwt_service.create_token_pair(user=test_admin)
+        token = token_pair.access
+        response = await async_client.get(
+            app.url_path_for("admin:country-detail", country_id=1),
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
     async def test_country_update_success(
             self,
             app: FastAPI,
@@ -206,7 +220,7 @@ class TestCountries:
             assert log_entry.model_type == Country.get_model_type()
             assert log_entry.target_id == country.id
 
-    async def test_country_update_error_not_found(
+    async def test_country_update_invalid_id(
             self,
             app: FastAPI,
             async_client: AsyncClient,
