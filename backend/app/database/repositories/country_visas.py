@@ -2,6 +2,7 @@ from typing import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.database.repositories.base import BaseRepository
 from app.exceptions import ObjectExistsException
@@ -16,7 +17,7 @@ class CountryVisasRepository(BaseRepository):
         self.db = db
 
     async def get_list(self, *, country_id: int = None) -> Sequence[CountryVisa]:
-        statement = select(CountryVisa).order_by(CountryVisa.id)
+        statement = select(CountryVisa).options(joinedload(CountryVisa.visa_type)).order_by(CountryVisa.id)
 
         if country_id:
             statement = statement.where(CountryVisa.country_id == country_id)
