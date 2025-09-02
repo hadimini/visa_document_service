@@ -7,6 +7,9 @@ class BaseAppException(HTTPException):
 
 
 class NoDefaultTariffException(BaseAppException):
+    """
+    Exception raised when no default tariff is found in the DB
+    """
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -15,6 +18,9 @@ class NoDefaultTariffException(BaseAppException):
 
 
 class AuthEmailAlreadyRegisteredException(BaseAppException):
+    """
+    Exception raised when a user tries to register with an email that's already in use.
+    """
     def __init__(self, email: str) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -24,6 +30,9 @@ class AuthEmailAlreadyRegisteredException(BaseAppException):
 
 
 class AuthEmailAlreadyVerifiedException(BaseAppException):
+    """
+    Exception raised when a user tries to verify an email that's already verified.
+    """
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -33,6 +42,9 @@ class AuthEmailAlreadyVerifiedException(BaseAppException):
 
 
 class AuthEmailNotFoundException(BaseAppException):
+    """
+    Exception raised when a user tries to verify an email that's not found.
+    """
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -42,6 +54,9 @@ class AuthEmailNotFoundException(BaseAppException):
 
 
 class AuthFailedException(BaseAppException):
+    """
+    Exception raised when user authentication goes wrong .
+    """
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -51,6 +66,9 @@ class AuthFailedException(BaseAppException):
 
 
 class AuthTokenExpiredException(BaseAppException):
+    """
+    Exception raised when user's access token has expired.
+    """
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -60,6 +78,9 @@ class AuthTokenExpiredException(BaseAppException):
 
 
 class AuthTokenBlacklistedException(BaseAppException):
+    """
+    Exception raised when user's access token is blacklisted.
+    """
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -69,6 +90,9 @@ class AuthTokenBlacklistedException(BaseAppException):
 
 
 class ForbiddenException(BaseAppException):
+    """
+    Exception raised when a user has no permission to perform this action.
+    """
     def __init__(self, detail: str = '') -> None:
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -77,6 +101,9 @@ class ForbiddenException(BaseAppException):
 
 
 class NotFoundException(BaseAppException):
+    """
+    Exception raised when a user tries to access a resource that's not found.
+    """
     def __init__(self, detail: str = '') -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -85,6 +112,9 @@ class NotFoundException(BaseAppException):
 
 
 class InvalidOrExpiredConfirmationTokenException(BaseAppException):
+    """
+    Exception raised when a user's access token has expired.
+    """
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -94,6 +124,9 @@ class InvalidOrExpiredConfirmationTokenException(BaseAppException):
 
 
 class InvalidTokenException(BaseAppException):
+    """
+    Exception raised when a user's access token is invalid.
+    """
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -103,6 +136,9 @@ class InvalidTokenException(BaseAppException):
 
 
 class NameExistsException(BaseAppException):
+    """
+    Exception raised when a user tries to create / update an object with a name already exists.
+    """
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -111,6 +147,9 @@ class NameExistsException(BaseAppException):
 
 
 class ObjectExistsException(BaseAppException):
+    """
+    Exception raised when a user tries to create / update an object with the same params.
+    """
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
