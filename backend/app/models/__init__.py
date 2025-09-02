@@ -2,6 +2,7 @@ from app.models.audit import LogEntry
 from app.models.clients import Client
 from app.models.countries import Country
 from app.models.country_visas import CountryVisa
+from app.models.m2m_country_visa_duration import country_visa_duration
 from app.models.tariffs import Tariff
 from app.models.tokens import BlackListToken
 from app.models.users import User

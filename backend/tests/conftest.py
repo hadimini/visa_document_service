@@ -19,15 +19,10 @@ from app.database.repositories.country_visas import CountryVisasRepository
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.urgencies import UrgenciesRepository
 from app.database.repositories.users import UsersRepository
+from app.database.repositories.visa_durations import VisaDurationsRepository
 from app.database.repositories.visa_types import VisaTypesRepository
 from app.models.base import Base
-from app.models.clients import Client
-from app.models.countries import Country
-from app.models.country_visas import CountryVisa
-from app.models.tariffs import Tariff
-from app.models.urgencies import Urgency
-from app.models.users import User
-from app.models.visa_types import VisaType
+from app.models import Client, Country, CountryVisa, Tariff, Urgency, User, VisaType, VisaDuration
 from app.schemas.client import ClientCreateSchema
 from app.schemas.country_visa import CountryVisaCreateSchema
 from app.schemas.tariff import TariffCreateSchema
@@ -300,4 +295,14 @@ async def country_visa_maker(async_db: AsyncSession):
             )
         )
         return country_visa
+    return inner
+
+
+@pytest_asyncio.fixture
+async def visa_duration_maker(async_db: AsyncSession):
+    visa_durations_repo = VisaDurationsRepository(async_db)
+
+    async def inner(*, term: str, entry: str) -> VisaDuration:
+        visa_duration = await visa_durations_repo.create(term=term, entry=entry)
+        return visa_duration
     return inner

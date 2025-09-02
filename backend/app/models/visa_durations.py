@@ -1,8 +1,14 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import Integer, String, UniqueConstraint, event
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
 from app.models.base import Base
+from app.models.m2m_country_visa_duration import country_visa_duration
+
+if TYPE_CHECKING:
+    from app.models import CountryVisa
 
 
 class VisaDuration(Base):
@@ -45,6 +51,12 @@ class VisaDuration(Base):
     name: Mapped[str] = mapped_column(String)
     term: Mapped[str] = mapped_column(ChoiceType(TERM_CHOICES))
     entry: Mapped[str] = mapped_column(ChoiceType(ENTRY_CHOICES))
+
+    # Many-to-many relationship
+    country_visas: Mapped[list["CountryVisa"]] = relationship(
+        secondary=country_visa_duration,
+        back_populates="visa_durations",
+    )
 
     def __repr__(self):
         return f'<VisaDuration(name={self.term}, term={self.entry})>'

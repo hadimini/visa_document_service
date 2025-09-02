@@ -5,13 +5,13 @@ from app.api.dependencies.db import get_repository
 from app.api.helpers import paginate
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.countries import CountriesRepository
+from app.database.repositories.country_visas import CountryVisasRepository
 from app.exceptions import NotFoundException
-from app.models.audit import LogEntry
-from app.models.countries import Country
-from app.models.users import User
+from app.models import Country, CountryVisa, LogEntry, User
 from app.schemas.audit import LogEntryCreateSchema
-from app.schemas.pagination import PagedResponseSchema, PageParamsSchema
 from app.schemas.country import CountryAdminPublicSchema, CountryUpdateSchema, CountryFilterSchema
+from app.schemas.country_visa import CountryVisaAdminPublicSchema, CountryVisaAdminUpdateSchema
+from app.schemas.pagination import PagedResponseSchema, PageParamsSchema
 
 router = APIRouter()
 
@@ -79,3 +79,44 @@ async def country_update(
     )
     await audit_repo.create(new_entry=entry_log)
     return country
+
+
+@router.get(
+    path="/{country_id}/country_visa/{country_visa_id}",
+    response_model=CountryVisaAdminPublicSchema,
+    name="admin:country_visa-detail"
+)
+async def country_visa_detail(
+        country_id: int,
+        country_visa_id: int,
+        country_visas_repo: CountryVisasRepository = Depends(get_repository(CountryVisasRepository)),
+):
+    country_visa: CountryVisa = await country_visas_repo.get_by_id(
+        country_visa_id=country_visa_id, populate_duration_data=True
+    )
+
+    if not country_visa:
+        raise NotFoundException()
+
+    return country_visa
+
+
+@router.put(
+    path="/{country_id}/country_visa/{country_visa_id}",
+    response_model=CountryVisaAdminPublicSchema,
+    name="admin:country_visa-update"
+)
+async def country_visa_update(
+        country_id: int,
+        data: CountryVisaAdminUpdateSchema,
+        country_visa_id: int,
+        country_visas_repo: CountryVisasRepository = Depends(get_repository(CountryVisasRepository)),
+):
+    country_visa: CountryVisa = await country_visas_repo.update(country_visa_id=country_visa_id, data=data)
+
+    if not country_visa:
+        raise NotFoundException()
+
+    country_visa = await country_visas_repo.get_by_id(country_visa_id=country_visa_id, populate_duration_data=True)
+
+    return country_visa

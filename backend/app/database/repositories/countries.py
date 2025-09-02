@@ -1,6 +1,7 @@
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import selectinload
+
 from app.database.repositories.base import BaseRepository
 from app.models import CountryVisa, VisaType
 from app.models.countries import Country

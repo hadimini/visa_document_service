@@ -2,12 +2,12 @@ from typing import Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.database.repositories.base import BaseRepository
 from app.exceptions import ObjectExistsException
-from app.models.country_visas import CountryVisa
-from app.schemas.country_visa import CountryVisaCreateSchema, CountryVisaUpdateSchema
+from app.models import CountryVisa, VisaDuration
+from app.schemas.country_visa import CountryVisaCreateSchema, CountryVisaAdminUpdateSchema
 
 
 class CountryVisasRepository(BaseRepository):
@@ -15,6 +15,27 @@ class CountryVisasRepository(BaseRepository):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(db)
         self.db = db
+
+    async def _get_visa_durations_by_ids(self, duration_ids: list[int]) -> list[VisaDuration]:
+        """
+        Get visa durations by ids.
+        :param duration_ids:
+        :return:
+        """
+        if not duration_ids:
+            return []
+
+        statement = select(VisaDuration).where(VisaDuration.id.in_(duration_ids))
+        result = await self.db.execute(statement)
+        return result.scalars().all()
+
+    async def _update_visa_durations(self, *, country_visa: CountryVisa, new_duration_ids: list[int] = None) -> None:
+        await country_visa.awaitable_attrs.visa_durations
+        country_visa.visa_durations.clear()
+
+        if new_duration_ids:
+            visa_durations = await self._get_visa_durations_by_ids(new_duration_ids)
+            country_visa.visa_durations.extend(visa_durations)
 
     async def get_list(self, *, country_id: int = None) -> Sequence[CountryVisa]:
         statement = select(CountryVisa).options(joinedload(CountryVisa.visa_type)).order_by(CountryVisa.id)
@@ -25,8 +46,13 @@ class CountryVisasRepository(BaseRepository):
         result = await self.db.scalars(statement)
         return result.all()
 
-    async def get_by_id(self, *, country_visa_id: int) -> CountryVisa:
-        statement = select(CountryVisa).where(CountryVisa.id == country_visa_id)
+    async def get_by_id(self, *, country_visa_id: int, populate_duration_data: bool = False) -> CountryVisa:
+        statement = select(CountryVisa).options(joinedload(CountryVisa.visa_type))
+
+        if populate_duration_data:
+            statement = statement.options(selectinload(CountryVisa.visa_durations))
+
+        statement = statement.where(CountryVisa.id == country_visa_id)
         result = await self.db.execute(statement)
         return result.scalars().one_or_none()
 
@@ -47,12 +73,24 @@ class CountryVisasRepository(BaseRepository):
         await self.db.commit()
         return country_visa
 
-    async def update(self, *, country_visa_id: int, data: CountryVisaUpdateSchema) -> CountryVisa | None:
+    async def update(self, *, country_visa_id: int, data: CountryVisaAdminUpdateSchema) -> CountryVisa | None:
         country_visa = await self.get_by_id(country_visa_id=country_visa_id)
 
-        if country_visa:
-            for attr, value in data.model_dump().items():
-                setattr(country_visa, attr, value)
-                await self.db.commit()
-                await self.db.refresh(country_visa)
-            return country_visa
+        if not country_visa:
+            return None
+        update_data = data.model_dump(exclude_unset=True, exclude={"visa_duration_ids"})
+
+        for attr, value in update_data.items():
+            setattr(country_visa, attr, value)
+        #
+        if data.visa_duration_ids:
+            await self._update_visa_durations(
+                country_visa=country_visa,
+                new_duration_ids=data.visa_duration_ids
+            )
+
+        await self.db.commit()
+        await self.db.refresh(country_visa, ["visa_durations"])
+
+        country_visa = await self.get_by_id(country_visa_id=country_visa_id, populate_duration_data=True)
+        return country_visa
