@@ -1,7 +1,12 @@
 from fastapi import HTTPException, status
 
 
-class NoDefaultTariffException(HTTPException):
+class BaseAppException(HTTPException):
+    """Base exception class"""
+    pass
+
+
+class NoDefaultTariffException(BaseAppException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -9,7 +14,7 @@ class NoDefaultTariffException(HTTPException):
         )
 
 
-class AuthEmailAlreadyRegisteredException(HTTPException):
+class AuthEmailAlreadyRegisteredException(BaseAppException):
     def __init__(self, email: str) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -18,7 +23,7 @@ class AuthEmailAlreadyRegisteredException(HTTPException):
         )
 
 
-class AuthEmailAlreadyVerifiedException(HTTPException):
+class AuthEmailAlreadyVerifiedException(BaseAppException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -27,7 +32,7 @@ class AuthEmailAlreadyVerifiedException(HTTPException):
         )
 
 
-class AuthEmailNotFoundException(HTTPException):
+class AuthEmailNotFoundException(BaseAppException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -36,7 +41,7 @@ class AuthEmailNotFoundException(HTTPException):
         )
 
 
-class AuthFailedException(HTTPException):
+class AuthFailedException(BaseAppException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -45,7 +50,7 @@ class AuthFailedException(HTTPException):
         )
 
 
-class AuthTokenExpiredException(HTTPException):
+class AuthTokenExpiredException(BaseAppException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -54,7 +59,7 @@ class AuthTokenExpiredException(HTTPException):
         )
 
 
-class AuthTokenBlacklistedException(HTTPException):
+class AuthTokenBlacklistedException(BaseAppException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -63,7 +68,7 @@ class AuthTokenBlacklistedException(HTTPException):
         )
 
 
-class ForbiddenException(HTTPException):
+class ForbiddenException(BaseAppException):
     def __init__(self, detail: str = '') -> None:
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -71,7 +76,7 @@ class ForbiddenException(HTTPException):
         )
 
 
-class NotFoundException(HTTPException):
+class NotFoundException(BaseAppException):
     def __init__(self, detail: str = '') -> None:
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -79,7 +84,7 @@ class NotFoundException(HTTPException):
         )
 
 
-class InvalidOrExpiredConfirmationTokenException(HTTPException):
+class InvalidOrExpiredConfirmationTokenException(BaseAppException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -88,7 +93,7 @@ class InvalidOrExpiredConfirmationTokenException(HTTPException):
         )
 
 
-class InvalidTokenException(HTTPException):
+class InvalidTokenException(BaseAppException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -97,7 +102,7 @@ class InvalidTokenException(HTTPException):
         )
 
 
-class NameExistsException(HTTPException):
+class NameExistsException(BaseAppException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -105,7 +110,7 @@ class NameExistsException(HTTPException):
         )
 
 
-class ObjectExistsException(HTTPException):
+class ObjectExistsException(BaseAppException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
