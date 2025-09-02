@@ -5,5 +5,6 @@ from app.models.country_visas import CountryVisa
 from app.models.tariffs import Tariff
 from app.models.tokens import BlackListToken
 from app.models.users import User
+from app.models.visa_durations import VisaDuration
 from app.models.visa_types import VisaType
 from app.models.urgencies import Urgency
