@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
 from app.models.visa_types import VisaType
-from app.exceptions import NameExistsException
+from app.exceptions import NameExistsException, NotFoundException
 from app.schemas.visa_type import VisaTypeCreateSchema, VisaTypeUpdateSchema
 
 
@@ -18,7 +18,7 @@ class VisaTypesRepository(BaseRepository):
         result = await self.db.scalars(statement)
         return result.all()
 
-    async def get_by_id(self, *, visa_type_id: int) -> VisaType:
+    async def get_by_id(self, *, visa_type_id: int) -> VisaType | None:
         statement = select(VisaType).where(VisaType.id == visa_type_id)
         result = await self.db.scalars(statement)
         return result.one_or_none()
@@ -42,9 +42,11 @@ class VisaTypesRepository(BaseRepository):
     async def update(self, *, visa_type_id: int, data: VisaTypeUpdateSchema) -> VisaType | None:
         visa_type = await self.get_by_id(visa_type_id=visa_type_id)
 
-        if visa_type:
-            for attr, value in data.model_dump().items():
-                setattr(visa_type, attr, value)
-                await self.db.commit()
-                await self.db.refresh(visa_type)
-            return visa_type
+        if not visa_type:
+            raise NotFoundException()
+
+        for attr, value in data.model_dump().items():
+            setattr(visa_type, attr, value)
+        await self.db.commit()
+        await self.db.refresh(visa_type)
+        return visa_type
