@@ -1,10 +1,9 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Integer, JSON, String
+from sqlalchemy import Boolean, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
-
 
 if TYPE_CHECKING:
     from app.models.country_visas import CountryVisa
@@ -24,7 +23,9 @@ class Country(Base):
         foreign_keys="CountryVisa.country_id",
     )
 
-    visa_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.visa_data = None
 
     def __repr__(self):
         return f"<Country {self.id}>"

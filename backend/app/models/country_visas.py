@@ -1,6 +1,6 @@
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Integer, ForeignKey, JSON
+from sqlalchemy import Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -27,7 +27,9 @@ class CountryVisa(IsActiveMixin, Base):
         back_populates="country_visas"
     )
 
-    duration_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.duration_data = None
 
     def __repr__(self):
         return f"<CountryVisa {self.id}>"
