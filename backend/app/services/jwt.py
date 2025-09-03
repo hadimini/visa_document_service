@@ -32,9 +32,9 @@ class JWTService:
         return jwt.encode(payload=payload.model_dump(), key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM))
 
     def create_refresh_token(self, *, payload: JWTPayloadSchema) -> str:
-        expire = datetime.now() + timedelta(minutes=JWT_REFRESH_TOKEN_EXPIRES_MINUTES)
-        expire = int(expire.timestamp())
-        payload: JWTPayloadSchema = payload.model_copy(update={"exp": expire})
+        expire_dt = datetime.now() + timedelta(minutes=JWT_REFRESH_TOKEN_EXPIRES_MINUTES)
+        expire_timestamp = int(expire_dt.timestamp())
+        payload: JWTPayloadSchema = payload.model_copy(update={"exp": expire_timestamp})
         return jwt.encode(payload=payload.model_dump(), key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM))
 
     def create_token_pair(self, *, user: User) -> TokenPairSchema | None:
