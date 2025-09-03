@@ -46,3 +46,4 @@ class CountryVisaAdminUpdateSchema(CoreSchema):
 class CountryVisaReferencePublicSchema(IDSchemaMixin):
     visa_type: VisaTypePublicSchema
     is_active: bool
+    visa_durations: Optional[list[VisaDurationPublicSchema]] = None

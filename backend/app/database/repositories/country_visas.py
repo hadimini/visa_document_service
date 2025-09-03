@@ -37,14 +37,24 @@ class CountryVisasRepository(BaseRepository):
             visa_durations = await self._get_visa_durations_by_ids(new_duration_ids)
             country_visa.visa_durations.extend(visa_durations)
 
+
     async def get_list(self, *, country_id: int = None) -> Sequence[CountryVisa]:
-        statement = select(CountryVisa).options(joinedload(CountryVisa.visa_type)).order_by(CountryVisa.id)
+        options = [
+            joinedload(CountryVisa.visa_type),
+            selectinload(CountryVisa.visa_durations)
+        ]
+
+        statement = select(CountryVisa).options(
+            *options
+        ).order_by(CountryVisa.id)
 
         if country_id:
             statement = statement.where(CountryVisa.country_id == country_id)
 
         result = await self.db.scalars(statement)
-        return result.all()
+        result = result.all()
+        return result
+
 
     async def get_by_id(self, *, country_visa_id: int, populate_duration_data: bool = False) -> CountryVisa | None:
         """Get CountryVisa by ID with optional duration data population."""
