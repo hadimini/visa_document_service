@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Optional, Sequence
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +16,7 @@ class CountryVisasRepository(BaseRepository):
         super().__init__(db)
         self.db = db
 
-    async def _get_visa_durations_by_ids(self, duration_ids: list[int]) -> list[VisaDuration]:
+    async def _get_visa_durations_by_ids(self, duration_ids: list[int]) -> Sequence[VisaDuration]:
         """
         Get visa durations by ids.
         :param duration_ids:
@@ -29,7 +29,9 @@ class CountryVisasRepository(BaseRepository):
         result = await self.db.execute(statement)
         return result.scalars().all()
 
-    async def _update_visa_durations(self, *, country_visa: CountryVisa, new_duration_ids: list[int] = None) -> None:
+    async def _update_visa_durations(
+            self, *, country_visa: CountryVisa, new_duration_ids: Optional[list[int]] = None
+    ) -> None:
         await country_visa.awaitable_attrs.visa_durations
         country_visa.visa_durations.clear()
 
@@ -37,7 +39,7 @@ class CountryVisasRepository(BaseRepository):
             visa_durations = await self._get_visa_durations_by_ids(new_duration_ids)
             country_visa.visa_durations.extend(visa_durations)
 
-    async def get_list(self, *, country_id: int = None) -> Sequence[CountryVisa]:
+    async def get_list(self, *, country_id: Optional[int] = None) -> Sequence[CountryVisa]:
         options = [
             joinedload(CountryVisa.visa_type),
             selectinload(CountryVisa.visa_durations)
@@ -51,8 +53,7 @@ class CountryVisasRepository(BaseRepository):
             statement = statement.where(CountryVisa.country_id == country_id)
 
         result = await self.db.scalars(statement)
-        result = result.all()
-        return result
+        return result.all()
 
     async def get_by_id(self, *, country_visa_id: int, populate_duration_data: bool = False) -> CountryVisa | None:
         """Get CountryVisa by ID with optional duration data population."""
