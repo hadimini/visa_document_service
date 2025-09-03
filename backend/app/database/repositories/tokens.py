@@ -28,7 +28,7 @@ class TokensRepository(BaseRepository):
     async def blacklist_token(self, *, token: str) -> BlackListToken:
         payload: JWTPayloadSchema = self.jwt_service.decode_token(token=token)
         assert payload.exp is not None, "Token expiration time must not be None"
-        
+
         black_list_token = BlackListToken(
             id=payload.jti,
             expire=datetime.fromtimestamp(payload.exp),

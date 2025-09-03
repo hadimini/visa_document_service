@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
 from app.models.urgencies import Urgency
-from app.exceptions import NameExistsException
+from app.exceptions import NameExistsException, NotFoundException
 from app.schemas.urgencies import UrgencyCreateSchema, UrgencyUpdateSchema
 
 
@@ -20,7 +20,7 @@ class UrgenciesRepository(BaseRepository):
         result = await self.db.scalars(statement)
         return result.all()
 
-    async def get_by_id(self, *, urgency_id: int) -> Urgency:
+    async def get_by_id(self, *, urgency_id: int) -> Urgency | None:
         statement = select(Urgency).where(Urgency.id == urgency_id)
         result = await self.db.execute(statement)
         urgency = result.scalars().one_or_none()
@@ -44,9 +44,11 @@ class UrgenciesRepository(BaseRepository):
     async def update(self, *, urgency_id: int, data: UrgencyUpdateSchema) -> Urgency | None:
         urgency = await self.get_by_id(urgency_id=urgency_id)
 
-        if urgency:
-            for attr, value in data.model_dump().items():
-                setattr(urgency, attr, value)
-                await self.db.commit()
-                await self.db.refresh(urgency)
-            return urgency
+        if not urgency:
+            raise NotFoundException()
+
+        for attr, value in data.model_dump().items():
+            setattr(urgency, attr, value)
+            await self.db.commit()
+            await self.db.refresh(urgency)
+        return urgency
