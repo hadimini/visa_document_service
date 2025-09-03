@@ -29,7 +29,7 @@ class ClientRepository(BaseRepository):
         result = await self.db.scalars(paginated_query)
         return result.all()
 
-    async def get_by_id(self, *, client_id: int) -> Client:
+    async def get_by_id(self, *, client_id: int) -> Client | None:
         statement = select(Client).options(
             joinedload(Client.tariff)
         ).where(Client.id == client_id)
