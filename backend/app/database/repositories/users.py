@@ -34,7 +34,6 @@ class UsersRepository(BaseRepository):
         user = User(**new_user.model_dump())
         self.db.add(user)
         await self.db.commit()
-        await self.db.refresh(new_user)
         return user
 
     async def update(self, *, user: User, data: UserUpdateSchema) -> User | None:
