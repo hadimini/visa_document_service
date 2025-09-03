@@ -25,7 +25,7 @@ class CountryVisaDataSchema(CoreSchema):
 
 
 class CountryAdminPublicSchema(IDSchemaMixin, CountryBaseSchema):
-    visa_data: CountryVisaDataSchema = None
+    visa_data: Optional[CountryVisaDataSchema] = None
 
 
 class CountryReferencePublicSchema(IDSchemaMixin, CountryBaseSchema):
