@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.countries import CountriesRepository
 from app.models.users import User
-from app.schemas.country import CountryFilterSchema, CountryUpdateSchema
+from app.schemas.country import CountryFilterSchema, CountryUpdateSchema, CountryReferencePublicSchema
 from app.services import jwt_service
 
 
@@ -40,7 +40,8 @@ class TestCountries:
             )
         )
         results = [
-            c.to_dict() for c in countries_in_db
+            CountryReferencePublicSchema.model_validate(c).model_dump()
+            for c in countries_in_db
         ]
         assert response.json() == results
 

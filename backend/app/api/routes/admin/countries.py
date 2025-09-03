@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import get_current_active_user
@@ -91,7 +93,7 @@ async def country_visa_detail(
         country_visa_id: int,
         country_visas_repo: CountryVisasRepository = Depends(get_repository(CountryVisasRepository)),
 ):
-    country_visa: CountryVisa = await country_visas_repo.get_by_id(
+    country_visa: Optional[CountryVisa] = await country_visas_repo.get_by_id(
         country_visa_id=country_visa_id, populate_duration_data=True
     )
 
@@ -112,7 +114,7 @@ async def country_visa_update(
         country_visa_id: int,
         country_visas_repo: CountryVisasRepository = Depends(get_repository(CountryVisasRepository)),
 ):
-    country_visa: CountryVisa = await country_visas_repo.update(country_visa_id=country_visa_id, data=data)
+    country_visa: Optional[CountryVisa] = await country_visas_repo.update(country_visa_id=country_visa_id, data=data)
 
     if not country_visa:
         raise NotFoundException()
