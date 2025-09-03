@@ -3,7 +3,7 @@ from sqlalchemy import select, update, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
-from app.exceptions import AuthEmailAlreadyRegisteredException, AuthEmailAlreadyVerifiedException
+from app.exceptions import AuthEmailAlreadyRegisteredException, AuthEmailAlreadyVerifiedException, NotFoundException
 from app.models.users import User
 from app.schemas.pagination import PageParamsSchema
 from app.schemas.user import (
@@ -20,7 +20,7 @@ class UsersRepository(BaseRepository):
         super().__init__(db)
         self.auth_service = AuthService()
 
-    async def create(self, *, new_user: UserCreateSchema) -> User:
+    async def create(self, *, new_user: UserCreateSchema) -> User | None:
         if await self.get_by_email(email=new_user.email):
             raise AuthEmailAlreadyRegisteredException(email=new_user.email)
 
@@ -31,13 +31,13 @@ class UsersRepository(BaseRepository):
             **new_user.model_dump(exclude={"password"}),
             **user_password_update.model_dump()
         )
-        new_user = User(**new_user.model_dump())
-        self.db.add(new_user)
+        user = User(**new_user.model_dump())
+        self.db.add(user)
         await self.db.commit()
         await self.db.refresh(new_user)
-        return new_user
+        return user
 
-    async def update(self, *, user: User, data: UserUpdateSchema) -> User:
+    async def update(self, *, user: User, data: UserUpdateSchema) -> User | None:
         statement = update(User).where(User.id == user.id).values(
             **data.model_dump()
         )
@@ -93,6 +93,9 @@ class UsersRepository(BaseRepository):
 
     async def verify_email(self, *, user_id: int) -> None:
         user = await self.get_by_id(user_id=user_id)
+
+        if not user:
+            raise NotFoundException()
 
         if user.email_verified:
             raise AuthEmailAlreadyVerifiedException()
