@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Depends, status, Body
+from fastapi import APIRouter, BackgroundTasks, Depends, status, Body, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import EmailStr
@@ -58,9 +58,15 @@ async def register(
         name=f"{new_user.first_name} {new_user.last_name}",
         type=Client.TYPE_INDIVIDUAL  # type: ignore[arg-type]
     )
-    new_client = await clients_repo.create(new_client=new_client)
-    new_user = new_user.model_copy(update={"individual_client_id": new_client.id})
+    client = await clients_repo.create(new_client=new_client)
+    new_user = new_user.model_copy(update={"individual_client_id": client.id})
     created_user = await users_repo.create(new_user=new_user)
+
+    if created_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create user"
+        )
 
     await audit_rep.create(
         new_entry=LogEntryCreateSchema(
@@ -188,6 +194,13 @@ async def profile_update(
         audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
     updated_user = await users_repo.update(user=current_user, data=user_data)
+
+    if updated_user is None:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update user profile"
+        )
+
     entry_log: LogEntryCreateSchema = LogEntryCreateSchema(
         user_id=updated_user.id,
         action=LogEntry.ACTION_UPDATE,
