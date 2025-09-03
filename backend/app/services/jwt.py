@@ -24,11 +24,11 @@ class JWTService:
     TYPE_EMAIL_CONFIRMATION_TOKEN = "email_confirmation"
 
     def create_access_token(self, *, payload: JWTPayloadSchema, minutes: int | None = None) -> str:
-        expire = datetime.now() + timedelta(
+        expire_dt = datetime.now() + timedelta(
             minutes=minutes or JWT_ACCESS_TOKEN_EXPIRES_MINUTES
         )
-        expire = int(expire.timestamp())
-        payload: JWTPayloadSchema = payload.model_copy(update={"exp": expire})
+        expire_timestamp = int(expire_dt.timestamp())
+        payload: JWTPayloadSchema = payload.model_copy(update={"exp": expire_timestamp})
         return jwt.encode(payload=payload.model_dump(), key=str(SECRET_KEY), algorithm=str(JWT_ALGORITHM))
 
     def create_refresh_token(self, *, payload: JWTPayloadSchema) -> str:
