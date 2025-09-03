@@ -3,7 +3,6 @@ from fastapi import APIRouter, Depends
 from app.api.dependencies.auth import role_required
 from app.api.routes.admin.clients import router as client_router
 from app.api.routes.admin.countries import router as countries_router
-# from app.api.routes.admin.country_visas import router as country_visas_router
 from app.api.routes.admin.urgencies import router as urgencies_router
 from app.api.routes.admin.users import router as users_router
 from app.api.routes.admin.visa_types import router as visa_types_router
@@ -29,14 +28,6 @@ router.include_router(
     tags=["admin-countries"]
 )
 
-# router.include_router(
-#     router=country_visas_router,
-#     dependencies=[
-#         Depends(role_required(User.ROLE_ADMIN))
-#     ],
-#     prefix="/country_visas",
-#     tags=["admin-country_visas"]
-# )
 
 router.include_router(
     router=users_router,

@@ -1,8 +1,7 @@
 from typing import Optional
 
-from pydantic import Field
-
 from app.schemas.core import CoreSchema, IDSchemaMixin
+from app.schemas.visa_durations import VisaDurationPublicSchema
 from app.schemas.visa_type import VisaTypePublicSchema
 
 
@@ -28,19 +27,20 @@ class CountryVisaPublicSchema(IDSchemaMixin, CountryVisaBaseSchema):
     pass
 
 
-class CountryVisaDurationAdminPublicSchema(IDSchemaMixin, CoreSchema):
-    name: str
+class CountryVisaDurationDataSchema(CoreSchema):
+    attached: Optional[list[VisaDurationPublicSchema]] = None
+    available: Optional[list[VisaDurationPublicSchema]] = None
 
 
 class CountryVisaAdminPublicSchema(IDSchemaMixin, CoreSchema):
     is_active: bool
     visa_type: VisaTypePublicSchema
-    visa_durations: Optional[list[CountryVisaDurationAdminPublicSchema]] = Field(default_factory=list)
+    duration_data: Optional[CountryVisaDurationDataSchema] = None
 
 
 class CountryVisaAdminUpdateSchema(CoreSchema):
     is_active: Optional[bool] = None
-    visa_duration_ids: Optional[list[int]] = Field(default_factory=list)
+    visa_duration_ids: Optional[list[int]] = None
 
 
 class CountryVisaReferencePublicSchema(IDSchemaMixin):

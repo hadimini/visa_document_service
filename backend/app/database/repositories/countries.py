@@ -66,7 +66,7 @@ class CountriesRepository(BaseRepository):
         if populate_visa_data:
             attached_ids = [
                 vc.visa_type.id for vc in country.country_visas
-            ] if country.country_visas else None
+            ]
 
             available_statement = select(VisaType)
 

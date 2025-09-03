@@ -6,7 +6,7 @@ from sqlalchemy.orm import joinedload, selectinload
 
 from app.database.repositories.base import BaseRepository
 from app.exceptions import ObjectExistsException
-from app.models import CountryVisa, VisaDuration
+from app.models import CountryVisa, VisaDuration, country_visa_duration
 from app.schemas.country_visa import CountryVisaCreateSchema, CountryVisaAdminUpdateSchema
 
 
@@ -46,15 +46,39 @@ class CountryVisasRepository(BaseRepository):
         result = await self.db.scalars(statement)
         return result.all()
 
-    async def get_by_id(self, *, country_visa_id: int, populate_duration_data: bool = False) -> CountryVisa:
-        statement = select(CountryVisa).options(joinedload(CountryVisa.visa_type))
+    async def get_by_id(self, *, country_visa_id: int, populate_duration_data: bool = False) -> CountryVisa | None:
+        """Get CountryVisa by ID with optional duration data population."""
+        options = [joinedload(CountryVisa.visa_type)]
 
         if populate_duration_data:
-            statement = statement.options(selectinload(CountryVisa.visa_durations))
+            options.append(selectinload(CountryVisa.visa_durations))
 
-        statement = statement.where(CountryVisa.id == country_visa_id)
+        statement = select(CountryVisa).options(*options).where(CountryVisa.id == country_visa_id)
+
         result = await self.db.execute(statement)
-        return result.scalars().one_or_none()
+        country_visa = result.scalars().one_or_none()
+
+        if not country_visa or not populate_duration_data:
+            return country_visa
+
+        available_visa_durations = await self.db.scalars(
+            select(VisaDuration)
+            .where(
+                ~VisaDuration.id.in_(
+                    select(country_visa_duration.c.visa_duration_id)
+                    .where(country_visa_duration.c.country_visa_id == country_visa_id)
+                )
+            )
+            .order_by(VisaDuration.id)
+        )
+
+        country_visa.duration_data = {
+            "attached": country_visa.visa_durations or None,
+            "available": available_visa_durations.all() or None
+        }
+
+        return country_visa
+
 
     async def exists(self, country_id: int, visa_type_id: int) -> bool:
         statement = select(CountryVisa).where(
@@ -82,8 +106,8 @@ class CountryVisasRepository(BaseRepository):
 
         for attr, value in update_data.items():
             setattr(country_visa, attr, value)
-        #
-        if data.visa_duration_ids:
+
+        if data.visa_duration_ids is not None:
             await self._update_visa_durations(
                 country_visa=country_visa,
                 new_duration_ids=data.visa_duration_ids

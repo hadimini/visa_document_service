@@ -48,7 +48,7 @@ class VisaDuration(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String)
+    name: Mapped[str] = mapped_column(String, nullable=True)
     term: Mapped[str] = mapped_column(ChoiceType(TERM_CHOICES))
     entry: Mapped[str] = mapped_column(ChoiceType(ENTRY_CHOICES))
 
