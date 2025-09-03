@@ -16,7 +16,7 @@ class TariffsRepository(BaseRepository):
         return result.one_or_none()
 
     async def create(self, *, new_tariff: TariffCreateSchema) -> Tariff:
-        new_tariff = Tariff(**new_tariff.model_dump())
-        self.db.add(new_tariff)
+        tariff = Tariff(**new_tariff.model_dump())
+        self.db.add(tariff)
         await self.db.commit()
-        return new_tariff
+        return tariff
