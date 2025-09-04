@@ -47,7 +47,7 @@ class Client(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
         foreign_keys="User.individual_client_id"
     )
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # pragma: no cover
         return f"<Client {self.id}>"
 
     @staticmethod

@@ -3,8 +3,7 @@ from fastapi import FastAPI
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.clients import Client
-from app.models.users import User
+from app.models import Client, User, Tariff
 from app.services import jwt_service
 
 pytestmark = pytest.mark.asyncio
@@ -29,11 +28,13 @@ class TestClients:
         assert response.status_code == 200
         assert len(response.json()["results"]) == 1
 
+        assert response.json()["results"][0]["MODEL_TYPE"] == Client.get_model_type()
         assert response.json()["results"][0]["id"] == test_individual.individual_client_id
         assert response.json()["results"][0]["name"] == test_individual.full_name
         assert response.json()["results"][0]["type"] == Client.TYPE_INDIVIDUAL
         assert response.json()["results"][0]["tariff"]["is_default"] is True
         client = await test_individual.awaitable_attrs.individual_client
+        assert response.json()["results"][0]["tariff"]["MODEL_TYPE"] == Tariff.get_model_type()
         assert response.json()["results"][0]["tariff"]["id"] == client.tariff.id
         assert response.json()["results"][0]["tariff"]["name"] == client.tariff.name
 
@@ -54,9 +55,11 @@ class TestClients:
         assert response.status_code == 200
 
         result: dict = response.json()
+        assert result["MODEL_TYPE"] == Client.get_model_type()
         assert result["id"] == test_individual.individual_client_id
         assert result["name"] == test_individual.full_name
         assert result["type"] == Client.TYPE_INDIVIDUAL
+        assert result["tariff"]["MODEL_TYPE"] == Tariff.get_model_type()
         assert result["tariff"]["is_default"] is True
         client: Client = await test_individual.awaitable_attrs.individual_client
         assert result["tariff"]["id"] == client.tariff.id
