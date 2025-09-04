@@ -19,6 +19,7 @@ from app.models.users import User
 from app.schemas.core import STRFTIME_FORMAT
 from app.schemas.token import JWTPayloadSchema
 from app.services import auth_service, jwt_service
+from tests.conftest import test_user
 
 pytestmark = pytest.mark.asyncio
 
@@ -229,6 +230,22 @@ class TestRegister:
         assert len(log_entries) == 2
         assert log_entries[0].user_id == user_in_db.id
         assert log_entries[0].action == LogEntry.ACTION_VERIFY
+
+    async def test_email_confirm_invalid_token(self, app: FastAPI, async_client: AsyncClient):
+        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
+        confirm_url = urljoin(BACKEND_URL, "auth/confirm-email?token=" + token)
+        response = await async_client.get(confirm_url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+    async def test_email_confirm_invalid_payload_type(self, app: FastAPI, async_client: AsyncClient, test_user: User):
+        token_pair = jwt_service.create_token_pair(user=test_user)
+        assert token_pair is not None
+
+        confirm_url = urljoin(BACKEND_URL, "auth/confirm-email?token=" + token_pair.access)
+        response = await async_client.get(confirm_url)
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
 
     async def test_email_already_confirmed(
             self,
