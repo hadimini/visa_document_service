@@ -60,7 +60,8 @@ class TestCountries:
                 "alpha2": "RU",
                 "alpha3": "RUS",
                 "available_for_order": False,
-                "visa_data": None
+                "visa_data": None,
+                "MODEL_TYPE": Country.get_model_type(),
             }
         ]
 
