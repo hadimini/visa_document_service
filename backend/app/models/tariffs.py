@@ -17,7 +17,7 @@ class Tariff(Base):
 
     clients: Mapped[list["Client"]] = relationship(back_populates="tariff", foreign_keys="Client.tariff_id")
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return "<Tariff {}>".format(self.id)
 
     @staticmethod

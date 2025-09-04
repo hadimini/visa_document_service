@@ -20,7 +20,7 @@ class VisaType(Base):
         foreign_keys="CountryVisa.visa_type_id"
     )
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f"<VisaType: {self.name}>"
 
     @staticmethod

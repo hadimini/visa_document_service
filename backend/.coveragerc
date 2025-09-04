@@ -3,3 +3,5 @@
 omit =
     */__init__.py
     */tests/*
+    */__repr__*
+    */__str__*

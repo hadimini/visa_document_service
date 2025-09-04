@@ -58,7 +58,7 @@ class VisaDuration(Base):
         back_populates="visa_durations",
     )
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f'<VisaDuration(name={self.term}, term={self.entry})>'
 
     @staticmethod

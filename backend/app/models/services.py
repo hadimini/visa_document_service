@@ -33,7 +33,7 @@ class Service(CreatedAtMixin, UpdatedAtMixin, Base):
     # TODO
     # visa_type, duration, urgency
 
-    def __repr__(self):
+    def __repr__(self):  # pragma: no cover
         return f"<Service {self.id}>"
 
     @staticmethod
