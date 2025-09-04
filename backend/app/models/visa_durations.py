@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Integer, String, UniqueConstraint, event
+from sqlalchemy import String, UniqueConstraint, event
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
 from app.models.base import Base
-from app.models.mixins import IDIntMixin
 from app.models.m2m_country_visa_duration import country_visa_duration
+from app.models.mixins import IDIntMixin
 
 if TYPE_CHECKING:
     from app.models import CountryVisa, Service

@@ -7,13 +7,14 @@ from sqlalchemy.sql import func
 
 from app.database.custom_types import ChoiceType
 from app.models.base import Base
+from app.models.mixins import IDIntMixin
 
 
 if TYPE_CHECKING:
     from app.models.users import User
 
 
-class LogEntry(Base):
+class LogEntry(IDIntMixin, Base):
     __tablename__ = "log_entries"
 
     ACTION_ACCESS = "access"
@@ -38,7 +39,6 @@ class LogEntry(Base):
         (ACTION_VERIFY, "Verify"),
     )
 
-    id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
     # The actor could be a system rather than a user, which is why it's nullable
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=True)
     action: Mapped[str] = mapped_column(ChoiceType(ACTION_CHOICES))

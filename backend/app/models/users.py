@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
 from app.models.base import Base
-from app.models.mixins import CreatedAtMixin, UpdatedAtMixin, IsActiveMixin
+from app.models.mixins import CreatedAtMixin, IDIntMixin, UpdatedAtMixin, IsActiveMixin
 
 
 if TYPE_CHECKING:
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from app.models.clients import Client
 
 
-class User(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
+class User(CreatedAtMixin, IDIntMixin, IsActiveMixin, UpdatedAtMixin, Base):
     __tablename__ = "users"
 
     ROLE_ADMIN: str = "admin"
@@ -31,7 +31,6 @@ class User(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
         (ROLE_OPERATOR, "Operator"),
     )
 
-    id: Mapped[int] = mapped_column(Integer, autoincrement=True, primary_key=True)
     first_name: Mapped[str] = mapped_column(String(50))
     last_name: Mapped[str] = mapped_column(String(50))
     email: Mapped[EmailStr] = mapped_column(String(100), unique=True, nullable=False, index=True)

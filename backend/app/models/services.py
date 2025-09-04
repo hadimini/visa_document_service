@@ -7,9 +7,8 @@ from app.database.custom_types import ChoiceType
 from app.models.base import Base
 from app.models.mixins import CreatedAtMixin, IDIntMixin, UpdatedAtMixin, ArchivedAtMixin
 
-
 if TYPE_CHECKING:
-    from app.models import Country, Urgency, VisaDuration, VisaType
+    from app.models import Country, TariffService, Urgency, VisaDuration, VisaType
 
 
 class Service(ArchivedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base):
@@ -25,6 +24,8 @@ class Service(ArchivedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base)
 
     name: Mapped[str] = mapped_column(String)
     fee_type: Mapped[str] = mapped_column(ChoiceType(FEE_TYPE_CHOICES))
+
+    # Foreign key fields
     country_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("countries.id", ondelete="CASCADE"), nullable=True
     )
@@ -40,6 +41,10 @@ class Service(ArchivedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base)
 
     # Relationships
     country: Mapped["Country"] = relationship(back_populates="services")
+    tariff_services: Mapped[list["TariffService"]] = relationship(
+        back_populates="service",
+        foreign_keys="TariffService.service_id"
+    )
     urgency: Mapped["Urgency"] = relationship(back_populates="services")
     visa_duration: Mapped["VisaDuration"] = relationship(back_populates="services")
     visa_type: Mapped["VisaType"] = relationship(back_populates="services")
