@@ -5,14 +5,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
 from app.models.base import Base
-from app.models.mixins import CreatedAtMixin, UpdatedAtMixin, IsActiveMixin
+from app.models.mixins import CreatedAtMixin, UpdatedAtMixin, IDIntMixin, IsActiveMixin
 
 if TYPE_CHECKING:
     from app.models.tariffs import Tariff
     from app.models.users import User
 
 
-class Client(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
+class Client(IDIntMixin, CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
     __tablename__ = "clients"
 
     TYPE_INDIVIDUAL = 'individual'
@@ -23,7 +23,6 @@ class Client(CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
         (TYPE_LEGAL, 'Legal'),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     tariff_id: Mapped[int] = mapped_column(Integer, ForeignKey("tariffs.id", ondelete="RESTRICT"))
     name: Mapped[str] = mapped_column(String(100))
     type: Mapped[str] = mapped_column(ChoiceType(TYPE_CHOICES))

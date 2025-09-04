@@ -5,13 +5,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
 from app.models.base import Base
+from app.models.mixins import IDIntMixin
 from app.models.m2m_country_visa_duration import country_visa_duration
 
 if TYPE_CHECKING:
     from app.models import CountryVisa, Service
 
 
-class VisaDuration(Base):
+class VisaDuration(IDIntMixin, Base):
     __tablename__ = "visa_durations"
     __table_args__ = (
         UniqueConstraint("term", "entry", name="uq_visa_duration_term_entry"),
@@ -47,7 +48,6 @@ class VisaDuration(Base):
         (MULTIPLE_ENTRY, 'Multiple entry')
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String, nullable=True)
     term: Mapped[str] = mapped_column(ChoiceType(TERM_CHOICES))
     entry: Mapped[str] = mapped_column(ChoiceType(ENTRY_CHOICES))

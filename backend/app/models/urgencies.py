@@ -4,16 +4,16 @@ from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+from app.models.mixins import IDIntMixin
 
 
 if TYPE_CHECKING:
     from app.models import Service
 
 
-class Urgency(Base):
+class Urgency(IDIntMixin, Base):
     __tablename__ = "urgencies"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String)
 
     # Relations

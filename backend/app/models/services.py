@@ -5,14 +5,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
 from app.models.base import Base
-from app.models.mixins import CreatedAtMixin, UpdatedAtMixin, ArchivedAtMixin
+from app.models.mixins import CreatedAtMixin, IDIntMixin, UpdatedAtMixin, ArchivedAtMixin
 
 
 if TYPE_CHECKING:
     from app.models import Country, Urgency, VisaDuration, VisaType
 
 
-class Service(ArchivedAtMixin, CreatedAtMixin, UpdatedAtMixin, Base):
+class Service(ArchivedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base):
     __tablename__ = "services"
 
     FEE_TYPE_CONSULAR = "consular"
@@ -23,7 +23,6 @@ class Service(ArchivedAtMixin, CreatedAtMixin, UpdatedAtMixin, Base):
         (FEE_TYPE_GENERAL, "General"),
     )
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String)
     fee_type: Mapped[str] = mapped_column(ChoiceType(FEE_TYPE_CHOICES))
     country_id: Mapped[int] = mapped_column(

@@ -4,15 +4,15 @@ from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
+from app.models.mixins import IDIntMixin
 
 if TYPE_CHECKING:
     from app.models import CountryVisa, Service
 
 
-class VisaType(Base):
+class VisaType(IDIntMixin, Base):
     __tablename__ = "visa_types"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String)
 
     # Relations

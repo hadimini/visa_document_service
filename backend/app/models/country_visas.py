@@ -5,16 +5,16 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
 from app.models.m2m_country_visa_duration import country_visa_duration
-from app.models.mixins import IsActiveMixin
+from app.models.mixins import IDIntMixin, IsActiveMixin
+
 
 if TYPE_CHECKING:
     from app.models import Country, VisaDuration, VisaType
 
 
-class CountryVisa(IsActiveMixin, Base):
+class CountryVisa(IDIntMixin, IsActiveMixin, Base):
     __tablename__ = "country_visas"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     country_id: Mapped[int] = mapped_column(Integer, ForeignKey("countries.id", ondelete="CASCADE"))
     visa_type_id: Mapped[int] = mapped_column(Integer, ForeignKey("visa_types.id", ondelete="CASCADE"))
 
