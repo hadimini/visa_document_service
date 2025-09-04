@@ -26,7 +26,7 @@ from app.models import Client, Country, CountryVisa, Tariff, Urgency, User, Visa
 from app.schemas.client import ClientCreateSchema
 from app.schemas.country_visa import CountryVisaCreateSchema
 from app.schemas.tariff import TariffCreateSchema
-from app.schemas.urgencies import UrgencyCreateSchema
+from app.schemas.urgency import UrgencyCreateSchema
 from app.schemas.user import UserCreateSchema
 from app.schemas.visa_type import VisaTypeCreateSchema
 

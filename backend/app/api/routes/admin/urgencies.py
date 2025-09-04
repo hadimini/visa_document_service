@@ -10,7 +10,7 @@ from app.models.audit import LogEntry
 from app.models.urgencies import Urgency
 from app.models.users import User
 from app.schemas.audit import LogEntryCreateSchema
-from app.schemas.urgencies import UrgencyPublicSchema, UrgencyCreateSchema, UrgencyUpdateSchema
+from app.schemas.urgency import UrgencyPublicSchema, UrgencyCreateSchema, UrgencyUpdateSchema
 
 router = APIRouter()
 

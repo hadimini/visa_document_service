@@ -6,7 +6,7 @@ from app.database.repositories.countries import CountriesRepository
 from app.database.repositories.country_visas import CountryVisasRepository
 from app.schemas.country import CountryFilterSchema, CountryReferencePublicSchema
 from app.schemas.country_visa import CountryVisaReferencePublicSchema
-from app.schemas.urgencies import UrgencyPublicSchema
+from app.schemas.urgency import UrgencyPublicSchema
 
 router = APIRouter()
 
