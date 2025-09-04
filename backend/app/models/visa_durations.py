@@ -8,7 +8,7 @@ from app.models.base import Base
 from app.models.m2m_country_visa_duration import country_visa_duration
 
 if TYPE_CHECKING:
-    from app.models import CountryVisa
+    from app.models import CountryVisa, Service
 
 
 class VisaDuration(Base):
@@ -51,6 +51,12 @@ class VisaDuration(Base):
     name: Mapped[str] = mapped_column(String, nullable=True)
     term: Mapped[str] = mapped_column(ChoiceType(TERM_CHOICES))
     entry: Mapped[str] = mapped_column(ChoiceType(ENTRY_CHOICES))
+
+    # Relations
+    services: Mapped[list["Service"]] = relationship(
+        back_populates="visa_duration",
+        foreign_keys="Service.visa_duration_id"
+    )
 
     # Many-to-many relationship
     country_visas: Mapped[list["CountryVisa"]] = relationship(

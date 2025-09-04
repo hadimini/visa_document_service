@@ -6,7 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
 
 if TYPE_CHECKING:
-    from app.models.country_visas import CountryVisa
+    from app.models import CountryVisa, Service
 
 
 class Country(Base):
@@ -17,6 +17,12 @@ class Country(Base):
     alpha2: Mapped[str] = mapped_column(String)
     alpha3: Mapped[str] = mapped_column(String)
     available_for_order: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Relations
+    services: Mapped[list["Service"]] = relationship(
+        back_populates="country",
+        foreign_keys="Service.country_id",
+    )
 
     country_visas: Mapped[list["CountryVisa"]] = relationship(
         back_populates="country",
