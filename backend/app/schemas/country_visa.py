@@ -1,11 +1,15 @@
 from typing import Optional
 
+from pydantic import Field
+
+from app.models import CountryVisa
 from app.schemas.core import CoreSchema, IDSchemaMixin
 from app.schemas.visa_durations import VisaDurationPublicSchema
 from app.schemas.visa_type import VisaTypePublicSchema
 
 
 class CountryVisaBaseSchema(CoreSchema):
+    MODEL_TYPE: str = Field(default_factory=lambda: CountryVisa.get_model_type())
     country_id: int | None = None
     visa_type_id: int | None = None
     is_active: bool
@@ -33,6 +37,7 @@ class CountryVisaDurationDataSchema(CoreSchema):
 
 
 class CountryVisaAdminPublicSchema(IDSchemaMixin, CoreSchema):
+    MODEL_TYPE: str = Field(default_factory=lambda: CountryVisa.get_model_type())
     is_active: bool
     visa_type: VisaTypePublicSchema
     duration_data: Optional[CountryVisaDurationDataSchema] = None

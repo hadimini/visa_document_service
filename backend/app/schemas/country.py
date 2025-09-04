@@ -3,7 +3,7 @@ from typing import Optional, Annotated
 from fastapi import Query
 from pydantic import Field
 
-from app.models import Country
+from app.models import Country, CountryVisa
 from app.schemas.core import CoreSchema, IDSchemaMixin
 from app.schemas.visa_type import VisaTypePublicSchema
 
@@ -17,6 +17,7 @@ class CountryBaseSchema(CoreSchema):
 
 
 class CountryVisaSchema(CoreSchema):
+    MODEL_TYPE: str = Field(default_factory=lambda: CountryVisa.get_model_type())
     id: int
     is_active: bool
     visa_type: VisaTypePublicSchema

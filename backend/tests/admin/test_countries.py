@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.countries import CountriesRepository
+from app.models import CountryVisa, VisaType
 from app.models.audit import LogEntry
 from app.models.countries import Country
 from app.models.users import User
@@ -95,9 +96,11 @@ class TestCountries:
         assert response.json().get("visa_data") == {
             "attached": [
                 {
+                    "MODEL_TYPE": CountryVisa.get_model_type(),
                     "id": russia_business_visa.id,
                     "is_active": True,
                     "visa_type": {
+                        "MODEL_TYPE": VisaType.get_model_type(),
                         "id": visa_business.id,
                         "name": visa_business.name,
                     }
@@ -105,6 +108,7 @@ class TestCountries:
             ],
             "available": [
                 {
+                    "MODEL_TYPE": VisaType.get_model_type(),
                     "id": visa_tourist.id,
                     "name": visa_tourist.name,
                 }

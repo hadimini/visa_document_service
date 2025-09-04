@@ -3,7 +3,7 @@ from fastapi import FastAPI, status
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import User, VisaDuration
+from app.models import Country, User, VisaType, VisaDuration, CountryVisa
 from app.services import jwt_service
 from tests.conftest import CountryMakerProtocol, VisaTypeMakerProtocol
 
@@ -96,16 +96,20 @@ class TestCountryVisas:
             headers={"Authorization": f"Bearer {token_pair.access}"},
         )
         assert response.status_code == status.HTTP_200_OK
+        assert response.json()["MODEL_TYPE"] == CountryVisa.get_model_type()
         assert response.json()["id"] == russia_business_visa.id
         assert response.json()["is_active"] is True
+        assert response.json()["visa_type"]["MODEL_TYPE"] == VisaType.get_model_type()
         assert response.json()["visa_type"]["id"] == visa_business.id
         assert response.json()["visa_type"]["name"] == visa_business.name
         assert len(response.json()["duration_data"]["attached"]) == 1
+        assert response.json()["duration_data"]["attached"][0]["MODEL_TYPE"] == VisaDuration.get_model_type()
         assert response.json()["duration_data"]["attached"][0]["id"] == duration_3_m_s.id
         assert response.json()["duration_data"]["attached"][0]["name"] == duration_3_m_s.name
         assert response.json()["duration_data"]["attached"][0]["term"] == duration_3_m_s.term
         assert response.json()["duration_data"]["attached"][0]["entry"] == duration_3_m_s.entry
         assert len(response.json()["duration_data"]["available"]) == 1
+        assert response.json()["duration_data"]["available"][0]["MODEL_TYPE"] == VisaDuration.get_model_type()
         assert response.json()["duration_data"]["available"][0]["id"] == duration_1_m_s.id
         assert response.json()["duration_data"]["available"][0]["name"] == duration_1_m_s.name
         assert response.json()["duration_data"]["available"][0]["term"] == duration_1_m_s.term
@@ -124,11 +128,14 @@ class TestCountryVisas:
             headers={"Authorization": f"Bearer {token_pair.access}"},
         )
         assert response.status_code == status.HTTP_200_OK
+        assert response.json()["MODEL_TYPE"] == CountryVisa.get_model_type()
         assert response.json()["id"] == russia_business_visa.id
         assert response.json()["is_active"] is True
+        assert response.json()["visa_type"]["MODEL_TYPE"] == VisaType.get_model_type()
         assert response.json()["visa_type"]["id"] == visa_business.id
         assert response.json()["visa_type"]["name"] == visa_business.name
         assert len(response.json()["duration_data"]["attached"]) == 2
+        assert response.json()["duration_data"]["attached"][0]["MODEL_TYPE"] == VisaDuration.get_model_type()
         assert response.json()["duration_data"]["attached"][0]["id"] == duration_1_m_s.id
         assert response.json()["duration_data"]["attached"][0]["name"] == duration_1_m_s.name
         assert response.json()["duration_data"]["attached"][0]["term"] == duration_1_m_s.term
@@ -152,11 +159,14 @@ class TestCountryVisas:
         )
 
         assert response.status_code == status.HTTP_200_OK
+        assert response.json()["MODEL_TYPE"] == CountryVisa.get_model_type()
         assert response.json()["id"] == russia_business_visa.id
         assert response.json()["is_active"] is True
+        assert response.json()["visa_type"]["MODEL_TYPE"] == VisaType.get_model_type()
         assert response.json()["visa_type"]["id"] == visa_business.id
         assert response.json()["visa_type"]["name"] == visa_business.name
         assert len(response.json()["duration_data"]["attached"]) == 2
+        assert response.json()["duration_data"]["attached"][0]["MODEL_TYPE"] == VisaDuration.get_model_type()
         assert response.json()["duration_data"]["attached"][0]["id"] == duration_1_m_s.id
         assert response.json()["duration_data"]["attached"][0]["name"] == duration_1_m_s.name
         assert response.json()["duration_data"]["attached"][0]["term"] == duration_1_m_s.term

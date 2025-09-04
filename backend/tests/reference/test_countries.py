@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.countries import CountriesRepository
-from app.models.users import User
+from app.models import Country, User
 from app.schemas.country import CountryFilterSchema, CountryUpdateSchema, CountryReferencePublicSchema
 from app.services import jwt_service
 
@@ -66,6 +66,7 @@ class TestCountries:
         assert len(response.json()) == 1
         assert response.json() == [
             {
+                "MODEL_TYPE": Country.get_model_type(),
                 "id": 160,
                 "name": "Russian Federation",
                 "alpha2": "RU",
@@ -97,6 +98,7 @@ class TestCountries:
         assert len(response.json()) == 1
         assert response.json() == [
             {
+                "MODEL_TYPE": Country.get_model_type(),
                 "id": 1,
                 "name": "Afghanistan",
                 "alpha2": "AF",

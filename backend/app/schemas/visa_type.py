@@ -1,11 +1,14 @@
 from typing import Annotated
 
 from fastapi import Query
+from pydantic import Field
 
+from app.models import VisaType
 from app.schemas.core import CoreSchema, IDSchemaMixin
 
 
 class VisaTypeBaseSchema(CoreSchema):
+    MODEL_TYPE: str = Field(default_factory=lambda: VisaType.get_model_type())
     name: str | None = None
 
 
