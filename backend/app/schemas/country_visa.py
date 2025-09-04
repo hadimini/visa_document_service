@@ -4,7 +4,7 @@ from pydantic import Field
 
 from app.models import CountryVisa
 from app.schemas.core import CoreSchema, IDSchemaMixin
-from app.schemas.visa_durations import VisaDurationPublicSchema
+from app.schemas.visa_duration import VisaDurationPublicSchema
 from app.schemas.visa_type import VisaTypePublicSchema
 
 
