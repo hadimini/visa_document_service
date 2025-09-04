@@ -1,6 +1,9 @@
 from datetime import datetime
 from uuid import UUID
 
+from pydantic import Field
+
+from app.models.tokens import BlackListToken
 from app.schemas.core import CoreSchema
 
 
@@ -39,5 +42,6 @@ class AccessTokenSchema(CoreSchema):
 
 
 class BlackListTokenSchema(CoreSchema):
+    MODEL_TYPE: str = Field(default_factory=lambda: BlackListToken.get_model_type())
     id: UUID
     expire: datetime

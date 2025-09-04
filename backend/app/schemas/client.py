@@ -1,13 +1,15 @@
 from typing import Annotated, Literal, Optional
 
 from fastapi import Query
-from pydantic import StringConstraints
+from pydantic import Field, StringConstraints
 
+from app.models import Client
 from app.schemas.core import CoreSchema, IDSchemaMixin
 from app.schemas.tariff import TariffPublicSchema
 
 
 class ClientBaseSchema(CoreSchema):
+    MODEL_TYPE: str = Field(default_factory=lambda: Client.get_model_type())
     tariff: Optional[TariffPublicSchema] = None
     name: Optional[str] = None
     type: Literal["individual", "legal"] | None = None

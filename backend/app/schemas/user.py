@@ -1,11 +1,13 @@
 from fastapi import Query
 from typing import Annotated, Literal, Optional
-from pydantic import EmailStr, StringConstraints
+from pydantic import EmailStr, Field, StringConstraints
 
+from app.models import User
 from app.schemas.core import CoreSchema, IDSchemaMixin, DateTimeSchemaMixin
 
 
 class UserBaseSchema(CoreSchema):
+    MODEL_TYPE: str = Field(default_factory=lambda: User.get_model_type())
     email: Optional[EmailStr]
     email_verified: bool = False
     first_name: Optional[str] = None
