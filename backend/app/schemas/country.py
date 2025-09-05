@@ -29,7 +29,11 @@ class CountryVisaDataSchema(CoreSchema):
     available: Optional[list[VisaTypeResponseSchema]] = None
 
 
-class CountryAdminPublicSchema(IDSchemaMixin, CountryBaseSchema):
+class CountryAdminListSchema(IDSchemaMixin, CountryBaseSchema):
+    pass
+
+
+class CountryAdminResponseSchema(IDSchemaMixin, CountryBaseSchema):
     visa_data: Optional[CountryVisaDataSchema] = None  # todo: We do not need it in list
 
 
@@ -48,4 +52,4 @@ class CountryFilterSchema(CoreSchema):
 
 
 class CountryListResponseSchema(PagedResponseSchema, CoreSchema):
-    items: list[CountryAdminPublicSchema]
+    items: list[CountryAdminListSchema]

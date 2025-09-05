@@ -13,7 +13,7 @@ from app.models import Country, CountryVisa, LogEntry, User
 from app.schemas.audit import LogEntryCreateSchema
 from app.schemas.country import (
     CountryListResponseSchema,
-    CountryAdminPublicSchema,
+    CountryAdminResponseSchema,
     CountryUpdateSchema,
     CountryFilterSchema
 )
@@ -40,7 +40,7 @@ async def country_list(
 
 @router.get(
     path="/{country_id}",
-    response_model=CountryAdminPublicSchema,
+    response_model=CountryAdminResponseSchema,
     summary="Country detail page",
     name="admin:country-detail"
 )
@@ -57,7 +57,7 @@ async def country_detail(
 
 @router.put(
     path="/{country_id}",
-    response_model=CountryAdminPublicSchema,
+    response_model=CountryAdminResponseSchema,
     summary="Country update page",
     name="admin:country-update"
 )
