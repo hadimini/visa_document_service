@@ -97,7 +97,7 @@ async def country_visa_detail(
         country_visa_id=country_visa_id, populate_duration_data=True
     )
 
-    if not country_visa:
+    if not country_visa or country_visa.country_id != country_id:
         raise NotFoundException()
 
     return country_visa
@@ -116,7 +116,7 @@ async def country_visa_update(
 ):
     country_visa: Optional[CountryVisa] = await country_visas_repo.update(country_visa_id=country_visa_id, data=data)
 
-    if not country_visa:
+    if not country_visa or country_visa.country_id != country_id:
         raise NotFoundException()
 
     country_visa = await country_visas_repo.get_by_id(country_visa_id=country_visa_id, populate_duration_data=True)
