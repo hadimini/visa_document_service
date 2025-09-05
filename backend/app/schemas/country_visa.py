@@ -5,7 +5,7 @@ from pydantic import Field
 from app.models import CountryVisa
 from app.schemas.core import CoreSchema, IDSchemaMixin
 from app.schemas.visa_duration import VisaDurationPublicSchema
-from app.schemas.visa_type import VisaTypePublicSchema
+from app.schemas.visa_type import VisaTypeResponseSchema
 
 
 class CountryVisaBaseSchema(CoreSchema):
@@ -39,7 +39,7 @@ class CountryVisaDurationDataSchema(CoreSchema):
 class CountryVisaAdminPublicSchema(IDSchemaMixin, CoreSchema):
     MODEL_TYPE: str = Field(default_factory=lambda: CountryVisa.get_model_type())
     is_active: bool
-    visa_type: VisaTypePublicSchema
+    visa_type: VisaTypeResponseSchema
     duration_data: Optional[CountryVisaDurationDataSchema] = None
 
 
@@ -49,6 +49,6 @@ class CountryVisaAdminUpdateSchema(CoreSchema):
 
 
 class CountryVisaReferencePublicSchema(IDSchemaMixin):
-    visa_type: VisaTypePublicSchema
+    visa_type: VisaTypeResponseSchema
     is_active: bool
     visa_durations: Optional[list[VisaDurationPublicSchema]] = None

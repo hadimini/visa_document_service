@@ -1,24 +1,23 @@
-from typing import Optional
-
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
-from app.api.helpers import paginate
+
+
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.services import ServicesRepository
 from app.exceptions import NotFoundException
 from app.models import LogEntry, Service, User
 from app.schemas.audit import LogEntryCreateSchema
-from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
-from app.schemas.service import ServicePublicSchema, ServiceFilterSchema, ServiceCreateSchema
+from app.schemas.pagination import PageParamsSchema
+from app.schemas.service import ServiceResponseSchema, ServiceFilterSchema, ServiceCreateSchema, ServiceListResponseSchema
 
 router = APIRouter()
 
 
 @router.get(
     path="",
-    response_model=PagedResponseSchema,
+    response_model=ServiceListResponseSchema,
     name="admin:service-list"
 )
 async def service_list(
@@ -27,16 +26,12 @@ async def service_list(
         services_repo: ServicesRepository = Depends(get_repository(ServicesRepository))
 ):
     result = await services_repo.get_list(query_filters=query_filters, page_params=page_params)
-    return paginate(
-        page_params,
-        result,
-        ServicePublicSchema
-    )
+    return result
 
 
 @router.get(
     path="/{service_id}",
-    response_model=ServicePublicSchema,
+    response_model=ServiceResponseSchema,
     name="admin:service-detail"
 )
 async def service_detail(
@@ -53,7 +48,7 @@ async def service_detail(
 
 @router.post(
     path="",
-    response_model=ServicePublicSchema,
+    response_model=ServiceResponseSchema,
     name="admin:service-create"
 )
 async def service_create(

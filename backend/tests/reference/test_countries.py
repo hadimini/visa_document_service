@@ -35,7 +35,7 @@ class TestCountries:
 
         countries_repo = CountriesRepository(async_db)
         countries_in_db = await countries_repo.get_full_list(
-            filters=CountryFilterSchema(
+            query_filters=CountryFilterSchema(
                 name=""
             )
         )

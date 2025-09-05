@@ -1,42 +1,48 @@
-from sqlalchemy import select
+from typing import Any
+
+from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from sqlalchemy.sql.elements import ClauseElement
 
-from app.database.repositories.base import BaseRepository
+from app.database.repositories.base import BasePaginatedRepository
+from app.database.repositories.mixins import BuildFiltersMixin
 from app.models import CountryVisa, VisaType
 from app.models.countries import Country
 from app.schemas.country import CountryFilterSchema, CountryUpdateSchema
 from app.schemas.pagination import PageParamsSchema
 
 
-class CountriesRepository(BaseRepository):
+class CountriesRepository(BasePaginatedRepository, BuildFiltersMixin):
     def __init__(self, db: AsyncSession):
-        super().__init__(db)
-        self.db = db
+        super().__init__(db=db, model=Country)
 
-    async def get_paginated_list(self, *, filters: CountryFilterSchema, page_params: PageParamsSchema):
-        # First, get paginated country IDs
-        count_stmt = select(Country.id)
+    def build_filters(self, *, query_filters: CountryFilterSchema) -> list:
+        filters: list[ClauseElement] = list()
 
-        if filters.name:
-            count_stmt = count_stmt.filter(Country.name.ilike(f"%{filters.name}%"))
+        if query_filters.name:
+            filters.append(Country.name.ilike(f"%{query_filters.name}%"))
 
-        count_stmt = count_stmt.filter(Country.available_for_order == filters.available_for_order)
-        count_stmt = count_stmt.offset((page_params.page - 1) * page_params.size).limit(page_params.size)
-        country_ids = (await self.db.scalars(count_stmt)).all()
+        if query_filters.available_for_order:
+            filters.append(
+                Country.available_for_order == query_filters.available_for_order
+            )
+        return filters
 
-        # Then fetch countries with relationships
-        if country_ids:
-            statement = select(Country).options(
-                selectinload(Country.country_visas).selectinload(CountryVisa.visa_type)
-            ).where(Country.id.in_(country_ids)).order_by(Country.id)
+    async def get_paginated_list(
+            self, *, query_filters: CountryFilterSchema, page_params: PageParamsSchema
+    ) -> dict[str, Any]:
+        statement = select(Country)
+        filters = self.build_filters(query_filters=query_filters)
 
-            result = await self.db.scalars(statement)
-            return result.unique().all()
-        else:
-            return []
+        if filters:
+            statement = statement.where(and_(*filters))
 
-    async def get_full_list(self, *, filters: CountryFilterSchema):
+        statement = statement.order_by(Country.id)
+        result = await self.paginate(statement, page_params)
+        return result
+
+    async def get_full_list(self, *, query_filters: CountryFilterSchema):
         """
         Retrieve all countries, only filters can be applied
         :param filters:
@@ -44,10 +50,10 @@ class CountriesRepository(BaseRepository):
         """
         statement = select(Country).order_by(Country.id)
 
-        if filters.name:
-            statement = statement.filter(Country.name.ilike(f"%{filters.name}%"))
+        filters = self.build_filters(query_filters=query_filters)
 
-        statement = statement.filter(Country.available_for_order == filters.available_for_order)
+        if filters:
+            statement = statement.where(and_(*filters))
 
         result = (await self.db.scalars(statement)).all()
         return result

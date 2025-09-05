@@ -11,6 +11,7 @@ from app.schemas.core import (
     CoreSchema,
     IDSchemaMixin
 )
+from app.schemas.pagination import PagedResponseSchema
 
 
 class FeeTypeEnum(str, Enum):
@@ -53,7 +54,7 @@ class ServiceCreateSchema(ServiceBaseSchema):
     )
 
 
-class ServicePublicSchema(
+class ServiceResponseSchema(
     ArchivedAtSchemaMixin,
     DateTimeSchemaMixin,
     IDSchemaMixin,
@@ -87,3 +88,7 @@ class ServiceFilterSchema(CoreSchema):
     urgency_id: Optional[int] = None
     visa_duration_id: Optional[int] = None
     visa_type_id: Optional[int] = None
+
+
+class ServiceListResponseSchema(PagedResponseSchema, CoreSchema):
+    items: list[ServiceResponseSchema]

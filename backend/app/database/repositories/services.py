@@ -1,23 +1,24 @@
-from typing import Sequence
+from typing import Any
 
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.sql.elements import ClauseElement
 
-from app.database.repositories.base import BaseRepository
+from app.database.repositories.base import BasePaginatedRepository
+from app.database.repositories.mixins import BuildFiltersMixin
 from app.models import Service
 from app.schemas.pagination import PageParamsSchema
 from app.schemas.service import ServiceCreateSchema, ServiceFilterSchema
 
 
-class ServicesRepository(BaseRepository):
+class ServicesRepository(BasePaginatedRepository, BuildFiltersMixin):
 
     def __init__(self, db: AsyncSession) -> None:
-        super().__init__(db)
+        super().__init__(db=db, model=Service)
 
-    def build_service_filters(self, *, query_filters: ServiceFilterSchema) -> list:
+    def build_filters(self, *, query_filters: ServiceFilterSchema) -> list:
         """Convert filter schema to SQLAlchemy filter conditions"""
-        filters = list()
+        filters: list[ClauseElement] = list()
 
         if query_filters.name:
             filters.append(Service.name.ilike(f"%{query_filters.name}%"))
@@ -40,17 +41,16 @@ class ServicesRepository(BaseRepository):
 
         return filters
 
-    async def get_list(self, *, query_filters: ServiceFilterSchema, page_params: PageParamsSchema) -> Sequence[Service]:
+    async def get_list(self, *, query_filters: ServiceFilterSchema, page_params: PageParamsSchema) -> dict[str, Any]:
         statement = select(Service)
-        filters = self.build_service_filters(query_filters=query_filters)
+        filters = self.build_filters(query_filters=query_filters)
 
         if filters:
             statement = statement.where(and_(*filters))
 
-        statement = statement.offset((page_params.page - 1) * page_params.size).limit(page_params.size)
-        return (await self.db.scalars(statement)).all()
+        return await self.paginate(statement, page_params)
 
-    async def get_by_id(self, *, service_id) -> Service:
+    async def get_by_id(self, *, service_id) -> Service | None:
         # options = [joinedload(Service.tariff)]  # todo
 
         statement = select(Service).where(Service.id == service_id)

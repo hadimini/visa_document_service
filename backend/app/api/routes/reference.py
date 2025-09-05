@@ -6,7 +6,7 @@ from app.database.repositories.countries import CountriesRepository
 from app.database.repositories.country_visas import CountryVisasRepository
 from app.schemas.country import CountryFilterSchema, CountryReferencePublicSchema
 from app.schemas.country_visa import CountryVisaReferencePublicSchema
-from app.schemas.urgency import UrgencyPublicSchema
+from app.schemas.urgency import UrgencyResponseSchema
 
 router = APIRouter()
 
@@ -19,10 +19,10 @@ router = APIRouter()
     name="reference:country-list"
 )
 async def country_list(
-        filters: CountryFilterSchema = Depends(),
+        query_filters: CountryFilterSchema = Depends(),
         countries_repo: CountriesRepository = Depends(get_repository(CountriesRepository))
 ):
-    results = await countries_repo.get_full_list(filters=filters)
+    results = await countries_repo.get_full_list(query_filters=query_filters)
     return results
 
 
@@ -42,7 +42,7 @@ async def country_visa_type_list(
 
 urgency_list = router.get(
     path="/urgencies",
-    response_model=list[UrgencyPublicSchema],
+    response_model=list[UrgencyResponseSchema],
     status_code=200,
     summary="Get all urgencies - unpaginated",
     name="reference:urgency-list"

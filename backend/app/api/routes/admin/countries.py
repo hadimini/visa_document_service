@@ -1,41 +1,41 @@
-from typing import Optional
+from typing import Optional, Any
 
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
-from app.api.helpers import paginate
+
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.countries import CountriesRepository
 from app.database.repositories.country_visas import CountryVisasRepository
 from app.exceptions import NotFoundException
 from app.models import Country, CountryVisa, LogEntry, User
 from app.schemas.audit import LogEntryCreateSchema
-from app.schemas.country import CountryAdminPublicSchema, CountryUpdateSchema, CountryFilterSchema
+from app.schemas.country import (
+    CountryListResponseSchema,
+    CountryAdminPublicSchema,
+    CountryUpdateSchema,
+    CountryFilterSchema
+)
 from app.schemas.country_visa import CountryVisaAdminPublicSchema, CountryVisaAdminUpdateSchema
-from app.schemas.pagination import PagedResponseSchema, PageParamsSchema
+from app.schemas.pagination import PageParamsSchema
 
 router = APIRouter()
 
 
 @router.get(
     path="",
-    response_model=PagedResponseSchema,
+    response_model=CountryListResponseSchema,
     summary="Country list page",
     name="admin:country-list"
 )
 async def country_list(
-        filters: CountryFilterSchema = Depends(),
+        query_filters: CountryFilterSchema = Depends(),
         page_params: PageParamsSchema = Depends(),
         countries_repo: CountriesRepository = Depends(get_repository(CountriesRepository)),
-
 ):
-    results: list[Country] = await countries_repo.get_paginated_list(filters=filters, page_params=page_params)
-    return paginate(
-        page_params,
-        results,
-        CountryAdminPublicSchema
-    )
+    result: dict[str, Any] = await countries_repo.get_paginated_list(query_filters=query_filters, page_params=page_params)
+    return result
 
 
 @router.get(

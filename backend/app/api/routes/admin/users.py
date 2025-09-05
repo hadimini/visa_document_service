@@ -1,31 +1,27 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends
 
 from app.api.dependencies.db import get_repository
-from app.api.helpers import paginate
 from app.database.repositories.users import UsersRepository
 from app.exceptions import NotFoundException
-from app.models.users import User
-from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
-from app.schemas.user import UserPublicSchema, UserFilterSchema
+from app.schemas.pagination import PageParamsSchema
+from app.schemas.user import UserResponseSchema, UserFilterSchema, UserListResponseSchema
 
 router = APIRouter()
 
 
-@router.get("/", response_model=PagedResponseSchema, name="admin:user-list")
+@router.get("", response_model=UserListResponseSchema, name="admin:user-list")
 async def user_list(
-        filters: UserFilterSchema = Depends(),
+        query_filters: UserFilterSchema = Depends(),
         page_params: PageParamsSchema = Depends(),
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
-    results: list[User] = await users_repo.get_list(filters=filters, page_params=page_params)
-    return paginate(
-        page_params,
-        results,
-        UserPublicSchema
-    )
+    result: dict[str, Any] = await users_repo.get_list(query_filters=query_filters, page_params=page_params)
+    return result
 
 
-@router.get("/{user_id}", response_model=UserPublicSchema, name="admin:user-detail")
+@router.get("/{user_id}", response_model=UserResponseSchema, name="admin:user-detail")
 async def user_detail(
         user_id: int,
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))

@@ -26,7 +26,7 @@ from app.models.users import User
 from app.schemas.audit import LogEntryCreateSchema
 from app.schemas.client import ClientCreateSchema
 from app.schemas.token import TokenVerifySchema
-from app.schemas.user import UserPublicSchema, UserCreateSchema, UserUpdateSchema
+from app.schemas.user import UserResponseSchema, UserCreateSchema, UserUpdateSchema
 from app.services import jwt_service
 from app.tasks import task_notify_on_email_confirm
 
@@ -35,7 +35,7 @@ router = APIRouter()
 
 @router.post(
     path="/register",
-    response_model=UserPublicSchema,
+    response_model=UserResponseSchema,
     name="auth:register",
     status_code=status.HTTP_201_CREATED
 )
@@ -179,14 +179,14 @@ async def logout(
     )
 
 
-@router.get("/profile", response_model=UserPublicSchema, name="auth:profile-detail")
+@router.get("/profile", response_model=UserResponseSchema, name="auth:profile-detail")
 async def profile_detail(
         current_user: User = Depends(get_current_active_user),
 ):
     return current_user
 
 
-@router.put("/profile", response_model=UserPublicSchema, name="auth:profile-update")
+@router.put("/profile", response_model=UserResponseSchema, name="auth:profile-update")
 async def profile_update(
         user_data: UserUpdateSchema,
         current_user: User = Depends(get_current_active_user),

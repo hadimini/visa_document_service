@@ -4,6 +4,7 @@ from pydantic import EmailStr, Field, StringConstraints
 
 from app.models import User
 from app.schemas.core import CoreSchema, IDSchemaMixin, DateTimeSchemaMixin
+from app.schemas.pagination import PagedResponseSchema
 
 
 class UserBaseSchema(CoreSchema):
@@ -39,7 +40,7 @@ class UserUpdateSchema(CoreSchema):
     last_name: str
 
 
-class UserPublicSchema(IDSchemaMixin, DateTimeSchemaMixin, UserBaseSchema):
+class UserResponseSchema(IDSchemaMixin, DateTimeSchemaMixin, UserBaseSchema):
     pass
 
 
@@ -51,3 +52,7 @@ class UserPasswordUpdateSchema(CoreSchema):
 class UserFilterSchema(CoreSchema):
     name: Annotated[str | None, Query(max_length=50, description="Filter by user's name")] = None
     role: Literal["admin", "employee", "individual", "manager", "operator"] | None = None
+
+
+class UserListResponseSchema(PagedResponseSchema, CoreSchema):
+    items: list[UserResponseSchema]

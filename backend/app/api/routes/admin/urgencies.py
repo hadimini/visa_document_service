@@ -10,21 +10,21 @@ from app.models.audit import LogEntry
 from app.models.urgencies import Urgency
 from app.models.users import User
 from app.schemas.audit import LogEntryCreateSchema
-from app.schemas.urgency import UrgencyPublicSchema, UrgencyCreateSchema, UrgencyUpdateSchema
+from app.schemas.urgency import UrgencyResponseSchema, UrgencyCreateSchema, UrgencyUpdateSchema
 
 router = APIRouter()
 
 
 urgency_list = router.get(
-    path="/",
-    response_model=list[UrgencyPublicSchema],
+    path="",
+    response_model=list[UrgencyResponseSchema],
     name="admin:urgency-list"
 )(urgency_list)
 
 
 @router.get(
     path="/{urgency_id}",
-    response_model=UrgencyPublicSchema,
+    response_model=UrgencyResponseSchema,
     name="admin:urgency-detail"
 )
 async def urgency_detail(
@@ -40,8 +40,8 @@ async def urgency_detail(
 
 
 @router.post(
-    path="/",
-    response_model=UrgencyPublicSchema,
+    path="",
+    response_model=UrgencyResponseSchema,
     status_code=status.HTTP_201_CREATED,
     name="admin:urgency-create",
 )
@@ -65,7 +65,7 @@ async def urgency_create(
 
 @router.put(
     path="/{urgency_id}",
-    response_model=UrgencyPublicSchema,
+    response_model=UrgencyResponseSchema,
     name="admin:urgency-update"
 )
 async def urgency_update(

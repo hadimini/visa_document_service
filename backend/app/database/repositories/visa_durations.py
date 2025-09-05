@@ -7,7 +7,6 @@ from app.models import VisaDuration
 class VisaDurationsRepository(BaseRepository):
     def __init__(self, db: AsyncSession):
         super().__init__(db)
-        self.db = db
 
     async def create(self, term: str, entry: str) -> VisaDuration:
         visa_duration = VisaDuration(

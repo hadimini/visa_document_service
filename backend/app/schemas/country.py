@@ -5,7 +5,8 @@ from pydantic import Field
 
 from app.models import Country, CountryVisa
 from app.schemas.core import CoreSchema, IDSchemaMixin
-from app.schemas.visa_type import VisaTypePublicSchema
+from app.schemas.pagination import PagedResponseSchema
+from app.schemas.visa_type import VisaTypeResponseSchema
 
 
 class CountryBaseSchema(CoreSchema):
@@ -20,12 +21,12 @@ class CountryVisaSchema(CoreSchema):
     MODEL_TYPE: str = Field(default_factory=lambda: CountryVisa.get_model_type())
     id: int
     is_active: bool
-    visa_type: VisaTypePublicSchema
+    visa_type: VisaTypeResponseSchema
 
 
 class CountryVisaDataSchema(CoreSchema):
     attached: Optional[list[CountryVisaSchema]] = None
-    available: Optional[list[VisaTypePublicSchema]] = None
+    available: Optional[list[VisaTypeResponseSchema]] = None
 
 
 class CountryAdminPublicSchema(IDSchemaMixin, CountryBaseSchema):
@@ -43,4 +44,8 @@ class CountryUpdateSchema(CoreSchema):
 
 class CountryFilterSchema(CoreSchema):
     name: Annotated[str | None, Query(max_length=50, description="Filter by country's name")] = None
-    available_for_order: Optional[bool] = False
+    available_for_order: Optional[bool] = None
+
+
+class CountryListResponseSchema(PagedResponseSchema, CoreSchema):
+    items: list[CountryAdminPublicSchema]

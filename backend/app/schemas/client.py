@@ -6,6 +6,7 @@ from pydantic import Field, StringConstraints
 from app.models import Client
 from app.schemas.core import CoreSchema, IDSchemaMixin
 from app.schemas.tariff import TariffPublicSchema
+from app.schemas.pagination import PagedResponseSchema
 
 
 class ClientBaseSchema(CoreSchema):
@@ -21,10 +22,14 @@ class ClientCreateSchema(CoreSchema):
     type: Literal["individual", "legal"]
 
 
-class ClientPublicSchema(IDSchemaMixin, ClientBaseSchema):
+class ClientResponseSchema(IDSchemaMixin, ClientBaseSchema):
     pass
 
 
 class ClientFilterSchema(CoreSchema):
     name: Annotated[str | None, Query(max_length=50, description="Filter by client's name")] = None
     type: Literal["individual", "legal"] | None = None
+
+
+class ClientListResponseSchema(PagedResponseSchema, CoreSchema):
+    items: list[ClientResponseSchema]

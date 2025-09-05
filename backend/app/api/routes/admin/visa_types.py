@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, status
 
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
-from app.api.helpers import paginate
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.visa_types import VisaTypesRepository
 from app.exceptions import NotFoundException
@@ -10,33 +9,35 @@ from app.models.audit import LogEntry
 from app.models.users import User
 from app.models.visa_types import VisaType
 from app.schemas.audit import LogEntryCreateSchema
-from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
-from app.schemas.visa_type import VisaTypePublicSchema, VisaTypeFilterSchema, VisaTypeUpdateSchema, VisaTypeCreateSchema
+from app.schemas.pagination import PageParamsSchema
+from app.schemas.visa_type import (
+    VisaTypeResponseSchema,
+    VisaTypeFilterSchema,
+    VisaTypeUpdateSchema,
+    VisaTypeCreateSchema,
+    VisaTypeListResponseSchema
+)
 
 router = APIRouter()
 
 
 @router.get(
     path="",
-    response_model=PagedResponseSchema,
+    response_model=VisaTypeListResponseSchema,
     name="admin:visa_type-list"
 )
 async def visa_type_list(
-        filters: VisaTypeFilterSchema = Depends(),
+        query_filters: VisaTypeFilterSchema = Depends(),
         page_params: PageParamsSchema = Depends(),
         visa_types_repo: VisaTypesRepository = Depends(get_repository(VisaTypesRepository))
 ):
-    results = await visa_types_repo.get_list()  # todo: apply filters and pagination
-    return paginate(
-        page_params,
-        results,
-        VisaTypePublicSchema
-    )
+    result = await visa_types_repo.get_list(query_filters=query_filters, page_params=page_params)  # todo: apply filters and pagination
+    return result
 
 
 @router.get(
     path="/{visa_type_id}",
-    response_model=VisaTypePublicSchema,
+    response_model=VisaTypeResponseSchema,
     name="admin:visa_type-detail"
 )
 async def visa_type_detail(
@@ -51,7 +52,7 @@ async def visa_type_detail(
 
 @router.post(
     path="",
-    response_model=VisaTypePublicSchema,
+    response_model=VisaTypeResponseSchema,
     name="admin:visa_type-create",
     status_code=status.HTTP_201_CREATED
 )
@@ -76,7 +77,7 @@ async def visa_type_create(
 
 @router.put(
     path="/{visa_type_id}",
-    response_model=VisaTypePublicSchema,
+    response_model=VisaTypeResponseSchema,
     name="admin:visa_type-update"
 )
 async def visa_type_update(

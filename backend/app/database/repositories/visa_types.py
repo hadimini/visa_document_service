@@ -1,22 +1,33 @@
+from typing import Any
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.repositories.base import BaseRepository
+from app.database.repositories.base import BasePaginatedRepository
+from app.database.repositories.mixins import BuildFiltersMixin
 from app.models.visa_types import VisaType
 from app.exceptions import NameExistsException, NotFoundException
+from app.schemas.pagination import PageParamsSchema
 from app.schemas.visa_type import VisaTypeCreateSchema, VisaTypeUpdateSchema
 
 
-class VisaTypesRepository(BaseRepository):
+class VisaTypesRepository(BasePaginatedRepository, BuildFiltersMixin):
 
     def __init__(self, db: AsyncSession) -> None:
-        super().__init__(db)
-        self.db = db
+        super().__init__(db=db, model=VisaType)
 
-    async def get_list(self):
+    def build_filters(self, *, query_filters) -> list:
+        # TODO
+        return []
+
+    async def get_list(self, *, query_filters, page_params: PageParamsSchema) -> dict[str, Any]:
         statement = select(VisaType).order_by(VisaType.id)
-        result = await self.db.scalars(statement)
-        return result.all()
+        filters = self.build_filters(query_filters=query_filters)
+
+        if filters:
+            statement = statement.where(*filters)
+
+        return await self.paginate(statement, page_params)
 
     async def get_by_id(self, *, visa_type_id: int) -> VisaType | None:
         statement = select(VisaType).where(VisaType.id == visa_type_id)

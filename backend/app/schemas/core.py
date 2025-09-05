@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict, computed_field
+from pydantic import BaseModel, field_validator
 
 STRFTIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 

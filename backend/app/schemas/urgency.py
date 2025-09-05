@@ -17,5 +17,5 @@ class UrgencyUpdateSchema(CoreSchema):
     name: str
 
 
-class UrgencyPublicSchema(IDSchemaMixin, UrgencyBaseSchema):
+class UrgencyResponseSchema(IDSchemaMixin, UrgencyBaseSchema):
     pass

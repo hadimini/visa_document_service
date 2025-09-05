@@ -13,7 +13,6 @@ class UrgenciesRepository(BaseRepository):
 
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(db)
-        self.db = db
 
     async def get_list(self) -> Sequence[Urgency]:
         statement = select(Urgency).order_by(Urgency.id)
