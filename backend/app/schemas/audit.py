@@ -19,7 +19,6 @@ class LogEntryPublicSchema(IDSchemaMixin, CreatedAtSchemaMixin, LogEntryBaseSche
 
 
 class LogEntryCreateSchema(CoreSchema):
-    action: str
     user_id: Optional[int] = None
     action: Optional[str] = None
     model_type: Optional[str] = None

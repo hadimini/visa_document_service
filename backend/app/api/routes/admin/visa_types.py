@@ -62,13 +62,15 @@ async def visa_type_create(
         audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
     visa_type = await visa_types_repo.create(data=data)
-    new_entry = LogEntryCreateSchema(
-        user_id=current_user.id,
-        action=LogEntry.ACTION_CREATE,
-        model_type=VisaType.get_model_type(),
-        target_id=visa_type.id,
+
+    await audit_repo.create(
+        data=LogEntryCreateSchema(
+            user_id=current_user.id,
+            action=LogEntry.ACTION_CREATE,
+            model_type=VisaType.get_model_type(),
+            target_id=visa_type.id,
+        )
     )
-    await audit_repo.create(new_entry=new_entry)
     return visa_type
 
 
@@ -92,12 +94,13 @@ async def visa_type_update(
     if not visa_type:
         raise NotFoundException()
 
-    new_entry = LogEntryCreateSchema(
-        user_id=current_user.id,
-        action=LogEntry.ACTION_UPDATE,
-        model_type=VisaType.get_model_type(),
-        target_id=visa_type.id,
+    await audit_repo.create(
+        data=LogEntryCreateSchema(
+            user_id=current_user.id,
+            action=LogEntry.ACTION_UPDATE,
+            model_type=VisaType.get_model_type(),
+            target_id=visa_type.id,
+        )
     )
-    await audit_repo.create(new_entry=new_entry)
 
     return visa_type

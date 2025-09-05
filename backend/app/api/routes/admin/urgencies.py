@@ -52,13 +52,14 @@ async def urgency_create(
         audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
 ):
     urgency = await urgencies_repo.create(data=data)
-    new_entry = LogEntryCreateSchema(
-        user_id=current_user.id,
-        action=LogEntry.ACTION_CREATE,
-        model_type=Urgency.get_model_type(),
-        target_id=urgency.id,
+    await audit_repo.create(
+        data=LogEntryCreateSchema(
+            user_id=current_user.id,
+            action=LogEntry.ACTION_CREATE,
+            model_type=Urgency.get_model_type(),
+            target_id=urgency.id,
+        )
     )
-    await audit_repo.create(new_entry=new_entry)
     return urgency
 
 
@@ -82,11 +83,12 @@ async def urgency_update(
     if not urgency:
         raise NotFoundException()
 
-    new_entry = LogEntryCreateSchema(
-        user_id=current_user.id,
-        action=LogEntry.ACTION_UPDATE,
-        model_type=Urgency.get_model_type(),
-        target_id=urgency.id,
+    await audit_repo.create(
+        data=LogEntryCreateSchema(
+            user_id=current_user.id,
+            action=LogEntry.ACTION_UPDATE,
+            model_type=Urgency.get_model_type(),
+            target_id=urgency.id,
+        )
     )
-    await audit_repo.create(new_entry=new_entry)
     return urgency

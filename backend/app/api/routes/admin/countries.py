@@ -79,7 +79,7 @@ async def country_update(
         model_type=Country.get_model_type(),
         target_id=country_id
     )
-    await audit_repo.create(new_entry=entry_log)
+    await audit_repo.create(data=entry_log)
     return country
 
 

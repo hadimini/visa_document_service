@@ -69,7 +69,7 @@ async def register(
         )
 
     await audit_rep.create(
-        new_entry=LogEntryCreateSchema(
+        data=LogEntryCreateSchema(
             user_id=created_user.id,
             action=LogEntry.ACTION_REGISTER
         )
@@ -99,7 +99,7 @@ async def confirm_email(
 
     await users_repo.verify_email(user_id=int(user_id))
     await audit_rep.create(
-        new_entry=LogEntryCreateSchema(
+        data=LogEntryCreateSchema(
             user_id=int(user_id),
             action=LogEntry.ACTION_VERIFY
         )
@@ -149,7 +149,7 @@ async def login(
         user_id=user.id,
         action=LogEntry.ACTION_LOGIN
     )
-    await audit_repo.create(new_entry=entry_log)
+    await audit_repo.create(data=entry_log)
 
     token_pair = jwt_service.create_token_pair(user=user)
     # Todo: Check if needs else
@@ -172,7 +172,7 @@ async def logout(
         user_id=current_user.id,
         action=LogEntry.ACTION_LOGOUT
     )
-    await audit_repo.create(new_entry=entry_log)
+    await audit_repo.create(data=entry_log)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"message": "Successfully logged out"}
@@ -207,7 +207,7 @@ async def profile_update(
         model_type=User.get_model_type(),
         target_id=updated_user.id
     )
-    await audit_repo.create(new_entry=entry_log)
+    await audit_repo.create(data=entry_log)
     return updated_user
 
 

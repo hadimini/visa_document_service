@@ -1,19 +1,26 @@
 from datetime import datetime
+from typing import Optional
 
-from pydantic import BaseModel, field_validator
-
+from pydantic import BaseModel, Field, field_validator, ConfigDict, computed_field
 
 STRFTIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 class CoreSchema(BaseModel):
     class Config:
-        # arbitrary_types_allowed = True
         from_attributes = True
 
 
 class IDSchemaMixin(BaseModel):
     id: int
+
+
+class ArchivedAtSchemaMixin(BaseModel):
+    archived_at: Optional[datetime] = None
+
+    @field_validator("archived_at")
+    def parse_archived_at(cls, value: datetime | None) -> str | None:
+        return value.strftime(STRFTIME_FORMAT) if value else None
 
 
 class CreatedAtSchemaMixin(BaseModel):
