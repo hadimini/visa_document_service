@@ -15,7 +15,4 @@ class PagedResponseSchema(CoreSchema, Generic[TypeT]):
     page: int
     size: int
     total: int
-    total_pages: int
-    has_next: bool
-    has_prev: bool
     results: list[TypeT]
