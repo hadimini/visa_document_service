@@ -31,7 +31,7 @@ class TestUsers:
         assert response.status_code == status.HTTP_200_OK
         result: dict = response.json()
         assert result["total"] == 1
-        r_user = result["results"][0]
+        r_user = result["items"][0]
         assert r_user["id"] == test_admin.id
         assert r_user["email"] == test_admin.email
         assert r_user["first_name"] == test_admin.first_name

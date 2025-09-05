@@ -34,8 +34,8 @@ class TestVisaTypes:
         )
         assert response.status_code == 200
         assert response.json()["total"] == 1
-        response.json()["results"][0]["id"] = visa_type.id
-        response.json()["results"][0]["name"] = visa_type.name
+        response.json()["items"][0]["id"] = visa_type.id
+        response.json()["items"][0]["name"] = visa_type.name
 
     async def test_detail(
             self,

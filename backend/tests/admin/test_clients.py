@@ -26,17 +26,17 @@ class TestClients:
             headers={"Authorization": f"Bearer {token_pair.access}"}
         )
         assert response.status_code == 200
-        assert len(response.json()["results"]) == 1
+        assert len(response.json()["items"]) == 1
 
-        assert response.json()["results"][0]["MODEL_TYPE"] == Client.get_model_type()
-        assert response.json()["results"][0]["id"] == test_individual.individual_client_id
-        assert response.json()["results"][0]["name"] == test_individual.full_name
-        assert response.json()["results"][0]["type"] == Client.TYPE_INDIVIDUAL
-        assert response.json()["results"][0]["tariff"]["is_default"] is True
+        assert response.json()["items"][0]["MODEL_TYPE"] == Client.get_model_type()
+        assert response.json()["items"][0]["id"] == test_individual.individual_client_id
+        assert response.json()["items"][0]["name"] == test_individual.full_name
+        assert response.json()["items"][0]["type"] == Client.TYPE_INDIVIDUAL
+        assert response.json()["items"][0]["tariff"]["is_default"] is True
         client = await test_individual.awaitable_attrs.individual_client
-        assert response.json()["results"][0]["tariff"]["MODEL_TYPE"] == Tariff.get_model_type()
-        assert response.json()["results"][0]["tariff"]["id"] == client.tariff.id
-        assert response.json()["results"][0]["tariff"]["name"] == client.tariff.name
+        assert response.json()["items"][0]["tariff"]["MODEL_TYPE"] == Tariff.get_model_type()
+        assert response.json()["items"][0]["tariff"]["id"] == client.tariff.id
+        assert response.json()["items"][0]["tariff"]["name"] == client.tariff.name
 
     async def test_detail_success(
             self,

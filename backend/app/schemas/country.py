@@ -30,7 +30,7 @@ class CountryVisaDataSchema(CoreSchema):
 
 
 class CountryAdminPublicSchema(IDSchemaMixin, CountryBaseSchema):
-    visa_data: Optional[CountryVisaDataSchema] = None
+    visa_data: Optional[CountryVisaDataSchema] = None  # todo: We do not need it in list
 
 
 class CountryReferencePublicSchema(IDSchemaMixin, CountryBaseSchema):

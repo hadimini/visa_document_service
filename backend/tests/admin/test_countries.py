@@ -54,7 +54,7 @@ class TestCountries:
         assert response.json().get("total") == 1
         assert response.json().get("page") == 1
         assert response.json().get("size") == 25
-        assert response.json().get("results") == [
+        assert response.json().get("items") == [
             {
                 "id": 160,
                 "name": "Russian Federation",
