@@ -31,9 +31,8 @@ class ClientRepository(BasePaginatedRepository, BuildFiltersMixin):
 
     async def get_list(self, *, query_filters: ClientFilterSchema, page_params: PageParamsSchema) -> dict[str, Any]:
         statement = select(Client).options(selectinload(Client.tariff))
-        filters = self.build_filters(query_filters=query_filters)
 
-        if filters:
+        if filters := self.build_filters(query_filters=query_filters):
             statement = statement.where(and_(*filters))
 
         return await self.paginate(statement, page_params)

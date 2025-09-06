@@ -33,9 +33,8 @@ class CountriesRepository(BasePaginatedRepository, BuildFiltersMixin):
             self, *, query_filters: CountryFilterSchema, page_params: PageParamsSchema
     ) -> dict[str, Any]:
         statement = select(Country)
-        filters = self.build_filters(query_filters=query_filters)
 
-        if filters:
+        if filters := self.build_filters(query_filters=query_filters):
             statement = statement.where(and_(*filters))
 
         statement = statement.order_by(Country.id)
@@ -50,9 +49,7 @@ class CountriesRepository(BasePaginatedRepository, BuildFiltersMixin):
         """
         statement = select(Country).order_by(Country.id)
 
-        filters = self.build_filters(query_filters=query_filters)
-
-        if filters:
+        if filters := self.build_filters(query_filters=query_filters):
             statement = statement.where(and_(*filters))
 
         result = (await self.db.scalars(statement)).all()

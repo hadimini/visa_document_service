@@ -54,9 +54,8 @@ class UsersRepository(BasePaginatedRepository, BuildFiltersMixin):
 
     async def get_list(self, *, query_filters: UserFilterSchema, page_params: PageParamsSchema) -> dict[str, Any]:
         statement = select(User)
-        filters = self.build_filters(query_filters=query_filters)
 
-        if filters:
+        if filters := self.build_filters(query_filters=query_filters):
             statement = statement.filter(*filters)
 
         return await self.paginate(statement, page_params=page_params)
