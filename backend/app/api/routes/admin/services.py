@@ -25,7 +25,7 @@ async def service_list(
         page_params: PageParamsSchema = Depends(),
         services_repo: ServicesRepository = Depends(get_repository(ServicesRepository))
 ):
-    result = await services_repo.get_list(query_filters=query_filters, page_params=page_params)
+    result = await services_repo.get_paginated_list(query_filters=query_filters, page_params=page_params)
     return result
 
 

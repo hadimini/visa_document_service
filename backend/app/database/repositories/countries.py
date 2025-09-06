@@ -38,8 +38,7 @@ class CountriesRepository(BasePaginatedRepository, BuildFiltersMixin):
             statement = statement.where(and_(*filters))
 
         statement = statement.order_by(Country.id)
-        result = await self.paginate(statement, page_params)
-        return result
+        return await self.paginate(statement, page_params)
 
     async def get_full_list(self, *, query_filters: CountryFilterSchema):
         """

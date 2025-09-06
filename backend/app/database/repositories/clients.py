@@ -29,12 +29,15 @@ class ClientRepository(BasePaginatedRepository, BuildFiltersMixin):
             filters.append(Client.type == query_filters.type)
         return filters
 
-    async def get_list(self, *, query_filters: ClientFilterSchema, page_params: PageParamsSchema) -> dict[str, Any]:
+    async def get_paginated_list(
+            self, *, query_filters: ClientFilterSchema, page_params: PageParamsSchema
+    ) -> dict[str, Any]:
         statement = select(Client).options(selectinload(Client.tariff))
 
         if filters := self.build_filters(query_filters=query_filters):
             statement = statement.where(and_(*filters))
 
+        statement = statement.order_by(Client.id)
         return await self.paginate(statement, page_params)
 
     async def get_by_id(self, *, client_id: int) -> Client | None:

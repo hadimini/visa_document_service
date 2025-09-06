@@ -17,7 +17,7 @@ async def user_list(
         page_params: PageParamsSchema = Depends(),
         users_repo: UsersRepository = Depends(get_repository(UsersRepository))
 ):
-    result: dict[str, Any] = await users_repo.get_list(query_filters=query_filters, page_params=page_params)
+    result: dict[str, Any] = await users_repo.get_paginated_list(query_filters=query_filters, page_params=page_params)
     return result
 
 

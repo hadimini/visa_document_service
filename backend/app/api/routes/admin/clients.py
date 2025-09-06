@@ -19,7 +19,7 @@ async def client_list(
         page_params: PageParamsSchema = Depends(),
         clients_repository: ClientRepository = Depends(get_repository(ClientRepository)),
 ):
-    result = await clients_repository.get_list(query_filters=query_filters, page_params=page_params)
+    result = await clients_repository.get_paginated_list(query_filters=query_filters, page_params=page_params)
     return result
 
 

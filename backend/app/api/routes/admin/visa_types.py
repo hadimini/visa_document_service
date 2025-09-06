@@ -31,7 +31,7 @@ async def visa_type_list(
         page_params: PageParamsSchema = Depends(),
         visa_types_repo: VisaTypesRepository = Depends(get_repository(VisaTypesRepository))
 ):
-    result = await visa_types_repo.get_list(query_filters=query_filters, page_params=page_params)  # todo: apply filters and pagination
+    result = await visa_types_repo.get_paginated_list(query_filters=query_filters, page_params=page_params)  # todo: apply filters and pagination
     return result
 
 

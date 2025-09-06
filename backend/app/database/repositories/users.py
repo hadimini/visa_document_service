@@ -52,12 +52,15 @@ class UsersRepository(BasePaginatedRepository, BuildFiltersMixin):
 
         return filters
 
-    async def get_list(self, *, query_filters: UserFilterSchema, page_params: PageParamsSchema) -> dict[str, Any]:
+    async def get_paginated_list(
+            self, *, query_filters: UserFilterSchema, page_params: PageParamsSchema
+    ) -> dict[str, Any]:
         statement = select(User)
 
         if filters := self.build_filters(query_filters=query_filters):
             statement = statement.filter(*filters)
 
+        statement = statement.order_by(User.id)
         return await self.paginate(statement, page_params=page_params)
 
     async def get_by_id(self, *, user_id: int) -> User | None:
