@@ -16,15 +16,17 @@ from app.config import DATABASE_URL, mail_config
 from app.database.db import get_session
 from app.database.repositories.clients import ClientRepository
 from app.database.repositories.country_visas import CountryVisasRepository
+from app.database.repositories.services import ServicesRepository
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.urgencies import UrgenciesRepository
 from app.database.repositories.users import UsersRepository
 from app.database.repositories.visa_durations import VisaDurationsRepository
 from app.database.repositories.visa_types import VisaTypesRepository
 from app.models.base import Base
-from app.models import Client, Country, CountryVisa, Tariff, Urgency, User, VisaType, VisaDuration
+from app.models import Client, Country, CountryVisa, Tariff, Urgency, User, VisaType, VisaDuration, Service
 from app.schemas.client import ClientCreateSchema
 from app.schemas.country_visa import CountryVisaCreateSchema
+from app.schemas.service import ServiceCreateSchema, FeeTypeEnum
 from app.schemas.tariff import TariffCreateSchema
 from app.schemas.urgency import UrgencyCreateSchema
 from app.schemas.user import UserCreateSchema
@@ -199,6 +201,11 @@ class VisaTypeMakerProtocol(Protocol):
         ...
 
 
+
+
+
+
+
 @pytest_asyncio.fixture
 async def visa_type_maker(async_db: AsyncSession) -> VisaTypeMakerProtocol:
     visa_types_repo = VisaTypesRepository(async_db)
@@ -305,4 +312,26 @@ async def visa_duration_maker(async_db: AsyncSession):
     async def inner(*, term: str, entry: str) -> VisaDuration:
         visa_duration = await visa_durations_repo.create(term=term, entry=entry)
         return visa_duration
+    return inner
+
+
+@pytest_asyncio.fixture
+async def service_maker(async_db: AsyncSession):
+    services_repo = ServicesRepository(async_db)
+    n = 1
+
+    async def inner(
+            *,
+            name: str | None = None,
+            fee_type: FeeTypeEnum,
+    ) -> Service:
+        nonlocal n
+        service = await services_repo.create(
+            data=ServiceCreateSchema(
+                name=name or f"Test Service {n}",
+                fee_type=fee_type,
+            )
+        )
+        n += 1
+        return service
     return inner

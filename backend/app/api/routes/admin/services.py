@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
@@ -49,7 +49,8 @@ async def service_detail(
 @router.post(
     path="",
     response_model=ServiceResponseSchema,
-    name="admin:service-create"
+    name="admin:service-create",
+    status_code=status.HTTP_201_CREATED
 )
 async def service_create(
         data: ServiceCreateSchema,
