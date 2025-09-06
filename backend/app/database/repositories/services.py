@@ -1,17 +1,14 @@
-from typing import Any
-
-from sqlalchemy import select, and_
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.elements import ClauseElement
 
 from app.database.repositories.base import BasePaginatedRepository
 from app.database.repositories.mixins import BuildFiltersMixin
 from app.models import Service
-from app.schemas.pagination import PageParamsSchema
 from app.schemas.service import ServiceCreateSchema, ServiceFilterSchema
 
 
-class ServicesRepository(BasePaginatedRepository, BuildFiltersMixin):
+class ServicesRepository(BasePaginatedRepository[Service], BuildFiltersMixin):
 
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(db=db, model=Service)
@@ -40,17 +37,6 @@ class ServicesRepository(BasePaginatedRepository, BuildFiltersMixin):
             filters.append(Service.visa_type_id == query_filters.visa_type_id)
 
         return filters
-
-    async def get_paginated_list(
-            self, *, query_filters: ServiceFilterSchema, page_params: PageParamsSchema
-    ) -> dict[str, Any]:
-        statement = select(Service)
-
-        if filters := self.build_filters(query_filters=query_filters):
-            statement = statement.where(and_(*filters))
-
-        statement = statement.order_by(Service.id)
-        return await self.paginate(statement, page_params)
 
     async def get_by_id(self, *, service_id) -> Service | None:
         # options = [joinedload(Service.tariff)]  # todo

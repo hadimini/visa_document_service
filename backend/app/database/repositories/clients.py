@@ -1,9 +1,9 @@
-from typing import Any
+from typing import Any, Optional
 
-from sqlalchemy import select, and_
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, joinedload
 from sqlalchemy.sql.elements import ClauseElement
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BasePaginatedRepository
 from app.database.repositories.mixins import BuildFiltersMixin
@@ -13,7 +13,7 @@ from app.schemas.client import ClientCreateSchema, ClientFilterSchema
 from app.schemas.pagination import PageParamsSchema
 
 
-class ClientRepository(BasePaginatedRepository, BuildFiltersMixin):
+class ClientRepository(BasePaginatedRepository[Client], BuildFiltersMixin):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(db=db, model=Client)
         self.users_repo = UsersRepository(db)
@@ -30,15 +30,16 @@ class ClientRepository(BasePaginatedRepository, BuildFiltersMixin):
         return filters
 
     async def get_paginated_list(
-            self, *, query_filters: ClientFilterSchema, page_params: PageParamsSchema
+            self,
+            *,
+            query_filters: Optional[ClientFilterSchema] = None,
+            page_params: PageParamsSchema
     ) -> dict[str, Any]:
-        statement = select(Client).options(selectinload(Client.tariff))
-
-        if filters := self.build_filters(query_filters=query_filters):
-            statement = statement.where(and_(*filters))
-
-        statement = statement.order_by(Client.id)
-        return await self.paginate(statement, page_params)
+        return await super().get_paginated_list(
+            query_filters=query_filters,
+            page_params=page_params,
+            options=[selectinload(Client.tariff)]
+        )
 
     async def get_by_id(self, *, client_id: int) -> Client | None:
         statement = select(Client).options(

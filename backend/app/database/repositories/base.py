@@ -1,13 +1,15 @@
-from typing import Any, TypeVar, Type
+from typing import Any, Optional, TypeVar, Type, Generic
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.elements import ClauseElement
 
 from app.schemas.pagination import PageParamsSchema
 
 
 ModelType = TypeVar("ModelType", bound=DeclarativeBase)
+FilterSchemaType = TypeVar("FilterSchemaType")
 
 
 class BaseRepository:
@@ -15,10 +17,57 @@ class BaseRepository:
         self.db = db
 
 
-class BasePaginatedRepository(BaseRepository):
+class BasePaginatedRepository(BaseRepository, Generic[ModelType]):
     def __init__(self, db: AsyncSession, model: Type[ModelType]) -> None:
         super().__init__(db)
         self.model = model
+
+    async def get_paginated_list(
+            self,
+            *,
+            query_filters: Optional[FilterSchemaType] = None,
+            page_params: PageParamsSchema,
+            additional_filters: Optional[list[ClauseElement]] = None,
+            order_by: Optional[Any] = None,
+            options: Optional[list] = None
+    ) -> dict[str, Any]:
+        """
+        Generic paginated list method
+
+        Args:
+            query_filters: Filter shema object
+            page_params: Pagination parameters
+            additional_filters: Extra SQLAlchemy filters
+            order_by: Ordering criteria (defaults to model.id)
+            options: SQLAlchemy options like selectinload, joinedload
+        """
+        statement = select(self.model)
+
+        # Apply options like selectinload, joinedload
+        if options:
+            statement = statement.options(*options)
+
+        # Build filters from query_filters if the repository has build filters method
+        filters = []
+
+        if hasattr(self, "build_filters") and query_filters:
+            filters.extend(self.build_filters(query_filters=query_filters))
+
+        # Add any additional filters
+        if additional_filters:
+            filters.extend(additional_filters)
+
+        # Apply filters
+        if filters:
+            statement = statement.where(and_(*filters))
+
+        # Apply ordering
+        if order_by is not None:
+            statement = statement.order_by(order_by)
+        else:
+            statement = statement.order_by(self.model.id)
+
+        return await self.paginate(query=statement, page_params=page_params)
 
     async def paginate(
             self,

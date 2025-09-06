@@ -1,5 +1,3 @@
-from typing import Any
-
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -10,10 +8,9 @@ from app.database.repositories.mixins import BuildFiltersMixin
 from app.models import CountryVisa, VisaType
 from app.models.countries import Country
 from app.schemas.country import CountryFilterSchema, CountryUpdateSchema
-from app.schemas.pagination import PageParamsSchema
 
 
-class CountriesRepository(BasePaginatedRepository, BuildFiltersMixin):
+class CountriesRepository(BasePaginatedRepository[Country], BuildFiltersMixin):
     def __init__(self, db: AsyncSession):
         super().__init__(db=db, model=Country)
 
@@ -28,17 +25,6 @@ class CountriesRepository(BasePaginatedRepository, BuildFiltersMixin):
                 Country.available_for_order == query_filters.available_for_order
             )
         return filters
-
-    async def get_paginated_list(
-            self, *, query_filters: CountryFilterSchema, page_params: PageParamsSchema
-    ) -> dict[str, Any]:
-        statement = select(Country)
-
-        if filters := self.build_filters(query_filters=query_filters):
-            statement = statement.where(and_(*filters))
-
-        statement = statement.order_by(Country.id)
-        return await self.paginate(statement, page_params)
 
     async def get_full_list(self, *, query_filters: CountryFilterSchema):
         """

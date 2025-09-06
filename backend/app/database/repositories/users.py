@@ -19,7 +19,7 @@ from app.schemas.user import (
 from app.services.auth import AuthService
 
 
-class UsersRepository(BasePaginatedRepository, BuildFiltersMixin):
+class UsersRepository(BasePaginatedRepository[User], BuildFiltersMixin):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(db=db, model=User)
         self.auth_service = AuthService()
@@ -37,31 +37,16 @@ class UsersRepository(BasePaginatedRepository, BuildFiltersMixin):
 
         if query_filters.role:
             filters.append(User.role == query_filters.role)
-        #     TODO: compare to below
-        # if query_filters.name:
-        #     statement = statement.filter(
-        #         or_(
-        #             User.first_name.ilike(f"%{query_filters.name}%"),
-        #             User.last_name.ilike(f"%{query_filters.name}%"),
-        #         )
-        #     )
-        # if query_filters.role:
-        #     statement = statement.filter(
-        #         User.role == query_filters.role
-        #     )
 
         return filters
 
     async def get_paginated_list(
             self, *, query_filters: UserFilterSchema, page_params: PageParamsSchema
     ) -> dict[str, Any]:
-        statement = select(User)
-
-        if filters := self.build_filters(query_filters=query_filters):
-            statement = statement.filter(*filters)
-
-        statement = statement.order_by(User.id)
-        return await self.paginate(statement, page_params=page_params)
+        return await super().get_paginated_list(
+            query_filters=query_filters,
+            page_params=page_params,
+        )
 
     async def get_by_id(self, *, user_id: int) -> User | None:
         statement = select(User).where(User.id == user_id)
