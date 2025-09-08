@@ -48,6 +48,7 @@ class ServicesRepository(BasePaginatedRepository[Service], BuildFiltersMixin):
         return service
 
     async def create(self, *, data: ServiceCreateSchema) -> Service:
+        """Create new service"""
         service_data = data.model_dump(exclude={"tariff_services"})
         service = Service(**service_data)
         self.db.add(service)
