@@ -112,7 +112,7 @@ class TestServicesRepository:
 
     @pytest.mark.asyncio
     async def test_get_by_id_not_found(self, services_repo: ServicesRepository):
-        """Test get_by_id when service exists"""
+        """Test get_by_id when service does not exist"""
         service = await services_repo.get_by_id(service_id=1000)
 
         assert service is None
