@@ -5,7 +5,7 @@ from sqlalchemy.sql.elements import ClauseElement
 
 from app.database.repositories.base import BasePaginatedRepository
 from app.database.repositories.mixins import BuildFiltersMixin
-from app.models import LogEntry, Service, TariffService
+from app.models import Service, TariffService
 from app.schemas.service import ServiceCreateSchema, ServiceFilterSchema
 
 
