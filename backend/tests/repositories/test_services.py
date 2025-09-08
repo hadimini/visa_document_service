@@ -1,10 +1,12 @@
+from decimal import Decimal
+
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.services import ServicesRepository
-from app.models import Service
+from app.models import Service, Tariff, TariffService
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
-from app.schemas.service import ServiceCreateSchema, ServiceFilterSchema, FeeTypeEnum
+from app.schemas.service import ServiceCreateSchema, ServiceFilterSchema, FeeTypeEnum, TariffServiceCreateSchema
 
 pytestmark = pytest.mark.asyncio
 
@@ -17,7 +19,7 @@ class TestServicesRepository:
         return ServicesRepository(async_db)
 
     @pytest.mark.asyncio
-    async def test_initialization(self, async_db, services_repo):
+    async def test_initialization(self, async_db, services_repo) -> None:
         """Test that the repository is initialized correctly"""
         assert services_repo.model == Service
         assert services_repo.db == async_db
@@ -40,13 +42,13 @@ class TestServicesRepository:
                  "visa_type_id": 4
              }, 6),
     ])
-    def test_build_filters(self, services_repo, filter_data, expected_filter_count):
+    def test_build_filters(self, services_repo, filter_data, expected_filter_count) -> None:
         """Test build_filters method"""
         filter_schema = ServiceFilterSchema(**filter_data)
         filters = services_repo.build_filters(query_filters=filter_schema)
         assert len(filters) == expected_filter_count
 
-    async def test_paginated_list(self, services_repo: ServicesRepository, service_maker):
+    async def test_paginated_list(self, services_repo: ServicesRepository, service_maker) -> None:
         """Test that the paginated list is returned correctly"""
         services = [
             await service_maker(fee_type=FeeTypeEnum.GENERAL)
@@ -71,7 +73,7 @@ class TestServicesRepository:
             "items": [services[0]]
         }
 
-    async def test_paginated_list_with_filters(self, services_repo: ServicesRepository, service_maker):
+    async def test_paginated_list_with_filters(self, services_repo: ServicesRepository, service_maker) -> None:
         """Test that the paginated list is returned correctly"""
         services = [
             await service_maker(fee_type=FeeTypeEnum.GENERAL)
@@ -102,7 +104,7 @@ class TestServicesRepository:
         }
 
     @pytest.mark.asyncio
-    async def test_get_by_id(self, services_repo: ServicesRepository, service_maker):
+    async def test_get_by_id(self, services_repo: ServicesRepository, service_maker) -> None:
         """Test get_by_id when service exists"""
         service = await service_maker(fee_type=FeeTypeEnum.GENERAL)
         service_db = await services_repo.get_by_id(service_id=service.id)
@@ -111,14 +113,14 @@ class TestServicesRepository:
         assert service.fee_type == service_db.fee_type
 
     @pytest.mark.asyncio
-    async def test_get_by_id_not_found(self, services_repo: ServicesRepository):
+    async def test_get_by_id_not_found(self, services_repo: ServicesRepository) -> None:
         """Test get_by_id when service does not exist"""
         service = await services_repo.get_by_id(service_id=1000)
 
         assert service is None
 
     @pytest.mark.asyncio
-    async def test_create_service(self, services_repo: ServicesRepository):
+    async def test_create_service(self, services_repo: ServicesRepository) -> None:
         """Test service creation"""
         data = ServiceCreateSchema(name="Test Service", fee_type=FeeTypeEnum.GENERAL)
         service = await services_repo.create(data=data)
@@ -126,3 +128,34 @@ class TestServicesRepository:
         assert service is not None
         assert service.name == "Test Service"
         assert service.fee_type == FeeTypeEnum.GENERAL
+
+    @pytest.mark.asyncio
+    async def test_create_service_with_tariffs(self, services_repo: ServicesRepository, test_tariff: Tariff) -> None:
+        """Test service creation"""
+        t_service = TariffServiceCreateSchema(
+            price=Decimal(10.5),
+            tax=Decimal(0.1),
+            tariff_id=test_tariff.id
+        )
+        data = ServiceCreateSchema(
+            name="Test Service",
+            fee_type=FeeTypeEnum.GENERAL,
+            tariff_services=[
+                t_service,
+            ]
+        )
+        service = await services_repo.create(data=data)
+
+        ts_tax_amount = TariffService.calculate_tax(t_service.price, t_service.tax)
+        ts_total = t_service.price + ts_tax_amount
+
+        assert service is not None
+        assert service.name == "Test Service"
+        assert service.fee_type == FeeTypeEnum.GENERAL
+        assert len(service.tariff_services) == 1
+        assert service.tariff_services[0].price == t_service.price
+        assert service.tariff_services[0].tax == t_service.tax
+        assert service.tariff_services[0].tax_amount == ts_tax_amount
+        assert service.tariff_services[0].total == ts_total
+        assert service.tariff_services[0].service_id == service.id
+        assert service.tariff_services[0].tariff_id == t_service.tariff_id

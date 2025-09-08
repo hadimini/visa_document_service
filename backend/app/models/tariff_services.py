@@ -19,6 +19,7 @@ class TariffService(IDIntMixin, CreatedAtMixin, UpdatedAtMixin, ArchivedAtMixin,
 
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))  # Net price
     tax: Mapped[Decimal] = mapped_column(Numeric(10, 2))  # Tax amount
+    tax_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))  # Tax amount
     total: Mapped[Decimal] = mapped_column(Numeric(10, 2))  # Total
 
     # Foreign key fields
@@ -29,11 +30,12 @@ class TariffService(IDIntMixin, CreatedAtMixin, UpdatedAtMixin, ArchivedAtMixin,
     service: Mapped["Service"] = relationship(back_populates="tariff_services")
     tariff: Mapped["Tariff"] = relationship(back_populates="tariff_services")
 
-    def __init__(self, price: Decimal, tax: Decimal, total: Decimal, service_id: int, tariff_id: int):
+    def __init__(self, price: Decimal, tax: Decimal, service_id: int, tariff_id: int):
         super().__init__()
         self.price = price
-        self.tax = self.calculate_tax(price, tax)
-        self.total = self.price + self.tax
+        self.tax = tax
+        self.tax_amount = self.calculate_tax(price, tax)
+        self.total = self.price + self.tax_amount
         self.service_id = service_id
         self.tariff_id = tariff_id
 
@@ -41,3 +43,7 @@ class TariffService(IDIntMixin, CreatedAtMixin, UpdatedAtMixin, ArchivedAtMixin,
     def calculate_tax(price: Decimal, tax: Decimal) -> Decimal:
         """Calculate tax based on price and tax"""
         return price * tax
+
+    @staticmethod
+    def get_model_type() -> str:
+        return "tariff_service"

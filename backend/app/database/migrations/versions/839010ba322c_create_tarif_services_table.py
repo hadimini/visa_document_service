@@ -21,6 +21,7 @@ def upgrade() -> None:
     op.create_table('tariff_services',
     sa.Column('price', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('tax', sa.Numeric(precision=10, scale=2), nullable=False),
+    sa.Column('tax_amount', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('total', sa.Numeric(precision=10, scale=2), nullable=False),
     sa.Column('service_id', sa.Integer(), nullable=False),
     sa.Column('tariff_id', sa.Integer(), nullable=False),

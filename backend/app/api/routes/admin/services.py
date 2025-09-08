@@ -40,7 +40,7 @@ async def service_detail(
 ):
     service = await services_repo.get_by_id(service_id=service_id)
 
-    if service is None:
+    if not service:
         raise NotFoundException(detail="Service not found")
 
     return service

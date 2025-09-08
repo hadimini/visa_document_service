@@ -1,10 +1,11 @@
+from decimal import Decimal
 from enum import Enum
 from typing import Annotated, Optional
 
 from fastapi import Query
 from pydantic import Field, ConfigDict
 
-from app.models import Service
+from app.models import Service, TariffService
 from app.schemas.core import (
     ArchivedAtSchemaMixin,
     DateTimeSchemaMixin,
@@ -12,6 +13,7 @@ from app.schemas.core import (
     IDSchemaMixin
 )
 from app.schemas.pagination import PagedResponseSchema
+from app.schemas.tariff import TariffPublicSchema
 
 
 class FeeTypeEnum(str, Enum):
@@ -34,10 +36,34 @@ class ServiceBaseSchema(CoreSchema):
     visa_type_id: Optional[int] = Field(default=None, description="Id of the associated visa type")
 
 
+class TariffServiceDetailSchema(IDSchemaMixin, CoreSchema):
+    """
+    Schema for Tariff Service model.
+    """
+    MODEL_TYPE: str = Field(default_factory=lambda: TariffService.get_model_type())
+    price: Decimal
+    tax: Optional[Decimal] = None
+    tax_amount: Optional[Decimal] = None
+    total: Decimal
+    tariff: TariffPublicSchema
+
+
+class TariffServiceCreateSchema(CoreSchema):
+    """
+    Schema for Tariff Service model.
+    """
+    price: Decimal = Field(gt=0, description="Price must be positive")
+    tax: Decimal = Field(ge=0, description="Tax cannot be negative")
+    tariff_id: int = Field(gt=0, description="Id of the tariff")
+
+
 class ServiceCreateSchema(ServiceBaseSchema):
     """
     Schema for creating a new Service.
     """
+    name: str = Field(min_length=1, max_length=255, description="Service name")
+    fee_type: FeeTypeEnum
+    tariff_services: Optional[list[TariffServiceCreateSchema]] = None
 
     model_config = ConfigDict(
         use_enum_values=True,
@@ -49,6 +75,13 @@ class ServiceCreateSchema(ServiceBaseSchema):
                 "urgency_id": 2,
                 "visa_duration_id": 3,
                 "visa_type_id": 4,
+                "tariff_services": [
+                    {
+                        "price": 10.3,
+                        "tax": 0.15,
+                        "tariff_id": 1
+                    }
+                ]
             }
         }
     )
@@ -63,7 +96,7 @@ class ServiceResponseSchema(
     """
     Schema for Service with all fields
     """
-    pass
+    tariff_services: Optional[list[TariffServiceDetailSchema]] = None
 
 
 class ServiceUpdateSchema(CoreSchema):

@@ -1,10 +1,11 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.elements import ClauseElement
 
 from app.database.repositories.base import BasePaginatedRepository
 from app.database.repositories.mixins import BuildFiltersMixin
-from app.models import Service
+from app.models import LogEntry, Service, TariffService
 from app.schemas.service import ServiceCreateSchema, ServiceFilterSchema
 
 
@@ -39,15 +40,27 @@ class ServicesRepository(BasePaginatedRepository[Service], BuildFiltersMixin):
         return filters
 
     async def get_by_id(self, *, service_id) -> Service | None:
-        # options = [joinedload(Service.tariff)]  # todo
-
-        statement = select(Service).where(Service.id == service_id)
-        return (
-            await self.db.scalars(statement)
-        ).one_or_none()
+        """Get service by id with relations loaded"""
+        options = [selectinload(Service.tariff_services).selectinload(TariffService.tariff)]
+        statement = select(Service).options(*options).where(Service.id == service_id)
+        result = await self.db.scalars(statement)
+        service = result.unique().one_or_none()
+        return service
 
     async def create(self, *, data: ServiceCreateSchema) -> Service:
-        service = Service(**data.model_dump())
+        service_data = data.model_dump(exclude={"tariff_services"})
+        service = Service(**service_data)
         self.db.add(service)
+        await self.db.flush()  # Flush to get the service ID
+
+        # Create tariff services if provided
+        if data.tariff_services:
+            for tariff_service_data in data.tariff_services:
+                tariff_service = TariffService(
+                    service_id=service.id,
+                    **tariff_service_data.model_dump()
+                )
+                self.db.add(tariff_service)
+
         await self.db.commit()
-        return service
+        return await self.get_by_id(service_id=service.id)
