@@ -36,18 +36,6 @@ class ServiceBaseSchema(CoreSchema):
     visa_type_id: Optional[int] = Field(default=None, description="Id of the associated visa type")
 
 
-class TariffServiceDetailSchema(IDSchemaMixin, CoreSchema):
-    """
-    Schema for Tariff Service model.
-    """
-    MODEL_TYPE: str = Field(default_factory=lambda: TariffService.get_model_type())
-    price: Decimal
-    tax: Optional[Decimal] = None
-    tax_amount: Optional[Decimal] = None
-    total: Decimal
-    tariff: TariffPublicSchema
-
-
 class TariffServiceCreateSchema(CoreSchema):
     """
     Schema for Tariff Service model.
@@ -87,6 +75,18 @@ class ServiceCreateSchema(ServiceBaseSchema):
     )
 
 
+class TariffServiceDetailSchema(IDSchemaMixin, CoreSchema):
+    """
+    Schema for Tariff Service model.
+    """
+    MODEL_TYPE: str = Field(default_factory=lambda: TariffService.get_model_type())
+    price: Decimal
+    tax: Optional[Decimal] = None
+    tax_amount: Optional[Decimal] = None
+    total: Decimal
+    tariff: TariffPublicSchema
+
+
 class ServiceResponseSchema(
     ArchivedAtSchemaMixin,
     DateTimeSchemaMixin,
@@ -96,6 +96,7 @@ class ServiceResponseSchema(
     """
     Schema for Service with all fields
     """
+    MODEL_TYPE: str = Field(default_factory=lambda: Service.get_model_type())
     tariff_services: Optional[list[TariffServiceDetailSchema]] = None
 
 

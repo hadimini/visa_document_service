@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.audit import AuditRepository
-from app.models import LogEntry, Service, User
+from app.models import LogEntry, Service, User, tariff_services
 from app.schemas.core import STRFTIME_FORMAT
 from app.schemas.service import FeeTypeEnum
 from app.services import jwt_service
@@ -27,6 +27,7 @@ class TestServicesRoutes:
         ]
         token_pair = jwt_service.create_token_pair(user=test_admin)
         assert token_pair is not None
+
         response = await async_client.get(
             url=app.url_path_for("admin:service-list"),
             headers={"Authorization": f"Bearer {token_pair.access}"}
@@ -34,35 +35,39 @@ class TestServicesRoutes:
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
-            'page': 1,
-            'size': 25,
-            'total': 2,
-            'total_pages': 1,
-            'has_next': False,
-            'has_prev': False,
-            'items': [
+            "page": 1,
+            "size": 25,
+            "total": 2,
+            "total_pages": 1,
+            "has_next": False,
+            "has_prev": False,
+            "items": [
                 {
-                    'name': services[0].name,
-                    'fee_type': services[0].fee_type,
-                    'country_id': None,
-                    'urgency_id': None,
-                    'visa_duration_id': None,
-                    'visa_type_id': None,
-                    'id': services[0].id,
-                    'updated_at': services[0].updated_at.strftime(STRFTIME_FORMAT),
-                    'created_at': services[0].created_at.strftime(STRFTIME_FORMAT),
-                    'archived_at': None
+                    "MODEL_TYPE": Service.get_model_type(),
+                    "name": services[0].name,
+                    "fee_type": services[0].fee_type,
+                    "country_id": None,
+                    "urgency_id": None,
+                    "visa_duration_id": None,
+                    "visa_type_id": None,
+                    "id": services[0].id,
+                    "updated_at": services[0].updated_at.strftime(STRFTIME_FORMAT),
+                    "created_at": services[0].created_at.strftime(STRFTIME_FORMAT),
+                    "archived_at": None,
+                    "tariff_services": []
                 }, {
-                    'name': services[1].name,
-                    'fee_type': services[1].fee_type,
-                    'country_id': None,
-                    'urgency_id': None,
-                    'visa_duration_id': None,
-                    'visa_type_id': None,
-                    'id': services[1].id,
-                    'updated_at': services[1].updated_at.strftime(STRFTIME_FORMAT),
-                    'created_at': services[1].created_at.strftime(STRFTIME_FORMAT),
-                    'archived_at': None
+                    "MODEL_TYPE": Service.get_model_type(),
+                    "name": services[1].name,
+                    "fee_type": services[1].fee_type,
+                    "country_id": None,
+                    "urgency_id": None,
+                    "visa_duration_id": None,
+                    "visa_type_id": None,
+                    "id": services[1].id,
+                    "updated_at": services[1].updated_at.strftime(STRFTIME_FORMAT),
+                    "created_at": services[1].created_at.strftime(STRFTIME_FORMAT),
+                    "archived_at": None,
+                    "tariff_services": []
                 }
             ]
         }
@@ -90,24 +95,26 @@ class TestServicesRoutes:
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
-            'page': 1,
-            'size': 25,
-            'total': 1,
-            'total_pages': 1,
-            'has_next': False,
-            'has_prev': False,
-            'items': [
+            "page": 1,
+            "size": 25,
+            "total": 1,
+            "total_pages": 1,
+            "has_next": False,
+            "has_prev": False,
+            "items": [
                 {
-                    'name': services[0].name,
-                    'fee_type': services[0].fee_type,
-                    'country_id': None,
-                    'urgency_id': None,
-                    'visa_duration_id': None,
-                    'visa_type_id': None,
-                    'id': services[0].id,
-                    'updated_at': services[0].updated_at.strftime(STRFTIME_FORMAT),
-                    'created_at': services[0].created_at.strftime(STRFTIME_FORMAT),
-                    'archived_at': None
+                    "MODEL_TYPE": Service.get_model_type(),
+                    "name": services[0].name,
+                    "fee_type": services[0].fee_type,
+                    "country_id": None,
+                    "urgency_id": None,
+                    "visa_duration_id": None,
+                    "visa_type_id": None,
+                    "id": services[0].id,
+                    "updated_at": services[0].updated_at.strftime(STRFTIME_FORMAT),
+                    "created_at": services[0].created_at.strftime(STRFTIME_FORMAT),
+                    "archived_at": None,
+                    "tariff_services": []
                 }
             ]
         }
@@ -131,16 +138,18 @@ class TestServicesRoutes:
 
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == {
-            'name': service.name,
-            'fee_type': service.fee_type,
-            'country_id': None,
-            'urgency_id': None,
-            'visa_duration_id': None,
-            'visa_type_id': None,
-            'id': service.id,
-            'updated_at': service.updated_at.strftime(STRFTIME_FORMAT),
-            'created_at': service.created_at.strftime(STRFTIME_FORMAT),
-            'archived_at': None
+            "MODEL_TYPE": Service.get_model_type(),
+            "name": service.name,
+            "fee_type": service.fee_type,
+            "country_id": None,
+            "urgency_id": None,
+            "visa_duration_id": None,
+            "visa_type_id": None,
+            "id": service.id,
+            "updated_at": service.updated_at.strftime(STRFTIME_FORMAT),
+            "created_at": service.created_at.strftime(STRFTIME_FORMAT),
+            "archived_at": None,
+            "tariff_services": []
         }
 
     @pytest.mark.asyncio
@@ -183,6 +192,7 @@ class TestServicesRoutes:
         )
 
         assert response.status_code == status.HTTP_201_CREATED
+        assert response.json()["MODEL_TYPE"] == Service.get_model_type()
         assert response.json()["name"] == data["name"]
         assert response.json()["fee_type"] == data["fee_type"]
 

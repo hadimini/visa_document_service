@@ -1,11 +1,14 @@
+from typing import Optional, Any
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.elements import ClauseElement
 
-from app.database.repositories.base import BasePaginatedRepository
+from app.database.repositories.base import BasePaginatedRepository, FilterSchemaType
 from app.database.repositories.mixins import BuildFiltersMixin
 from app.models import Service, TariffService
+from app.schemas.pagination import PageParamsSchema
 from app.schemas.service import ServiceCreateSchema, ServiceFilterSchema
 
 
@@ -38,6 +41,21 @@ class ServicesRepository(BasePaginatedRepository[Service], BuildFiltersMixin):
             filters.append(Service.visa_type_id == query_filters.visa_type_id)
 
         return filters
+
+    async def get_paginated_list(
+            self,
+            *,
+            query_filters: Optional[ServiceFilterSchema] = None,
+            page_params: PageParamsSchema,
+            additional_filters: Optional[list[ClauseElement]] = None,
+    ) -> dict[str, Any]:
+        return await super().get_paginated_list(
+            query_filters=query_filters,
+            page_params=page_params,
+            options=[
+                selectinload(Service.tariff_services).selectinload(TariffService.tariff)
+            ]
+        )
 
     async def get_by_id(self, *, service_id) -> Service | None:
         """Get service by id with relations loaded"""
