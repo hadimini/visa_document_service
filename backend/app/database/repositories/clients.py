@@ -13,7 +13,7 @@ from app.schemas.client import ClientCreateSchema, ClientFilterSchema
 from app.schemas.pagination import PageParamsSchema
 
 
-class ClientRepository(BasePaginatedRepository[Client], BuildFiltersMixin):
+class ClientsRepository(BasePaginatedRepository[Client], BuildFiltersMixin):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(db=db, model=Client)
         self.users_repo = UsersRepository(db)

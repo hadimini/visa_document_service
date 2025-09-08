@@ -7,7 +7,7 @@ from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
 from app.api.dependencies.token import get_current_user_token
 from app.database.repositories.audit import AuditRepository
-from app.database.repositories.clients import ClientRepository
+from app.database.repositories.clients import ClientsRepository
 from app.database.repositories.tariffs import TariffsRepository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
@@ -44,7 +44,7 @@ async def register(
         bg_tasks: BackgroundTasks,
         users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
         audit_rep: AuditRepository = Depends(get_repository(AuditRepository)),
-        clients_repo: ClientRepository = Depends(get_repository(ClientRepository)),
+        clients_repo: ClientsRepository = Depends(get_repository(ClientsRepository)),
         tariffs_repo: TariffsRepository = Depends(get_repository(TariffsRepository)),
 ):
     # Register creates individual clients

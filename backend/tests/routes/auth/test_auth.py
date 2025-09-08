@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import mail_config, BACKEND_URL
 from app.database.repositories.audit import AuditRepository
-from app.database.repositories.clients import ClientRepository
+from app.database.repositories.clients import ClientsRepository
 from app.database.repositories.tokens import TokensRepository
 from app.database.repositories.users import UsersRepository
 from app.helpers import fetch_urls_from_text, fetch_url_param_value
@@ -35,7 +35,7 @@ class TestRegister:
             test_tariff: Tariff,
     ):
         audit_repo = AuditRepository(async_db)
-        clients_repo = ClientRepository(async_db)
+        clients_repo = ClientsRepository(async_db)
         users_rpo = UsersRepository(async_db)
         user_data = {
             "email": "user@example.com",
