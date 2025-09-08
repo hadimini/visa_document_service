@@ -1,7 +1,6 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database.repositories.audit import AuditRepository
 from app.database.repositories.services import ServicesRepository
 from app.models import Service
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
@@ -16,10 +15,6 @@ class TestServicesRepository:
     @pytest.fixture
     def services_repo(self, async_db: AsyncSession) -> ServicesRepository:
         return ServicesRepository(async_db)
-
-    @pytest.fixture
-    def audit_repo(self, async_db: AsyncSession) -> AuditRepository:
-        return AuditRepository(async_db)
 
     @pytest.mark.asyncio
     async def test_initialization(self, async_db, services_repo):
@@ -123,7 +118,7 @@ class TestServicesRepository:
         assert service is None
 
     @pytest.mark.asyncio
-    async def test_create_service(self, services_repo: ServicesRepository, audit_repo: AuditRepository):
+    async def test_create_service(self, services_repo: ServicesRepository):
         """Test service creation"""
         data = ServiceCreateSchema(name="Test Service", fee_type=FeeTypeEnum.GENERAL)
         service = await services_repo.create(data=data)
