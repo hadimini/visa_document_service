@@ -10,7 +10,8 @@ from app.exceptions import NotFoundException
 from app.models import LogEntry, Service, User
 from app.schemas.audit import LogEntryCreateSchema
 from app.schemas.pagination import PageParamsSchema
-from app.schemas.service import ServiceResponseSchema, ServiceFilterSchema, ServiceCreateSchema, ServiceListResponseSchema
+from app.schemas.service import ServiceResponseSchema, ServiceFilterSchema, ServiceCreateSchema, \
+    ServiceListResponseSchema, ServiceUpdateSchema
 
 router = APIRouter()
 
@@ -63,6 +64,34 @@ async def service_create(
         data=LogEntryCreateSchema(
             user_id=current_user.id,
             action=LogEntry.ACTION_CREATE,
+            model_type=Service.get_model_type(),
+            target_id=service.id
+        )
+    )
+    return service
+
+
+@router.put(
+    path="/{service_id}",
+    response_model=ServiceResponseSchema,
+    name="admin:service-update",
+)
+async def service_update(
+        service_id: int,
+        data: ServiceUpdateSchema,
+        current_user: User = Depends(get_current_active_user),
+        services_repo: ServicesRepository = Depends(get_repository(ServicesRepository)),
+        audit_repo: AuditRepository = Depends(get_repository(AuditRepository))
+):
+    service = await services_repo.update(service_id=service_id, data=data)
+
+    if not service:
+        raise NotFoundException(detail="Service not found")
+
+    await audit_repo.create(
+        data=LogEntryCreateSchema(
+            user_id=current_user.id,
+            action=LogEntry.ACTION_UPDATE,
             model_type=Service.get_model_type(),
             target_id=service.id
         )

@@ -9,7 +9,7 @@ from app.database.repositories.base import BasePaginatedRepository, FilterSchema
 from app.database.repositories.mixins import BuildFiltersMixin
 from app.models import Service, TariffService
 from app.schemas.pagination import PageParamsSchema
-from app.schemas.service import ServiceCreateSchema, ServiceFilterSchema
+from app.schemas.service import ServiceCreateSchema, ServiceFilterSchema, ServiceUpdateSchema
 
 
 class ServicesRepository(BasePaginatedRepository[Service], BuildFiltersMixin):
@@ -83,3 +83,32 @@ class ServicesRepository(BasePaginatedRepository[Service], BuildFiltersMixin):
 
         await self.db.commit()
         return await self.get_by_id(service_id=service.id)
+
+    async def update(self, *, service_id: int, data: ServiceUpdateSchema) -> Service | None:
+        """Update service"""
+        service = await self.get_by_id(service_id=service_id)
+
+        if not service:
+            return None
+
+        update_data = data.model_dump(exclude_unset=True, exclude={"tariff_services"})
+
+        for attr, val in update_data.items():
+            setattr(service, attr, val)
+
+        if data.tariff_services is not None:
+            for ts in service.tariff_services:
+                await self.db.delete(ts)
+            await self.db.flush()
+
+            new_tariff_services = [
+                TariffService(
+                    service_id=30,
+                    **ts_data.model_dump(exclude_unset=True)
+                )
+                for ts_data in data.tariff_services
+            ]
+            service.tariff_services = new_tariff_services
+
+        await self.db.commit()
+        return await self.get_by_id(service_id=service_id)

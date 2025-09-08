@@ -1,6 +1,7 @@
+from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import String, Integer, ForeignKey
+from sqlalchemy import String, Integer, ForeignKey, event
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
@@ -43,7 +44,8 @@ class Service(ArchivedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base)
     country: Mapped["Country"] = relationship(back_populates="services")
     tariff_services: Mapped[list["TariffService"]] = relationship(
         back_populates="service",
-        foreign_keys="TariffService.service_id"
+        foreign_keys="TariffService.service_id",
+        cascade="all, delete-orphan",
     )
     urgency: Mapped["Urgency"] = relationship(back_populates="services")
     visa_duration: Mapped["VisaDuration"] = relationship(back_populates="services")
@@ -55,3 +57,9 @@ class Service(ArchivedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base)
     @staticmethod
     def get_model_type() -> str:
         return "service"
+
+
+@event.listens_for(Service, "before_update")
+def set_updated_at(mapper, connection, target):
+    """Automatically set updated_at on any update"""
+    target.updated_at = datetime.now()

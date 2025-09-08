@@ -38,11 +38,18 @@ class ServiceBaseSchema(CoreSchema):
 
 class TariffServiceCreateSchema(CoreSchema):
     """
-    Schema for Tariff Service model.
+    Schema for creating Tariff Service model.
     """
     price: Decimal = Field(gt=0, description="Price must be positive")
     tax: Decimal = Field(ge=0, description="Tax cannot be negative")
     tariff_id: int = Field(gt=0, description="Id of the tariff")
+
+
+class TariffServiceUpdateSchema(TariffServiceCreateSchema):
+    """
+    Schema for updating Tariff Service model.
+    """
+    pass
 
 
 class ServiceCreateSchema(ServiceBaseSchema):
@@ -51,6 +58,10 @@ class ServiceCreateSchema(ServiceBaseSchema):
     """
     name: str = Field(min_length=1, max_length=255, description="Service name")
     fee_type: FeeTypeEnum
+    country_id: Optional[int] = None
+    urgency_id: Optional[int] = None
+    visa_duration_id: Optional[int] = None
+    visa_type_id: Optional[int] = None
     tariff_services: Optional[list[TariffServiceCreateSchema]] = None
 
     model_config = ConfigDict(
@@ -73,6 +84,21 @@ class ServiceCreateSchema(ServiceBaseSchema):
             }
         }
     )
+
+
+
+
+class ServiceUpdateSchema(CoreSchema):
+    """
+    Schema for updating an existing Service.
+    """
+    name: Optional[str] = Field(None, min_length=1, max_length=255)
+    fee_type: Optional[FeeTypeEnum] = None
+    country_id: Optional[int] = None
+    urgency_id: Optional[int] = None
+    visa_duration_id: Optional[int] = None
+    visa_type_id: Optional[int] = None
+    tariff_services: Optional[list[TariffServiceUpdateSchema]] = None
 
 
 class TariffServiceDetailSchema(IDSchemaMixin, CoreSchema):
@@ -98,18 +124,6 @@ class ServiceResponseSchema(
     """
     MODEL_TYPE: str = Field(default_factory=lambda: Service.get_model_type())
     tariff_services: Optional[list[TariffServiceDetailSchema]] = None
-
-
-class ServiceUpdateSchema(CoreSchema):
-    """
-    Schema for updating an existing Service.
-    """
-    name: Optional[str] = Field(None, min_length=1, max_length=255)
-    fee_type: Optional[FeeTypeEnum] = None
-    country_id: Optional[int] = None
-    urgency_id: Optional[int] = None
-    visa_duration_id: Optional[int] = None
-    visa_type_id: Optional[int] = None
 
 
 class ServiceFilterSchema(CoreSchema):

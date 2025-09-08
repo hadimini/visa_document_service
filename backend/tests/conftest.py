@@ -23,10 +23,20 @@ from app.database.repositories.users import UsersRepository
 from app.database.repositories.visa_durations import VisaDurationsRepository
 from app.database.repositories.visa_types import VisaTypesRepository
 from app.models.base import Base
-from app.models import Client, Country, CountryVisa, Tariff, Urgency, User, VisaType, VisaDuration, Service
+from app.models import (
+    Client,
+    Country,
+    CountryVisa,
+    Service,
+    Tariff,
+    Urgency,
+    User,
+    VisaType,
+    VisaDuration,
+)
 from app.schemas.client import ClientCreateSchema, ClientTypeEnum
 from app.schemas.country_visa import CountryVisaCreateSchema
-from app.schemas.service import ServiceCreateSchema, FeeTypeEnum
+from app.schemas.service import ServiceCreateSchema, FeeTypeEnum, TariffServiceCreateSchema
 from app.schemas.tariff import TariffCreateSchema
 from app.schemas.urgency import UrgencyCreateSchema
 from app.schemas.user import UserCreateSchema
@@ -334,14 +344,16 @@ async def service_maker(async_db: AsyncSession):
 
     async def inner(
             *,
-            name: str | None = None,
             fee_type: FeeTypeEnum,
+            name: Optional[str] = None,
+            tariff_services: Optional[list[TariffServiceCreateSchema]] = None
     ) -> Service:
         nonlocal n
         service = await services_repo.create(
             data=ServiceCreateSchema(
                 name=name or f"Test Service {n}",
                 fee_type=fee_type,
+                tariff_services=tariff_services,
             )
         )
         n += 1
