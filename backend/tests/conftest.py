@@ -14,7 +14,7 @@ from sqlalchemy.pool import NullPool
 from app.api.server import get_application
 from app.config import DATABASE_URL, mail_config
 from app.database.db import get_session
-from app.database.repositories.clients import ClientRepository
+from app.database.repositories.clients import ClientsRepository
 from app.database.repositories.country_visas import CountryVisasRepository
 from app.database.repositories.services import ServicesRepository
 from app.database.repositories.tariffs import TariffsRepository
@@ -24,7 +24,7 @@ from app.database.repositories.visa_durations import VisaDurationsRepository
 from app.database.repositories.visa_types import VisaTypesRepository
 from app.models.base import Base
 from app.models import Client, Country, CountryVisa, Tariff, Urgency, User, VisaType, VisaDuration, Service
-from app.schemas.client import ClientCreateSchema
+from app.schemas.client import ClientCreateSchema, ClientTypeEnum
 from app.schemas.country_visa import CountryVisaCreateSchema
 from app.schemas.service import ServiceCreateSchema, FeeTypeEnum
 from app.schemas.tariff import TariffCreateSchema
@@ -127,7 +127,23 @@ async def test_tariff(
     return await tariffs_repo.create(new_tariff=new_tariff)
 
 
-# TODO: This may need update to create individual
+@pytest_asyncio.fixture
+async def client_maker(async_db: AsyncSession, test_tariff: Tariff):
+    clients_repo = ClientsRepository(async_db)
+    n = 1
+    async def inner(*, name: Optional[str] = None, type: ClientTypeEnum):
+        nonlocal n
+        client = await clients_repo.create(
+            new_client=ClientCreateSchema(
+                name=name or f"Test Client {n}",
+                type=type,
+                tariff_id=test_tariff.id,
+            )
+        )
+        n += 1
+        return client
+    return inner
+
 
 @pytest_asyncio.fixture
 async def test_user(async_db: AsyncSession) -> User:
@@ -160,8 +176,9 @@ async def test_admin(
 async def test_individual(
         async_db: AsyncSession,
         test_tariff: Tariff,
+        client_maker
 ) -> User:
-    clients_repo = ClientRepository(async_db)
+    clients_repo = ClientsRepository(async_db)
 
     new_user = UserCreateSchema(
         email=EmailStr("individual@example.com"),
@@ -199,11 +216,6 @@ async def load_countries(async_db: AsyncSession) -> None:
 class VisaTypeMakerProtocol(Protocol):
     async def __call__(self, *, name: Optional[str] = None) -> VisaType:
         ...
-
-
-
-
-
 
 
 @pytest_asyncio.fixture
