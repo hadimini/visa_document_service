@@ -4,8 +4,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.base import BaseRepository
+from app.exceptions import NameExistsException
 from app.models.urgencies import Urgency
-from app.exceptions import NameExistsException, NotFoundException
 from app.schemas.urgency import UrgencyCreateSchema, UrgencyUpdateSchema
 
 

@@ -86,8 +86,6 @@ class ServiceCreateSchema(ServiceBaseSchema):
     )
 
 
-
-
 class ServiceUpdateSchema(CoreSchema):
     """
     Schema for updating an existing Service.

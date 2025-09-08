@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql.elements import ClauseElement
 
-from app.database.repositories.base import BasePaginatedRepository, FilterSchemaType
+from app.database.repositories.base import BasePaginatedRepository
 from app.database.repositories.mixins import BuildFiltersMixin
 from app.models import Service, TariffService
 from app.schemas.pagination import PageParamsSchema
