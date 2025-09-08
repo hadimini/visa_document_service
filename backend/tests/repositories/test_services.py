@@ -6,7 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database.repositories.services import ServicesRepository
 from app.models import Service, Tariff, TariffService
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
-from app.schemas.service import ServiceCreateSchema, ServiceFilterSchema, FeeTypeEnum, TariffServiceCreateSchema
+from app.schemas.service import (
+    ServiceCreateSchema,
+    ServiceFilterSchema,
+    FeeTypeEnum,
+    TariffServiceCreateSchema,
+    ServiceUpdateSchema,
+    TariffServiceUpdateSchema
+)
 
 pytestmark = pytest.mark.asyncio
 
@@ -159,3 +166,39 @@ class TestServicesRepository:
         assert service.tariff_services[0].total == ts_total
         assert service.tariff_services[0].service_id == service.id
         assert service.tariff_services[0].tariff_id == t_service.tariff_id
+
+    @pytest.mark.asyncio
+    async def test_update_service(self, services_repo: ServicesRepository, test_tariff: Tariff, service_maker) -> None:
+        """Test service update"""
+        t_service = TariffServiceCreateSchema(
+            price=Decimal(10.5),
+            tax=Decimal(0.1),
+            tariff_id=test_tariff.id
+        )
+        service = await service_maker(fee_type=FeeTypeEnum.GENERAL, tariff_services=[t_service])
+        new_t_service = TariffServiceUpdateSchema(
+            price=Decimal(5.5),
+            tax=Decimal(0.5),
+            tariff_id=test_tariff.id
+        )
+        new_data = ServiceUpdateSchema(
+            name="New name",
+            fee_type=FeeTypeEnum.CONSULAR,
+            tariff_services=[new_t_service]
+        )
+        await services_repo.update(service_id=service.id, data=new_data)
+
+        new_ts_tax_amount = TariffService.calculate_tax(new_t_service.price, new_t_service.tax)
+        new_ts_total = new_t_service.price + new_ts_tax_amount
+
+        assert service is not None
+        assert service.name == new_data.name
+        assert service.fee_type == new_data.fee_type
+        assert len(service.tariff_services) == 1
+        assert service.tariff_services[0].price == new_t_service.price
+        assert service.tariff_services[0].tax == new_t_service.tax
+        assert service.tariff_services[0].tax_amount == new_ts_tax_amount
+        assert service.tariff_services[0].total == new_ts_total
+        assert service.tariff_services[0].service_id == service.id
+        assert service.tariff_services[0].tariff_id == new_t_service.tariff_id
+
