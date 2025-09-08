@@ -20,7 +20,7 @@ class TestServicesRoutes:
             async_db: AsyncSession,
             test_admin: User,
             service_maker
-    ):
+    ) -> None:
         services = [
             await service_maker(fee_type=FeeTypeEnum.CONSULAR)
             for _ in range(2)
@@ -80,7 +80,7 @@ class TestServicesRoutes:
             async_db: AsyncSession,
             test_admin: User,
             service_maker
-    ):
+    ) -> None:
         services = [
             await service_maker(fee_type=FeeTypeEnum.CONSULAR)
             for _ in range(2)
@@ -127,7 +127,7 @@ class TestServicesRoutes:
             async_db: AsyncSession,
             test_admin: User,
             service_maker
-    ):
+    ) -> None:
         service = await service_maker(fee_type=FeeTypeEnum.CONSULAR)
         token_pair = jwt_service.create_token_pair(user=test_admin)
         assert token_pair is not None
@@ -160,7 +160,7 @@ class TestServicesRoutes:
             async_db: AsyncSession,
             test_admin: User,
             service_maker
-    ):
+    ) -> None:
         token_pair = jwt_service.create_token_pair(user=test_admin)
         assert token_pair is not None
         response = await async_client.get(
@@ -177,7 +177,7 @@ class TestServicesRoutes:
             async_client: AsyncClient,
             async_db: AsyncSession,
             test_admin: User,
-    ):
+    ) -> None:
         token_pair = jwt_service.create_token_pair(user=test_admin)
         assert token_pair is not None
         """Test service creation"""
