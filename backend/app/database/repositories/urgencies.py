@@ -44,7 +44,7 @@ class UrgenciesRepository(BaseRepository):
         urgency = await self.get_by_id(urgency_id=urgency_id)
 
         if not urgency:
-            raise NotFoundException()
+            return None
 
         for attr, value in data.model_dump().items():
             setattr(urgency, attr, value)
