@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.urgencies import UrgenciesRepository
+from app.exceptions import NameExistsException
 from app.models import Urgency
 from app.schemas.urgency import UrgencyCreateSchema, UrgencyUpdateSchema
 from tests.conftest import UrgencyMakerProtocol
@@ -54,6 +55,12 @@ class TestUrgenciesRepository:
 
         assert isinstance(urgency, Urgency)
         assert urgency.name == "Urgency name"
+
+    @pytest.mark.asyncio
+    async def test_create_urgency_name_exists(self, urgencies_repo: UrgenciesRepository, urgency_maker: UrgencyMakerProtocol) -> None:
+        urgency = await urgency_maker(name="Urgency name")
+        with pytest.raises(NameExistsException, match=""):
+            await urgencies_repo.create(data=UrgencyCreateSchema(name="Urgency name"))
 
     @pytest.mark.asyncio
     async def test_update_urgency(self, urgencies_repo: UrgenciesRepository, urgency_maker: UrgencyMakerProtocol) -> None:
