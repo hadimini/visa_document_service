@@ -20,18 +20,15 @@ class CountriesRepository(BasePaginatedRepository[Country], BuildFiltersMixin):
         if query_filters.name:
             filters.append(Country.name.ilike(f"%{query_filters.name}%"))
 
-        if query_filters.available_for_order:
+        if query_filters.available_for_order is not None:
             filters.append(
                 Country.available_for_order == query_filters.available_for_order
             )
+
         return filters
 
     async def get_full_list(self, *, query_filters: CountryFilterSchema):
-        """
-        Retrieve all countries, only filters can be applied
-        :param filters:
-        :return:
-        """
+        """Retrieve all countries, only filters can be applied"""
         statement = select(Country).order_by(Country.id)
 
         if filters := self.build_filters(query_filters=query_filters):
