@@ -58,8 +58,8 @@ class TestUrgenciesRepository:
 
     @pytest.mark.asyncio
     async def test_create_urgency_name_exists(self, urgencies_repo: UrgenciesRepository, urgency_maker: UrgencyMakerProtocol) -> None:
-        urgency = await urgency_maker(name="Urgency name")
-        with pytest.raises(NameExistsException, match=""):
+        await urgency_maker(name="Urgency name")
+        with pytest.raises(NameExistsException, match="Name already exists"):
             await urgencies_repo.create(data=UrgencyCreateSchema(name="Urgency name"))
 
     @pytest.mark.asyncio
