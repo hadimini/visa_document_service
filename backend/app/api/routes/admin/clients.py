@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from app.api.dependencies.db import get_repository
 from app.database.repositories.clients import ClientsRepository
 from app.exceptions import NotFoundException
-from app.schemas.client import ClientFilterSchema, ClientResponseSchema, ClientListResponseSchema
+from app.schemas.client import ClientFilterSchema, ClientPublicSchema, ClientListResponseSchema
 from app.schemas.pagination import PageParamsSchema
 
 router = APIRouter()
@@ -26,7 +26,7 @@ async def client_list(
 @router.get(
     path="/{client_id}",
     name="admin:client-detail",
-    response_model=ClientResponseSchema
+    response_model=ClientPublicSchema
 )
 async def client_detail(
         client_id: int,

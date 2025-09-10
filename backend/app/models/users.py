@@ -10,8 +10,7 @@ from app.models.mixins import CreatedAtMixin, IDIntMixin, UpdatedAtMixin, IsActi
 
 
 if TYPE_CHECKING:
-    from app.models.audit import LogEntry
-    from app.models.clients import Client
+    from app.models import Client, LogEntry, Order
 
 
 class User(CreatedAtMixin, IDIntMixin, IsActiveMixin, UpdatedAtMixin, Base):
@@ -53,6 +52,11 @@ class User(CreatedAtMixin, IDIntMixin, IsActiveMixin, UpdatedAtMixin, Base):
         "Client",
         back_populates="individual",
         foreign_keys=individual_client_id
+    )
+    orders: Mapped[list["Order"]] = relationship(
+        "Order",
+        back_populates="created_by",
+        foreign_keys="Order.created_by_id",
     )
 
     def __repr__(self):  # pragma: no cover

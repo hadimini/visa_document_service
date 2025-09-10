@@ -8,8 +8,7 @@ from app.models.base import Base
 from app.models.mixins import CreatedAtMixin, UpdatedAtMixin, IDIntMixin, IsActiveMixin
 
 if TYPE_CHECKING:
-    from app.models.tariffs import Tariff
-    from app.models.users import User
+    from app.models import Order, Tariff, User
 
 
 class Client(IDIntMixin, CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
@@ -44,6 +43,10 @@ class Client(IDIntMixin, CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
         back_populates="individual_client",
         uselist=False,
         foreign_keys="User.individual_client_id"
+    )
+    orders: Mapped["Order"] = relationship(
+        back_populates="client",
+        foreign_keys="Order.client_id",
     )
 
     def __repr__(self) -> str:  # pragma: no cover

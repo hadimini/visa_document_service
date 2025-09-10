@@ -28,7 +28,7 @@ class ClientCreateSchema(CoreSchema):
     type: ClientTypeEnum
 
 
-class ClientResponseSchema(IDSchemaMixin, ClientBaseSchema):
+class ClientPublicSchema(IDSchemaMixin, ClientBaseSchema):
     pass
 
 
@@ -38,4 +38,4 @@ class ClientFilterSchema(CoreSchema):
 
 
 class ClientListResponseSchema(PagedResponseSchema, CoreSchema):
-    items: list[ClientResponseSchema]
+    items: list[ClientPublicSchema]

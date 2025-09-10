@@ -7,7 +7,7 @@ from app.models.base import Base
 from app.models.mixins import IDIntMixin
 
 if TYPE_CHECKING:
-    from app.models import CountryVisa, Service
+    from app.models import CountryVisa, Order, Service
 
 
 class Country(IDIntMixin, Base):
@@ -27,6 +27,10 @@ class Country(IDIntMixin, Base):
     country_visas: Mapped[list["CountryVisa"]] = relationship(
         back_populates="country",
         foreign_keys="CountryVisa.country_id",
+    )
+    orders: Mapped[list["Order"]] = relationship(
+        back_populates="country",
+        foreign_keys="Order.country_id",
     )
 
     def __init__(self, **kwargs):

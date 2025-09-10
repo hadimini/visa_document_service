@@ -24,9 +24,11 @@ from app.database.repositories.visa_durations import VisaDurationsRepository
 from app.database.repositories.visa_types import VisaTypesRepository
 from app.models.base import Base
 from app.models import (
+    Applicant,
     Client,
     Country,
     CountryVisa,
+    Order,
     Service,
     Tariff,
     Urgency,
@@ -36,6 +38,7 @@ from app.models import (
 )
 from app.schemas.client import ClientCreateSchema, ClientTypeEnum
 from app.schemas.country_visa import CountryVisaCreateSchema
+from app.schemas.order.base import OrderStatusEnum
 from app.schemas.service import ServiceCreateSchema, FeeTypeEnum, TariffServiceCreateSchema
 from app.schemas.tariff import TariffCreateSchema
 from app.schemas.urgency import UrgencyCreateSchema
@@ -307,6 +310,64 @@ async def country_maker(async_db: AsyncSession) -> CountryMakerProtocol:
         async_db.add(country)
         await async_db.commit()
         return country
+
+    return inner
+
+
+class OrderMakerProtocol(Protocol):
+    async def __call__(
+            self,
+            *,
+            country: Country,
+            client: Client,
+            created_by: User,
+            urgency: Urgency,
+            visa_duration: VisaDuration,
+            visa_type: VisaType,
+            status: Optional[OrderStatusEnum] = None,
+            applicant_data: Optional[dict[str, str]] = None,
+    ) -> Country:
+        ...
+
+
+@pytest_asyncio.fixture
+async def order_maker(async_db: AsyncSession) -> OrderMakerProtocol:
+
+    async def inner(
+            *,
+            country: Country,
+            client: Client,
+            created_by: User,
+            urgency: Urgency,
+            visa_duration: VisaDuration,
+            visa_type: VisaType,
+            status: Optional[OrderStatusEnum] = None,
+            applicant_data: Optional[dict[str, str]] = None,
+    ) -> Order:
+        order = Order(
+            country_id=country.id,
+            client_id=client.id,
+            created_by_id=created_by.id,
+            urgency_id=urgency.id,
+            visa_duration_id=visa_duration.id,
+            visa_type_id=visa_type.id,
+            status=status,
+        )
+        async_db.add(order)
+        await async_db.flush()
+
+        if applicant_data:
+            applicant = Applicant(
+                first_name=applicant_data["first_name"],
+                last_name=applicant_data["last_name"],
+                gender=applicant_data["gender"],
+                email=applicant_data["email"],
+                order=order,
+            )
+            async_db.add(applicant)
+
+        await async_db.commit()
+        return order
 
     return inner
 
