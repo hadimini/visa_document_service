@@ -1,20 +1,21 @@
 from typing import Optional
 
-from app.schemas.applicant import (
-    ApplicantPublicSchema,
-    ApplicantCreateSchema,
-    ApplicantUpdateSchema
-)
+from app.schemas.applicant import ApplicantPublicSchema
 from app.schemas.client import ClientPublicSchema
 from app.schemas.core import (
     CoreSchema
 )
-from app.schemas.order.base import BaseOrderSchema, BaseOrderPublicSchema
+from app.schemas.order.base import (
+    BaseOrderSchema,
+    BaseOrderPublicSchema,
+    BaseOrderCreateSchema,
+    BaseOrderUpdateSchema
+)
 from app.schemas.pagination import PagedResponseSchema
 
 
-class BaseAdminOrderSchema(BaseOrderSchema):
-    client_id: Optional[int] = None
+# class BaseAdminOrderSchema(BaseOrderSchema):
+#     client_id: Optional[int] = None
 
 
 class AdminOrderListSchema(BaseOrderPublicSchema):
@@ -25,12 +26,12 @@ class AdminOrderDetailSchema(AdminOrderListSchema):
     applicant: ApplicantPublicSchema
 
 
-class AdminOrderCreateSchema(BaseAdminOrderSchema):
-    applicant: ApplicantCreateSchema
+class AdminOrderCreateSchema(BaseOrderCreateSchema):
+    client_id: int
 
 
-class AdminOrderUpdateSchema(BaseAdminOrderSchema):
-    applicant: ApplicantUpdateSchema
+class AdminOrderUpdateSchema(BaseOrderUpdateSchema):
+    client_id: Optional[int] = None
 
 
 class AdminOrderListSchema(PagedResponseSchema, CoreSchema):

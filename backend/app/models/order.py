@@ -76,7 +76,7 @@ class Order(ArchivedAtMixin, CompletedAtMixin, CreatedAtMixin, IDIntMixin, Updat
     visa_type: Mapped["VisaType"] = relationship()
 
     def __repr__(self) -> str:
-        return f"<Order {self.id}>"
+        return f"<Order {self.number}>"
 
     @staticmethod
     def get_model_type() -> str:

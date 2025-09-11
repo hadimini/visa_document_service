@@ -7,8 +7,8 @@ from sqlalchemy.sql.elements import ClauseElement
 
 from app.database.repositories.base import BasePaginatedRepository
 from app.database.repositories.mixins import BuildFiltersMixin
-
-from app.models import Order
+from app.models import Order, Applicant
+from app.schemas.order.admin import AdminOrderCreateSchema
 from app.schemas.order.base import OrdersFilterSchema
 
 
@@ -33,16 +33,47 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
 
         return filters
 
-    async def get_by_id(self, *, order_id: int, populate_client: Optional[bool] = False) -> Order | None:
-        options = [joinedload(Order.client)]
-
+    async def get_by_id(
+            self,
+            *,
+            order_id: int,
+            populate_client: Optional[bool] = False
+    ) -> Order | None:
+        options = [
+            joinedload(Order.country),
+            joinedload(Order.created_by),
+            joinedload(Order.urgency),
+            joinedload(Order.visa_type),
+            joinedload(Order.visa_duration),
+            joinedload(Order.applicant),
+        ]
         statement = select(Order)
 
         if populate_client:
-            statement = statement.options(*options)
+            options.append(joinedload(Order.client))
 
-        result = await self.db.scalars(statement.where(Order.id == order_id))
-        return result.one_or_none()
+        statement = statement.options(*options).where(Order.id == order_id)
+        result = await self.db.execute(statement)
+        return result.scalars().one_or_none()
 
-    # TODO: Create
+    async def create(self, *, data: AdminOrderCreateSchema, populate_client: bool = False) -> Order:
+        try:
+            # Create the order without the applicant field
+            order = Order(**data.model_dump(exclude_unset=True, exclude={"applicant"}))
+            self.db.add(order)
+            await self.db.flush()
+
+            # If there's applicant data, create the applicant
+            if data.applicant:
+                applicant_data = data.applicant.model_dump()
+                applicant = Applicant(**applicant_data, order_id=order.id)
+                self.db.add(applicant)
+
+            await self.db.commit()
+            order = await self.get_by_id(order_id=order.id, populate_client=populate_client)
+            return order
+        except Exception as e:
+            await self.db.rollback()
+            raise e
+
     # TODO: Update

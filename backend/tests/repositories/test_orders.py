@@ -1,8 +1,12 @@
 import pytest
+from sqlalchemy import select, func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.orders import OrdersRepository
-from app.models import Order, VisaDuration, Applicant
+from app.models import Order, VisaDuration, Applicant, User
+from app.schemas.applicant import ApplicantCreateSchema
+from app.schemas.order.admin import AdminOrderCreateSchema
 from app.schemas.order.base import OrdersFilterSchema, OrderStatusEnum
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
 from tests.conftest import OrderMakerProtocol, CountryMakerProtocol
@@ -119,9 +123,9 @@ class TestOrdersRepository:
             country_maker: CountryMakerProtocol,
             visa_duration_maker,
             visa_type_maker,
-            test_individual,
+            test_individual: User,
             urgency_maker,
-            test_user
+            test_user: User
     ) -> None:
         """Test that the paginated list is returned correctly"""
         countries = [
@@ -180,9 +184,9 @@ class TestOrdersRepository:
             country_maker: CountryMakerProtocol,
             visa_duration_maker,
             visa_type_maker,
-            test_individual,
+            test_individual: User,
             urgency_maker,
-            test_user
+            test_user: User
     ) -> None:
         country = await country_maker(name="Russia", alpha2="RU", alpha3="RUS")
         urgency = await urgency_maker()
@@ -228,3 +232,104 @@ class TestOrdersRepository:
         order = await orders_repo.get_by_id(order_id=1000)
 
         assert order is None
+
+    @pytest.mark.asyncio
+    async def test_create_order(
+            self,
+            orders_repo: OrdersRepository,
+            test_individual: User,
+            test_user: User,
+            country_maker: CountryMakerProtocol,
+            urgency_maker,
+            visa_duration_maker,
+            visa_type_maker,
+    ) -> None:
+        country = await country_maker(name="Russia", alpha2="RU", alpha3="RUS")
+        urgency = await urgency_maker()
+        visa_duration = await visa_duration_maker(term=VisaDuration.TERM_1, entry=VisaDuration.SINGLE_ENTRY)
+        visa_type = await visa_type_maker(name="Business")
+        client = await test_individual.awaitable_attrs.individual_client
+        applicant_data = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john@example.com",
+            "gender": Applicant.GENDER_MALE
+        }
+        applicant_data = ApplicantCreateSchema(
+            first_name="John",
+            last_name="Doe",
+            email="john@example.com",
+            gender=Applicant.GENDER_MALE
+        )
+        order_data = AdminOrderCreateSchema(
+            status=OrderStatusEnum.NEW,
+            country_id=country.id,
+            client_id=client.id,
+            created_by_id=test_user.id,
+            urgency_id=urgency.id,
+            visa_duration_id=visa_duration.id,
+            visa_type_id=visa_type.id,
+            applicant=applicant_data,
+        )
+
+        order = await orders_repo.create(data=order_data)
+
+        assert order is not None
+        assert isinstance(order, Order)
+        assert order.country == country
+        assert order.client == client
+        assert order.created_by == test_user
+        assert order.urgency == urgency
+        assert order.visa_duration == visa_duration
+        assert order.visa_type == visa_type
+
+        applicant = await order.awaitable_attrs.applicant
+
+        assert applicant is not None
+        assert isinstance(applicant, Applicant)
+        assert applicant.first_name == applicant_data.first_name
+        assert applicant.last_name == applicant_data.last_name
+        assert applicant.email == applicant_data.email
+        assert applicant.gender == applicant_data.gender
+
+    @pytest.mark.asyncio
+    async def test_create_order_rollback_on_exception(
+            self,
+            async_db: AsyncSession,
+            orders_repo: OrdersRepository,
+            test_individual: User,
+            test_user: User,
+            urgency_maker,
+            visa_duration_maker,
+            visa_type_maker,
+    ) -> None:
+        urgency = await urgency_maker()
+        visa_duration = await visa_duration_maker(term=VisaDuration.TERM_1, entry=VisaDuration.SINGLE_ENTRY)
+        visa_type = await visa_type_maker(name="Business")
+        client = await test_individual.awaitable_attrs.individual_client
+        applicant_data = ApplicantCreateSchema(
+            first_name="John",
+            last_name="Doe",
+            email="john@example.com",
+            gender=Applicant.GENDER_MALE
+        )
+        order_data = AdminOrderCreateSchema(
+            status=OrderStatusEnum.NEW,
+            country_id=1000,  # THIS CAUSES EXCEPTION
+            client_id=client.id,
+            created_by_id=test_user.id,
+            urgency_id=urgency.id,
+            visa_duration_id=visa_duration.id,
+            visa_type_id=visa_type.id,
+            applicant=applicant_data,
+        )
+
+        with pytest.raises(IntegrityError):
+            await orders_repo.create(data=order_data)  # This should raise an exception
+
+        result = await async_db.scalars(
+            select(func.count()).select_from(Order)
+        )
+        orders_count = result.first()
+
+        assert orders_count == 0

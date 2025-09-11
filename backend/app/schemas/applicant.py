@@ -20,7 +20,10 @@ class ApplicantBaseSchema(CoreSchema):
 
 
 class ApplicantCreateSchema(ApplicantBaseSchema):
-    pass
+    first_name: str
+    last_name: str
+    email: str
+    gender: ApplicantGenderEnum
 
 
 class ApplicantUpdateSchema(ApplicantBaseSchema):
