@@ -101,7 +101,8 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
                 await self.db.execute(statement)
 
             await self.db.commit()
-            await self.db.refresh(order)
+
+            order = await self.get_by_id(order_id=order.id, populate_client=populate_client)
             return order
 
         except Exception as e:
