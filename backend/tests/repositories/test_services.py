@@ -202,3 +202,20 @@ class TestServicesRepository:
         assert service.tariff_services[0].service_id == service.id
         assert service.tariff_services[0].tariff_id == new_t_service.tariff_id
 
+    @pytest.mark.asyncio
+    async def test_update_service_not_found(self, services_repo: ServicesRepository, test_tariff) -> None:
+        """Test service update"""
+
+        new_t_service = TariffServiceUpdateSchema(
+            price=Decimal(5.5),
+            tax=Decimal(0.5),
+            tariff_id=test_tariff.id
+        )
+        new_data = ServiceUpdateSchema(
+            name="New name",
+            fee_type=FeeTypeEnum.CONSULAR,
+            tariff_services=[new_t_service]
+        )
+        service = await services_repo.update(service_id=1000, data=new_data)
+
+        assert service is None
