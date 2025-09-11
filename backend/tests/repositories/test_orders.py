@@ -5,11 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.orders import OrdersRepository
 from app.models import Order, VisaDuration, Applicant, User
-from app.schemas.applicant import ApplicantCreateSchema, ApplicantGenderEnum
-from app.schemas.order.admin import AdminOrderCreateSchema
+from app.schemas.applicant import ApplicantCreateSchema, ApplicantGenderEnum, ApplicantUpdateSchema
+from app.schemas.order.admin import AdminOrderCreateSchema, AdminOrderUpdateSchema
 from app.schemas.order.base import OrdersFilterSchema, OrderStatusEnum
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
-from tests.conftest import OrderMakerProtocol, CountryMakerProtocol
+from tests.conftest import OrderMakerProtocol, CountryMakerProtocol, UrgencyMakerProtocol, VisaTypeMakerProtocol
 
 
 class TestOrdersRepository:
@@ -326,3 +326,179 @@ class TestOrdersRepository:
         orders_count = result.first()
 
         assert orders_count == 0
+
+    @pytest.mark.asyncio
+    async def test_update_order(
+            self,
+            async_db: AsyncSession,
+            orders_repo: OrdersRepository,
+            test_individual: User,
+            test_user: User,
+            country_maker: CountryMakerProtocol,
+            urgency_maker: UrgencyMakerProtocol,
+            order_maker: OrderMakerProtocol,
+            visa_duration_maker,
+            visa_type_maker: VisaTypeMakerProtocol,
+    ) -> None:
+        country = await country_maker(name="Russia", alpha2="RU", alpha3="RUS")
+        urgency = await urgency_maker()
+        visa_duration = await visa_duration_maker(term=VisaDuration.TERM_1, entry=VisaDuration.SINGLE_ENTRY)
+        visa_type = await visa_type_maker(name="Business")
+        client = await test_individual.awaitable_attrs.individual_client
+        applicant_data_1 = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john@example.com",
+            "gender": Applicant.GENDER_MALE
+        }
+        order = await order_maker(
+            country=country,
+            client=client,
+            created_by=test_user,
+            urgency=urgency,
+            visa_duration=visa_duration,
+            visa_type=visa_type,
+            status=OrderStatusEnum.NEW,
+            applicant_data=applicant_data_1,
+        )
+        country_2 = await country_maker(name="Germany", alpha2="DE", alpha3="DEU")
+        urgency_2 = await urgency_maker()
+        visa_duration_2 = await visa_duration_maker(term=VisaDuration.TERM_12, entry=VisaDuration.DOUBLE_ENTRY)
+        visa_type_2 = await visa_type_maker(name="Tourism")
+        applicant_updated_data = ApplicantUpdateSchema(
+            first_name="Sue",
+            last_name="SSue",
+            email="sue@example.com",
+            gender=ApplicantGenderEnum.FEMALE
+
+        )
+        order_data = AdminOrderUpdateSchema(
+            status=OrderStatusEnum.COMPLETED,
+            country_id=country_2.id,
+            urgency_id=urgency_2.id,
+            visa_duration_id=visa_duration_2.id,
+            visa_type_id=visa_type_2.id,
+            applicant=applicant_updated_data
+        )
+        await orders_repo.update(order_id=order.id, data=order_data)
+
+        assert order.status == order_data.status
+        assert order.country_id == order_data.country_id
+        assert order.urgency_id == order_data.urgency_id
+        assert order.visa_duration_id == order_data.visa_duration_id
+        assert order.visa_type_id == order_data.visa_type_id
+        assert order.applicant.first_name == applicant_updated_data.first_name
+        assert order.applicant.last_name == applicant_updated_data.last_name
+        assert order.applicant.email == applicant_updated_data.email
+        assert order.applicant.gender == applicant_updated_data.gender
+
+    @pytest.mark.asyncio
+    async def test_update_order_not_found(
+            self,
+            async_db: AsyncSession,
+            orders_repo: OrdersRepository,
+            test_individual: User,
+            test_user: User,
+            country_maker: CountryMakerProtocol,
+            urgency_maker: UrgencyMakerProtocol,
+            visa_duration_maker,
+            visa_type_maker: VisaTypeMakerProtocol,
+    ) -> None:
+        country = await country_maker(name="Germany", alpha2="DE", alpha3="DEU")
+        urgency = await urgency_maker()
+        visa_duration = await visa_duration_maker(term=VisaDuration.TERM_12, entry=VisaDuration.DOUBLE_ENTRY)
+        visa_type = await visa_type_maker(name="Tourism")
+        applicant_data = ApplicantUpdateSchema(
+            first_name="Sue",
+            last_name="SSue",
+            email="sue@example.com",
+            gender=ApplicantGenderEnum.FEMALE
+        )
+        order_data = AdminOrderUpdateSchema(
+            status=OrderStatusEnum.COMPLETED,
+            country_id=country.id,
+            urgency_id=urgency.id,
+            visa_duration_id=visa_duration.id,
+            visa_type_id=visa_type.id,
+            applicant=applicant_data
+        )
+        order = await orders_repo.update(order_id=1000, data=order_data)
+
+        assert order is None
+
+    @pytest.mark.asyncio
+    async def test_update_order_rollback_on_exception(
+            self,
+            async_db: AsyncSession,
+            orders_repo: OrdersRepository,
+            test_individual: User,
+            test_user: User,
+            order_maker: OrderMakerProtocol,
+            country_maker: CountryMakerProtocol,
+            urgency_maker: UrgencyMakerProtocol,
+            visa_duration_maker,
+            visa_type_maker: VisaTypeMakerProtocol,
+    ) -> None:
+        country = await country_maker(name="Russia", alpha2="RU", alpha3="RUS")
+        urgency = await urgency_maker()
+        visa_duration = await visa_duration_maker(term=VisaDuration.TERM_1, entry=VisaDuration.SINGLE_ENTRY)
+        visa_type = await visa_type_maker(name="Business")
+        client = await test_individual.awaitable_attrs.individual_client
+        applicant_data = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "john@example.com",
+            "gender": Applicant.GENDER_MALE
+        }
+        order = await order_maker(
+            country=country,
+            client=client,
+            created_by=test_user,
+            urgency=urgency,
+            visa_duration=visa_duration,
+            visa_type=visa_type,
+            status=OrderStatusEnum.NEW,
+            applicant_data=applicant_data,
+        )
+
+        urgency_2 = await urgency_maker()
+        visa_duration_2 = await visa_duration_maker(term=VisaDuration.TERM_12, entry=VisaDuration.DOUBLE_ENTRY)
+        visa_type_2 = await visa_type_maker(name="Tourism")
+        applicant_updated_data = ApplicantUpdateSchema(
+            first_name="Sue",
+            last_name="SSue",
+            email="sue@example.com",
+            gender=ApplicantGenderEnum.FEMALE
+        )
+        order_data = AdminOrderUpdateSchema(
+            status=OrderStatusEnum.COMPLETED,
+            country_id=1000,  # This causes integrity error
+            urgency_id=urgency_2.id,
+            visa_duration_id=visa_duration_2.id,
+            visa_type_id=visa_type_2.id,
+            applicant=applicant_updated_data,
+        )
+
+        order_id = order.id
+
+        with pytest.raises(IntegrityError):
+            await orders_repo.update(order_id=order_id, data=order_data)
+
+        # Re-fetch the order with all relationships properly loaded
+        updated_order = await orders_repo.get_by_id(
+            order_id=order_id,
+            populate_client=True
+        )
+
+        # Assert nothing changed
+        assert updated_order.status == OrderStatusEnum.NEW
+        assert updated_order.country_id == country.id
+        assert updated_order.urgency_id == urgency.id
+        assert updated_order.visa_duration_id == visa_duration.id
+        assert updated_order.visa_type_id == visa_type.id
+
+        # Access relationships safely
+        assert updated_order.applicant.first_name == applicant_data["first_name"]
+        assert updated_order.applicant.last_name == applicant_data["last_name"]
+        assert updated_order.applicant.email == applicant_data["email"]
+        assert updated_order.applicant.gender == applicant_data["gender"]

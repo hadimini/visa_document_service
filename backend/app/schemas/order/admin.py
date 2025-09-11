@@ -6,16 +6,11 @@ from app.schemas.core import (
     CoreSchema
 )
 from app.schemas.order.base import (
-    BaseOrderSchema,
     BaseOrderPublicSchema,
     BaseOrderCreateSchema,
     BaseOrderUpdateSchema
 )
 from app.schemas.pagination import PagedResponseSchema
-
-
-# class BaseAdminOrderSchema(BaseOrderSchema):
-#     client_id: Optional[int] = None
 
 
 class AdminOrderListSchema(BaseOrderPublicSchema):

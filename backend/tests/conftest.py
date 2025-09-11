@@ -261,7 +261,7 @@ async def visa_type_maker(async_db: AsyncSession) -> VisaTypeMakerProtocol:
 
 
 class UrgencyMakerProtocol(Protocol):
-    async def __call__(self, *, name: Optional[str] = None) -> VisaType:
+    async def __call__(self, *, name: Optional[str] = None) -> Urgency:
         ...
 
 
@@ -326,7 +326,7 @@ class OrderMakerProtocol(Protocol):
             visa_type: VisaType,
             status: Optional[OrderStatusEnum] = None,
             applicant_data: Optional[dict[str, str]] = None,
-    ) -> Country:
+    ) -> Order:
         ...
 
 
@@ -386,6 +386,11 @@ async def country_visa_maker(async_db: AsyncSession):
         )
         return country_visa
     return inner
+
+
+class VisaDurationMakerProtocol(Protocol):
+    async def __call__(self, *, term: str, entry: str) -> VisaDuration:
+        ...
 
 
 @pytest_asyncio.fixture
