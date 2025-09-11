@@ -249,12 +249,6 @@ class TestOrdersRepository:
         visa_duration = await visa_duration_maker(term=VisaDuration.TERM_1, entry=VisaDuration.SINGLE_ENTRY)
         visa_type = await visa_type_maker(name="Business")
         client = await test_individual.awaitable_attrs.individual_client
-        applicant_data = {
-            "first_name": "John",
-            "last_name": "Doe",
-            "email": "john@example.com",
-            "gender": Applicant.GENDER_MALE
-        }
         applicant_data = ApplicantCreateSchema(
             first_name="John",
             last_name="Doe",
@@ -271,8 +265,7 @@ class TestOrdersRepository:
             visa_type_id=visa_type.id,
             applicant=applicant_data,
         )
-
-        order = await orders_repo.create(data=order_data)
+        order = await orders_repo.create(data=order_data, populate_client=True)
 
         assert order is not None
         assert isinstance(order, Order)
