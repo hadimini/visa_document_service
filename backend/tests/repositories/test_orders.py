@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.orders import OrdersRepository
 from app.models import Order, VisaDuration, Applicant, User
-from app.schemas.applicant import ApplicantCreateSchema
+from app.schemas.applicant import ApplicantCreateSchema, ApplicantGenderEnum
 from app.schemas.order.admin import AdminOrderCreateSchema
 from app.schemas.order.base import OrdersFilterSchema, OrderStatusEnum
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
@@ -253,7 +253,7 @@ class TestOrdersRepository:
             first_name="John",
             last_name="Doe",
             email="john@example.com",
-            gender=Applicant.GENDER_MALE
+            gender=ApplicantGenderEnum.FEMALE
         )
         order_data = AdminOrderCreateSchema(
             status=OrderStatusEnum.NEW,
@@ -304,7 +304,7 @@ class TestOrdersRepository:
             first_name="John",
             last_name="Doe",
             email="john@example.com",
-            gender=Applicant.GENDER_MALE
+            gender=ApplicantGenderEnum.MALE
         )
         order_data = AdminOrderCreateSchema(
             status=OrderStatusEnum.NEW,

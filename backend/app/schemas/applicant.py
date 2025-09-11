@@ -8,8 +8,8 @@ from app.schemas.core import ArchivedAtSchemaMixin, CoreSchema, IDSchemaMixin
 
 
 class ApplicantGenderEnum(str, Enum):
-    male = Applicant.GENDER_MALE
-    female = Applicant.GENDER_FEMALE
+    MALE = Applicant.GENDER_MALE
+    FEMALE = Applicant.GENDER_FEMALE
 
 
 class ApplicantBaseSchema(CoreSchema):
