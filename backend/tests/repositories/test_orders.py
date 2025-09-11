@@ -112,6 +112,67 @@ class TestOrdersRepository:
         }
 
     @pytest.mark.asyncio
+    async def test_paginated_list_with_filters(
+            self,
+            orders_repo: OrdersRepository,
+            order_maker: OrderMakerProtocol,
+            country_maker: CountryMakerProtocol,
+            visa_duration_maker,
+            visa_type_maker,
+            test_individual,
+            urgency_maker,
+            test_user
+    ) -> None:
+        """Test that the paginated list is returned correctly"""
+        countries = [
+            await country_maker(name=f"Test Country {i}", alpha2=f"R{i}", alpha3=f"RU{i}")
+            for i in range(5)
+        ]
+        urgency = await urgency_maker()
+        visa_duration = await visa_duration_maker(term=VisaDuration.TERM_1, entry=VisaDuration.SINGLE_ENTRY)
+        visa_type = await visa_type_maker(name="Business")
+        client = await test_individual.awaitable_attrs.individual_client
+
+        orders = [
+            await order_maker(
+                country=countries[i],
+                client=client,
+                created_by=test_user,
+                urgency=urgency,
+                visa_duration=visa_duration,
+                visa_type=visa_type,
+                status=OrderStatusEnum.DRAFT,
+            )
+            for i in range(5)
+        ]
+
+        paginated_result = await orders_repo.get_paginated_list(
+            query_filters=OrdersFilterSchema(
+                country_id=countries[0].id,
+                client_id=test_individual.individual_client_id,
+                created_by_id=test_user.id,
+                urgency_id=urgency.id,
+                visa_duration_id=visa_duration.id,
+                visa_type_id=visa_type.id,
+            ),
+            page_params=PageParamsSchema(
+                page=1,
+                size=1
+            )
+        )
+        assert paginated_result == {
+            **PagedResponseSchema(
+            page=1,
+            size=1,
+            total=1,
+            total_pages=1,
+            has_next=False,
+            has_prev=False,
+        ).model_dump(),
+            "items": [orders[0]]
+        }
+
+    @pytest.mark.asyncio
     async def test_get_by_id(
             self,
             orders_repo: OrdersRepository,
