@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.audit import AuditRepository
-from app.models import Client, Country, Order, Tariff, Urgency, User, VisaDuration, VisaType
+from app.models import Client, Country, Order, Tariff, Urgency, User, VisaDuration, VisaType, LogEntry
 from app.schemas.applicant import ApplicantCreateUpdateSchema, ApplicantGenderEnum
 from app.schemas.core import STRFTIME_FORMAT
 from app.schemas.order.admin import AdminOrderCreateSchema, AdminOrderUpdateSchema
@@ -194,7 +194,8 @@ class TestAdminOrdersRoutes:
             visa_duration_maker: VisaDurationMakerProtocol,
             visa_type_maker: VisaTypeMakerProtocol,
             test_individual: User,
-            access_token: str
+            access_token: str,
+            audit_rpo
     ) -> None:
         country: Country = await country_maker(name="Russia", alpha2="RU", alpha3="RUS", available_for_order=True)
         urgency: Urgency = await urgency_maker()
@@ -262,6 +263,13 @@ class TestAdminOrdersRoutes:
         assert response.json()["completed_at"] is None
         assert response.json()["archived_at"] is None
 
+        logs = await audit_rpo.get_for_user(user_id=test_admin.id)
+        assert len(logs) == 1
+        assert logs[0].user_id == test_admin.id
+        assert logs[0].action == LogEntry.ACTION_CREATE
+        assert logs[0].model_type == Order.get_model_type()
+        assert logs[0].target_id == response.json().get("id")
+
     @pytest.mark.asyncio
     async def test_create_order_with_exception(
             self,
@@ -301,7 +309,8 @@ class TestAdminOrdersRoutes:
             test_individual: User,
             urgency_maker: UrgencyMakerProtocol,
             test_admin: User,
-            access_token: str
+            access_token: str,
+            audit_rpo
     ) -> None:
         country = await country_maker(name="Russia", alpha2="RU", alpha3="RUS", available_for_order=True)
         urgency = await urgency_maker()
@@ -393,6 +402,13 @@ class TestAdminOrdersRoutes:
         assert response.json()["updated_at"] == order.updated_at.strftime(STRFTIME_FORMAT)
         assert response.json()["completed_at"] is None
         assert response.json()["archived_at"] is None
+
+        logs = await audit_rpo.get_for_user(user_id=test_admin.id)
+        assert len(logs) == 1
+        assert logs[0].user_id == test_admin.id
+        assert logs[0].action == LogEntry.ACTION_UPDATE
+        assert logs[0].model_type == Order.get_model_type()
+        assert logs[0].target_id == response.json().get("id")
 
     @pytest.mark.asyncio
     async def test_update_order_not_found(
