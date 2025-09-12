@@ -88,12 +88,19 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
                 setattr(order, attr, value)
 
             if data.applicant:
-                statement = update(Applicant).where(Applicant.order_id == order_id).values(
-                    **data.applicant.model_dump(exclude_unset=True)
-                )
-                await self.db.execute(statement)
+                if order.applicant:
+                    # Update existing applicant
+                    applicant_data = data.applicant.model_dump(exclude_unset=True)
+                    for attr, value in applicant_data.items():
+                        setattr(order.applicant, attr, value)
+                else:
+                    # Create new applicant
+                    applicant_data = data.applicant.model_dump()
+                    applicant = Applicant(**applicant_data, order_id=order.id)
+                    self.db.add(applicant)
 
             await self.db.commit()
+            await self.db.refresh(order)
 
             order = await self.get_by_id(order_id=order.id, populate_client=populate_client)
             return order
