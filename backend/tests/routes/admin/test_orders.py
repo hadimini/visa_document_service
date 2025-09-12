@@ -4,7 +4,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.audit import AuditRepository
-from app.models import Client, Country, Order, Tariff, Urgency, User, VisaDuration, VisaType, LogEntry
+from app.models import Client, Country, Order, Tariff, Urgency, User, VisaDuration, VisaType, LogEntry, Applicant
 from app.schemas.applicant import ApplicantCreateUpdateSchema, ApplicantGenderEnum
 from app.schemas.core import STRFTIME_FORMAT
 from app.schemas.order.admin import AdminOrderCreateSchema, AdminOrderUpdateSchema
@@ -361,9 +361,9 @@ class TestAdminOrdersRoutes:
         assert response.json()["status"] == OrderStatusEnum.NEW
         assert response.json()["number"] == order.number
         assert response.json()["country"]["MODEL_TYPE"] == Country.get_model_type()
-        assert response.json()["country"]["id"] == country.id
-        assert response.json()["country"]["alpha2"] == country.alpha2
-        assert response.json()["country"]["alpha3"] == country.alpha3
+        assert response.json()["country"]["id"] == country_2.id
+        assert response.json()["country"]["alpha2"] == country_2.alpha2
+        assert response.json()["country"]["alpha3"] == country_2.alpha3
         assert response.json()["country"]["available_for_order"] is True
 
         assert response.json()["created_by"]["MODEL_TYPE"] == User.get_model_type()
@@ -373,18 +373,18 @@ class TestAdminOrdersRoutes:
         assert response.json()["created_by"]["last_name"] == test_admin.last_name
 
         assert response.json()["urgency"]["MODEL_TYPE"] == Urgency.get_model_type()
-        assert response.json()["urgency"]["id"] == urgency.id
-        assert response.json()["urgency"]["name"] == urgency.name
+        assert response.json()["urgency"]["id"] == urgency_2.id
+        assert response.json()["urgency"]["name"] == urgency_2.name
 
         assert response.json()["visa_duration"]["MODEL_TYPE"] == VisaDuration.get_model_type()
-        assert response.json()["visa_duration"]["id"] == visa_duration.id
-        assert response.json()["visa_duration"]["name"] == visa_duration.name
-        assert response.json()["visa_duration"]["term"] == visa_duration.term
-        assert response.json()["visa_duration"]["entry"] == visa_duration.entry
+        assert response.json()["visa_duration"]["id"] == visa_duration_2.id
+        assert response.json()["visa_duration"]["name"] == visa_duration_2.name
+        assert response.json()["visa_duration"]["term"] == visa_duration_2.term
+        assert response.json()["visa_duration"]["entry"] == visa_duration_2.entry
 
         assert response.json()["visa_type"]["MODEL_TYPE"] == VisaType.get_model_type()
-        assert response.json()["visa_type"]["id"] == visa_type.id
-        assert response.json()["visa_type"]["name"] == visa_type.name
+        assert response.json()["visa_type"]["id"] == visa_type_2.id
+        assert response.json()["visa_type"]["name"] == visa_type_2.name
 
         client: Client = await test_individual.awaitable_attrs.individual_client
         assert response.json()["client"]["MODEL_TYPE"] == Client.get_model_type()
@@ -397,7 +397,12 @@ class TestAdminOrdersRoutes:
         assert response.json()["client"]["tariff"]["id"] == tariff.id
         assert response.json()["client"]["tariff"]["is_default"] == tariff.is_default
 
-        assert response.json()["applicant"] is None
+        assert response.json()["applicant"]["MODEL_TYPE"] == Applicant.get_model_type()
+        assert response.json()["applicant"]["first_name"] == update_data.applicant.first_name
+        assert response.json()["applicant"]["last_name"] == update_data.applicant.last_name
+        assert response.json()["applicant"]["email"] == update_data.applicant.email
+        assert response.json()["applicant"]["gender"] == update_data.applicant.gender
+
         assert response.json()["created_at"] == order.created_at.strftime(STRFTIME_FORMAT)
         assert response.json()["updated_at"] == order.updated_at.strftime(STRFTIME_FORMAT)
         assert response.json()["completed_at"] is None
@@ -409,6 +414,86 @@ class TestAdminOrdersRoutes:
         assert logs[0].action == LogEntry.ACTION_UPDATE
         assert logs[0].model_type == Order.get_model_type()
         assert logs[0].target_id == response.json().get("id")
+
+        # Update applicant data again
+
+        update_data = AdminOrderUpdateSchema(
+            **update_data.model_dump(exclude={"applicant"}),
+            applicant=ApplicantCreateUpdateSchema(
+                first_name="Sue",
+                last_name="Doe",
+                email="sue@example.com",
+                gender=ApplicantGenderEnum.FEMALE
+            )
+        )
+
+        response = await async_client.put(
+            url=app.url_path_for("admin:order-update", order_id=order.id),
+            json=update_data.model_dump(),
+            headers={
+                "Authorization": f"Bearer {access_token}"
+            }
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json()["id"] == order.id
+        assert response.json()["MODEL_TYPE"] == Order.get_model_type()
+        assert response.json()["status"] == OrderStatusEnum.NEW
+        assert response.json()["number"] == order.number
+        assert response.json()["country"]["MODEL_TYPE"] == Country.get_model_type()
+        assert response.json()["country"]["id"] == country_2.id
+        assert response.json()["country"]["alpha2"] == country_2.alpha2
+        assert response.json()["country"]["alpha3"] == country_2.alpha3
+        assert response.json()["country"]["available_for_order"] is True
+
+        assert response.json()["created_by"]["MODEL_TYPE"] == User.get_model_type()
+        assert response.json()["created_by"]["id"] == test_admin.id
+        assert response.json()["created_by"]["email"] == test_admin.email
+        assert response.json()["created_by"]["first_name"] == test_admin.first_name
+        assert response.json()["created_by"]["last_name"] == test_admin.last_name
+
+        assert response.json()["urgency"]["MODEL_TYPE"] == Urgency.get_model_type()
+        assert response.json()["urgency"]["id"] == urgency_2.id
+        assert response.json()["urgency"]["name"] == urgency_2.name
+
+        assert response.json()["visa_duration"]["MODEL_TYPE"] == VisaDuration.get_model_type()
+        assert response.json()["visa_duration"]["id"] == visa_duration_2.id
+        assert response.json()["visa_duration"]["name"] == visa_duration_2.name
+        assert response.json()["visa_duration"]["term"] == visa_duration_2.term
+        assert response.json()["visa_duration"]["entry"] == visa_duration_2.entry
+
+        assert response.json()["visa_type"]["MODEL_TYPE"] == VisaType.get_model_type()
+        assert response.json()["visa_type"]["id"] == visa_type_2.id
+        assert response.json()["visa_type"]["name"] == visa_type_2.name
+
+        client: Client = await test_individual.awaitable_attrs.individual_client
+        assert response.json()["client"]["MODEL_TYPE"] == Client.get_model_type()
+        assert response.json()["client"]["id"] == test_individual.individual_client_id
+        assert response.json()["client"]["name"] == client.name
+        assert response.json()["client"]["type"] == client.type
+
+        tariff: Tariff = await client.awaitable_attrs.tariff
+        assert response.json()["client"]["tariff"]["MODEL_TYPE"] == Tariff.get_model_type()
+        assert response.json()["client"]["tariff"]["id"] == tariff.id
+        assert response.json()["client"]["tariff"]["is_default"] == tariff.is_default
+
+        assert response.json()["applicant"]["MODEL_TYPE"] == Applicant.get_model_type()
+        assert response.json()["applicant"]["first_name"] == update_data.applicant.first_name
+        assert response.json()["applicant"]["last_name"] == update_data.applicant.last_name
+        assert response.json()["applicant"]["email"] == update_data.applicant.email
+        assert response.json()["applicant"]["gender"] == update_data.applicant.gender
+
+        assert response.json()["created_at"] == order.created_at.strftime(STRFTIME_FORMAT)
+        assert response.json()["updated_at"] == order.updated_at.strftime(STRFTIME_FORMAT)
+        assert response.json()["completed_at"] is None
+        assert response.json()["archived_at"] is None
+
+        logs = await audit_rpo.get_for_user(user_id=test_admin.id)
+        assert len(logs) == 2
+        assert logs[-1].user_id == test_admin.id
+        assert logs[-1].action == LogEntry.ACTION_UPDATE
+        assert logs[-1].model_type == Order.get_model_type()
+        assert logs[-1].target_id == response.json().get("id")
 
     @pytest.mark.asyncio
     async def test_update_order_not_found(
