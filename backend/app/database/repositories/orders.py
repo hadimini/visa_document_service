@@ -9,7 +9,7 @@ from app.database.repositories.base import BasePaginatedRepository
 from app.database.repositories.mixins import BuildFiltersMixin
 from app.models import Order, Applicant
 from app.schemas.order.admin import AdminOrderCreateSchema, AdminOrderUpdateSchema
-from app.schemas.order.base import OrdersFilterSchema
+from app.schemas.order.admin import AdminOrderFilterSchema
 
 
 class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
@@ -17,7 +17,7 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
     def __init__(self, db: AsyncSession) -> None:
         super().__init__(db=db, model=Order)
 
-    def build_filters(self, *, query_filters: OrdersFilterSchema) -> list:
+    def build_filters(self, *, query_filters: AdminOrderFilterSchema) -> list:
         """Convert filter schema to SQLAlchemy filter conditions"""
         filters: list[ClauseElement] = list()
 

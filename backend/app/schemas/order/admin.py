@@ -8,7 +8,8 @@ from app.schemas.core import (
 from app.schemas.order.base import (
     BaseOrderPublicSchema,
     BaseOrderCreateSchema,
-    BaseOrderUpdateSchema
+    BaseOrderUpdateSchema,
+    BaseOrdersFilterSchema
 )
 from app.schemas.pagination import PagedResponseSchema
 
@@ -31,3 +32,8 @@ class AdminOrderUpdateSchema(BaseOrderUpdateSchema):
 
 class AdminOrderListSchema(PagedResponseSchema, CoreSchema):
     items: list[AdminOrderDetailSchema]
+
+
+class AdminOrderFilterSchema(BaseOrdersFilterSchema):
+    created_by_id: Optional[int] = None
+    client_id: Optional[int] = None

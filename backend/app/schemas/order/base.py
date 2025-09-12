@@ -59,7 +59,7 @@ class BaseOrderPublicSchema(
 class BaseOrderCreateSchema(CoreSchema):
     status: Optional[OrderStatusEnum] = None
     country_id: int
-    created_by_id: int
+    created_by_id: Optional[int] = None
     urgency_id: int
     visa_duration_id: int
     visa_type_id: int
@@ -70,5 +70,9 @@ class BaseOrderUpdateSchema(BaseOrderSchema):
     applicant: Optional[ApplicantUpdateSchema] = None
 
 
-class OrdersFilterSchema(BaseOrderSchema):
-    client_id: Optional[int] = None
+class BaseOrdersFilterSchema(BaseOrderSchema):
+    status: Optional[OrderStatusEnum] = None
+    country_id: Optional[int] = None
+    urgency_id: Optional[int] = None
+    visa_duration_id: Optional[int] = None
+    visa_type_id: Optional[int] = None

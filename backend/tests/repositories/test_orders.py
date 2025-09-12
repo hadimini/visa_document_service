@@ -7,7 +7,8 @@ from app.database.repositories.orders import OrdersRepository
 from app.models import Order, VisaDuration, Applicant, User
 from app.schemas.applicant import ApplicantCreateSchema, ApplicantGenderEnum, ApplicantUpdateSchema
 from app.schemas.order.admin import AdminOrderCreateSchema, AdminOrderUpdateSchema
-from app.schemas.order.base import OrdersFilterSchema, OrderStatusEnum
+from app.schemas.order.base import OrderStatusEnum
+from app.schemas.order.admin import AdminOrderFilterSchema
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
 from tests.conftest import OrderMakerProtocol, CountryMakerProtocol, UrgencyMakerProtocol, VisaTypeMakerProtocol
 
@@ -53,7 +54,7 @@ class TestOrdersRepository:
     )
     def test_build_filters(self, orders_repo: OrdersRepository, filter_data, expected_filter_count) -> None:
         """Test build_filters method"""
-        filter_schema = OrdersFilterSchema(**filter_data)
+        filter_schema = AdminOrderFilterSchema(**filter_data)
         filters = orders_repo.build_filters(query_filters=filter_schema)
 
         assert len(filters) == expected_filter_count
@@ -151,7 +152,7 @@ class TestOrdersRepository:
         ]
 
         paginated_result = await orders_repo.get_paginated_list(
-            query_filters=OrdersFilterSchema(
+            query_filters=AdminOrderFilterSchema(
                 country_id=countries[0].id,
                 client_id=test_individual.individual_client_id,
                 created_by_id=test_user.id,
