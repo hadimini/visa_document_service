@@ -347,6 +347,34 @@ class TestOrdersRepository:
         assert order.applicant.email == applicant_data.email
         assert order.applicant.gender == applicant_data.gender
 
+        # Update applicant
+
+        applicant_data_updated = ApplicantCreateUpdateSchema(
+            first_name="Joe",
+            last_name="Doe",
+            email="joe@example.com",
+            gender=ApplicantGenderEnum.MALE
+        )
+        order_data = AdminOrderUpdateSchema(
+            status=OrderStatusEnum.COMPLETED,
+            country_id=country_2.id,
+            urgency_id=urgency_2.id,
+            visa_duration_id=visa_duration_2.id,
+            visa_type_id=visa_type_2.id,
+            applicant=applicant_data_updated
+        )
+        await orders_repo.update(order_id=order.id, data=order_data)
+
+        assert order.status == order_data.status
+        assert order.country_id == order_data.country_id
+        assert order.urgency_id == order_data.urgency_id
+        assert order.visa_duration_id == order_data.visa_duration_id
+        assert order.visa_type_id == order_data.visa_type_id
+        assert order.applicant.first_name == applicant_data_updated.first_name
+        assert order.applicant.last_name == applicant_data_updated.last_name
+        assert order.applicant.email == applicant_data_updated.email
+        assert order.applicant.gender == applicant_data_updated.gender
+
     @pytest.mark.asyncio
     async def test_update_order_not_found(
             self,
