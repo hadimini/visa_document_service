@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from pathlib import Path
 from typing import Protocol, Optional
 
@@ -9,6 +10,7 @@ from httpx import AsyncClient, ASGITransport
 from pydantic.v1 import EmailStr
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.orm import attributes
 from sqlalchemy.pool import NullPool
 
 from app.api.server import get_application
@@ -341,8 +343,7 @@ async def order_maker(async_db: AsyncSession) -> OrderMakerProtocol:
             urgency: Urgency,
             visa_duration: VisaDuration,
             visa_type: VisaType,
-            status: Optional[OrderStatusEnum] = None,
-            applicant_data: Optional[dict[str, str]] = None,
+            status: Optional[OrderStatusEnum] = None
     ) -> Order:
         order = Order(
             country_id=country.id,
@@ -355,18 +356,10 @@ async def order_maker(async_db: AsyncSession) -> OrderMakerProtocol:
         )
         async_db.add(order)
         await async_db.flush()
-
-        if applicant_data:
-            applicant = Applicant(
-                first_name=applicant_data["first_name"],
-                last_name=applicant_data["last_name"],
-                gender=applicant_data["gender"],
-                email=applicant_data["email"],
-                order=order,
-            )
-            async_db.add(applicant)
-
+        order.number = f"{datetime.now().year}-{order.id:04d}"
+        attributes.flag_modified(order, "number")
         await async_db.commit()
+        await async_db.refresh(order)
         return order
 
     return inner

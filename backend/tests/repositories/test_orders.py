@@ -10,7 +10,8 @@ from app.schemas.order.admin import AdminOrderCreateSchema, AdminOrderUpdateSche
 from app.schemas.order.base import OrderStatusEnum
 from app.schemas.order.admin import AdminOrderFilterSchema
 from app.schemas.pagination import PageParamsSchema, PagedResponseSchema
-from tests.conftest import OrderMakerProtocol, CountryMakerProtocol, UrgencyMakerProtocol, VisaTypeMakerProtocol
+from tests.conftest import OrderMakerProtocol, CountryMakerProtocol, UrgencyMakerProtocol, VisaTypeMakerProtocol, \
+    VisaDurationMakerProtocol
 
 
 class TestOrdersRepository:
@@ -65,11 +66,11 @@ class TestOrdersRepository:
             orders_repo: OrdersRepository,
             order_maker: OrderMakerProtocol,
             country_maker: CountryMakerProtocol,
-            visa_duration_maker,
-            visa_type_maker,
-            test_individual,
-            urgency_maker,
-            test_user
+            visa_duration_maker: VisaDurationMakerProtocol,
+            visa_type_maker: VisaTypeMakerProtocol,
+            test_individual: User,
+            urgency_maker: UrgencyMakerProtocol,
+            test_user: User
     ) -> None:
         """Test that the paginated list is returned correctly"""
         country = await country_maker(name="Russia", alpha2="RU", alpha3="RUS")

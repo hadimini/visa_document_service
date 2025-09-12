@@ -6,7 +6,7 @@ from app.schemas.core import (
     CoreSchema
 )
 from app.schemas.order.base import (
-    BaseOrderPublicSchema,
+    BaseOrderListSchema,
     BaseOrderCreateSchema,
     BaseOrderUpdateSchema,
     BaseOrdersFilterSchema
@@ -14,12 +14,12 @@ from app.schemas.order.base import (
 from app.schemas.pagination import PagedResponseSchema
 
 
-class AdminOrderListSchema(BaseOrderPublicSchema):
+class AdminOrderListSchema(BaseOrderListSchema):
     client: ClientPublicSchema
 
 
 class AdminOrderDetailSchema(AdminOrderListSchema):
-    applicant: ApplicantPublicSchema
+    applicant: Optional[ApplicantPublicSchema] = None
 
 
 class AdminOrderCreateSchema(BaseOrderCreateSchema):
@@ -30,8 +30,8 @@ class AdminOrderUpdateSchema(BaseOrderUpdateSchema):
     client_id: Optional[int] = None
 
 
-class AdminOrderListSchema(PagedResponseSchema, CoreSchema):
-    items: list[AdminOrderDetailSchema]
+class AdminOrderPaginatedListSchema(PagedResponseSchema, CoreSchema):
+    items: list[AdminOrderListSchema]
 
 
 class AdminOrderFilterSchema(BaseOrdersFilterSchema):

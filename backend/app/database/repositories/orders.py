@@ -57,18 +57,11 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
         return result.scalars().one_or_none()
 
     async def create(self, *, data: AdminOrderCreateSchema, populate_client: bool = False) -> Order:
+        # TODO: assert country.available_for_order is True
+
         try:
-            # Create the order without the applicant field
             order = Order(**data.model_dump(exclude_unset=True, exclude={"applicant"}))
             self.db.add(order)
-            await self.db.flush()
-
-            # If there's applicant data, create the applicant
-            if data.applicant:
-                applicant_data = data.applicant.model_dump()
-                applicant = Applicant(**applicant_data, order_id=order.id)
-                self.db.add(applicant)
-
             await self.db.commit()
             order = await self.get_by_id(order_id=order.id, populate_client=populate_client)
             return order

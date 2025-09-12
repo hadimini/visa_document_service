@@ -48,15 +48,15 @@ class UpdatedAtSchemaMixin(BaseModel):
 
 
 class CompletedAtSchemaMixin(BaseModel):
-    completed_at: datetime
+    completed_at: Optional[datetime] = None
 
     @field_validator("completed_at")
-    def parse_completed_at(cls, value: datetime) -> str:
-        return value.strftime(STRFTIME_FORMAT)
+    def parse_completed_at(cls, value: datetime | None) -> str:
+        return value and value.strftime(STRFTIME_FORMAT)
 
     @field_validator('completed_at')
-    def default_completed_at(cls, value: datetime) -> datetime:
-        return value or datetime.now()
+    def default_completed_at(cls, value: datetime | None) -> datetime:
+        return value
 
 
 class DateTimeSchemaMixin(CreatedAtSchemaMixin, UpdatedAtSchemaMixin):

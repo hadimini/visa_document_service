@@ -40,20 +40,25 @@ class BaseOrderSchema(CoreSchema):
     visa_type_id: Optional[int] = None
 
 
-class BaseOrderPublicSchema(
+class BaseOrderListSchema(
     ArchivedAtSchemaMixin,
     DateTimeSchemaMixin,
     CompletedAtSchemaMixin,
     IDSchemaMixin,
-    BaseOrderSchema
+    # BaseOrderSchema
 ):
     MODEL_TYPE: str = Field(default_factory=lambda: Order.get_model_type())
+    status: OrderStatusEnum
+    number: str
     country: CountryReferencePublicSchema
     created_by: UserResponseSchema
     urgency: UrgencyResponseSchema
     visa_duration: VisaDurationPublicSchema
     visa_type: VisaTypeResponseSchema
-    applicant: ApplicantPublicSchema
+
+
+class BaseOrderPublicSchema(BaseOrderListSchema):
+    applicant: Optional[ApplicantPublicSchema] = None
 
 
 class BaseOrderCreateSchema(CoreSchema):
@@ -63,7 +68,6 @@ class BaseOrderCreateSchema(CoreSchema):
     urgency_id: int
     visa_duration_id: int
     visa_type_id: int
-    applicant: Optional[ApplicantCreateSchema] = None
 
 
 class BaseOrderUpdateSchema(BaseOrderSchema):

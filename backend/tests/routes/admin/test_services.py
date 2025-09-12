@@ -6,7 +6,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.audit import AuditRepository
-from app.models import LogEntry, Service, User, tariff_services, Tariff, TariffService
+from app.models import LogEntry, Service, User, Tariff, TariffService
 from app.schemas.core import STRFTIME_FORMAT
 from app.schemas.service import FeeTypeEnum, TariffServiceCreateSchema
 from app.services import jwt_service

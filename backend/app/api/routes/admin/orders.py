@@ -11,7 +11,7 @@ from app.models import LogEntry, Order, User
 from app.schemas.audit import LogEntryCreateSchema
 from app.schemas.order.admin import (
     AdminOrderFilterSchema,
-    AdminOrderListSchema,
+    AdminOrderPaginatedListSchema,
     AdminOrderDetailSchema,
     AdminOrderCreateSchema,
     AdminOrderUpdateSchema,
@@ -25,13 +25,13 @@ router = APIRouter()
 
 @router.get(
     path="",
-    response_model=AdminOrderListSchema,
+    response_model=AdminOrderPaginatedListSchema,
     name="admin:order-list",
     status_code=status.HTTP_200_OK,
 )
-async def order_list(
-        query_filters: AdminOrderFilterSchema,
-        page_params: PageParamsSchema,
+async def order_paginated_list(
+        query_filters: AdminOrderFilterSchema = Depends(),
+        page_params: PageParamsSchema = Depends(),
         orders_repo: OrdersRepository = Depends(get_repository(OrdersRepository)),
 ):
     result = await orders_repo.get_paginated_list(query_filters=query_filters, page_params=page_params)
