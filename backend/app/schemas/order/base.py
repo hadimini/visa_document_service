@@ -6,8 +6,7 @@ from pydantic import Field
 from app.models import Order
 from app.schemas.applicant import (
     ApplicantPublicSchema,
-    ApplicantCreateSchema,
-    ApplicantUpdateSchema
+    ApplicantCreateUpdateSchema
 )
 from app.schemas.core import (
     CoreSchema,
@@ -62,7 +61,6 @@ class BaseOrderPublicSchema(BaseOrderListSchema):
 
 
 class BaseOrderCreateSchema(CoreSchema):
-    status: Optional[OrderStatusEnum] = None
     country_id: int
     created_by_id: Optional[int] = None
     urgency_id: int
@@ -70,8 +68,13 @@ class BaseOrderCreateSchema(CoreSchema):
     visa_type_id: int
 
 
-class BaseOrderUpdateSchema(BaseOrderSchema):
-    applicant: Optional[ApplicantUpdateSchema] = None
+class BaseOrderUpdateSchema(CoreSchema):
+    status: OrderStatusEnum
+    country_id: int
+    urgency_id: int
+    visa_duration_id: int
+    visa_type_id: int
+    applicant: Optional[ApplicantCreateUpdateSchema] = None
 
 
 class BaseOrdersFilterSchema(BaseOrderSchema):

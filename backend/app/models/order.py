@@ -34,7 +34,7 @@ class Order(ArchivedAtMixin, CompletedAtMixin, CreatedAtMixin, IDIntMixin, Updat
         (STATUS_CANCELED, "Canceled"),
     )
 
-    status: Mapped[str] = mapped_column(ChoiceType(choices=STATUS_CHOICES), default=STATUS_NEW, server_default="new")
+    status: Mapped[str] = mapped_column(ChoiceType(choices=STATUS_CHOICES), default=STATUS_DRAFT, server_default="draft")
     number: Mapped[str] = mapped_column(String, nullable=True)
     # Foreign key fields
     country_id: Mapped[int] = mapped_column(

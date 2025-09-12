@@ -69,12 +69,11 @@ async def order_create(
         current_user: User = Depends(get_current_active_user)
 ):
     try:
-        data = AdminOrderCreateSchema(
-            status=OrderStatusEnum.DRAFT,
+        order_data = AdminOrderCreateSchema(
             created_by_id=current_user.id,
-            **data.model_dump(exclude_unset=True)
+            **data.model_dump(exclude={"created_by_id"}),
         )
-        order = await orders_repo.create(data=data, populate_client=True)
+        order = await orders_repo.create(data=order_data, populate_client=True)
 
         await audit_repo.create(
             data=LogEntryCreateSchema(
@@ -107,7 +106,7 @@ async def order_update(
         order = await orders_repo.update(order_id=order_id, data=data, populate_client=True)
 
         if not order:
-            raise NotFoundException(detail="Order not found")
+            raise NotFoundException()
 
         await audit_repo.create(
             data=LogEntryCreateSchema(
@@ -118,6 +117,10 @@ async def order_update(
             )
         )
         return order
+
+    except NotFoundException:
+        raise NotFoundException(detail="Order not found")
+
     except Exception as e:
         logger.error(f"Failed to update order {order_id}: {str(e)}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to update order")

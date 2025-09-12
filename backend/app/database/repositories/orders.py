@@ -60,7 +60,7 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
         # TODO: assert country.available_for_order is True
 
         try:
-            order = Order(**data.model_dump(exclude_unset=True, exclude={"applicant"}))
+            order = Order(**data.model_dump())
             self.db.add(order)
             await self.db.commit()
             order = await self.get_by_id(order_id=order.id, populate_client=populate_client)

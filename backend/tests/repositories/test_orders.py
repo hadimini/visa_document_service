@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.repositories.orders import OrdersRepository
 from app.models import Order, VisaDuration, Applicant, User
-from app.schemas.applicant import ApplicantCreateSchema, ApplicantGenderEnum, ApplicantUpdateSchema
+from app.schemas.applicant import ApplicantCreateUpdateSchema, ApplicantGenderEnum
 from app.schemas.order.admin import AdminOrderCreateSchema, AdminOrderUpdateSchema
 from app.schemas.order.base import OrderStatusEnum
 from app.schemas.order.admin import AdminOrderFilterSchema
@@ -251,7 +251,7 @@ class TestOrdersRepository:
         visa_duration = await visa_duration_maker(term=VisaDuration.TERM_1, entry=VisaDuration.SINGLE_ENTRY)
         visa_type = await visa_type_maker(name="Business")
         client = await test_individual.awaitable_attrs.individual_client
-        applicant_data = ApplicantCreateSchema(
+        applicant_data = ApplicantCreateUpdateSchema(
             first_name="John",
             last_name="Doe",
             email="john@example.com",
@@ -302,21 +302,19 @@ class TestOrdersRepository:
         visa_duration = await visa_duration_maker(term=VisaDuration.TERM_1, entry=VisaDuration.SINGLE_ENTRY)
         visa_type = await visa_type_maker(name="Business")
         client = await test_individual.awaitable_attrs.individual_client
-        applicant_data = ApplicantCreateSchema(
+        applicant_data = ApplicantCreateUpdateSchema(
             first_name="John",
             last_name="Doe",
             email="john@example.com",
             gender=ApplicantGenderEnum.MALE
         )
         order_data = AdminOrderCreateSchema(
-            status=OrderStatusEnum.NEW,
             country_id=1000,  # THIS CAUSES EXCEPTION
             client_id=client.id,
             created_by_id=test_user.id,
             urgency_id=urgency.id,
             visa_duration_id=visa_duration.id,
             visa_type_id=visa_type.id,
-            applicant=applicant_data,
         )
 
         with pytest.raises(IntegrityError):
