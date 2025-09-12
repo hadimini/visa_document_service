@@ -113,7 +113,6 @@ class TestAdminOrdersRoutes:
         )
 
         assert response.status_code == status.HTTP_200_OK
-        print("\n\n", response.json())
         assert response.json()["id"] == order.id
         assert response.json()["MODEL_TYPE"] == Order.get_model_type()
         assert response.json()["status"] == OrderStatusEnum.DRAFT
@@ -160,3 +159,24 @@ class TestAdminOrdersRoutes:
         assert response.json()["updated_at"] == order.updated_at.strftime(STRFTIME_FORMAT)
         assert response.json()["completed_at"] is None
         assert response.json()["archived_at"] is None
+
+    @pytest.mark.asyncio
+    async def test_get_by_id_not_found(
+            self,
+            app: FastAPI,
+            async_db: AsyncSession,
+            async_client: AsyncClient,
+            test_admin: User
+    ) -> None:
+        token_pair = jwt_service.create_token_pair(user=test_admin)
+        assert token_pair is not None
+
+        response = await async_client.get(
+            url=app.url_path_for("admin:order-detail", order_id=1000),
+            headers={
+                "Authorization": f"Bearer {token_pair.access}"
+            }
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert response.json()["detail"] == "Order not found"

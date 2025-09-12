@@ -50,6 +50,9 @@ async def order_detail(
 ):
     result = await orders_repo.get_by_id(order_id=order_id, populate_client=True)
 
+    if result is None:
+        raise NotFoundException(detail="Order not found")
+
     return result
 
 
