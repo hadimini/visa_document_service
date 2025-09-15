@@ -52,7 +52,8 @@ class ClientsRepository(BasePaginatedRepository[Client], BuildFiltersMixin):
         data: dict = {
             "name": new_client.name,
             "tariff_id": new_client.tariff_id,
-            "type": Client.TYPE_INDIVIDUAL
+            "type": Client.TYPE_INDIVIDUAL,
+            "email": new_client.email,
         }
 
         client = Client(**data)

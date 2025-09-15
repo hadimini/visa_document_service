@@ -101,6 +101,7 @@ class TestClientsRepository:
 
         assert client.id == client_in_db.id
         assert client.type == client_in_db.type
+        assert client.email == client_in_db.email
 
     @pytest.mark.asyncio
     async def test_get_by_id_not_found(self, clients_repo: ClientsRepository) -> None:
@@ -112,7 +113,12 @@ class TestClientsRepository:
     @pytest.mark.asyncio
     async def test_create_client(self, test_tariff, clients_repo: ClientsRepository) -> None:
         """Test client creation"""
-        data = ClientCreateSchema(name="Client ABC", type=ClientTypeEnum.INDIVIDUAL, tariff_id=test_tariff.id)
+        data = ClientCreateSchema(
+            name="Client ABC",
+            type=ClientTypeEnum.INDIVIDUAL,
+            tariff_id=test_tariff.id,
+            email="client@example.com"
+        )
         client = await clients_repo.create(new_client=data)
 
         assert client is not None

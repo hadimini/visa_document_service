@@ -153,6 +153,7 @@ async def client_maker(async_db: AsyncSession, test_tariff: Tariff):
                 name=name or f"Test Client {n}",
                 type=type,
                 tariff_id=test_tariff.id,
+                email=EmailStr("test_client_{}@example.com".format(n)),
             )
         )
         n += 1
@@ -205,6 +206,7 @@ async def test_individual(
     client = await clients_repo.create(
         new_client=ClientCreateSchema(
             tariff_id=test_tariff.id,
+            email=new_user.email,
             name=new_user.get_full_name(),
             type=Client.TYPE_INDIVIDUAL  # type: ignore[arg-type]
         )

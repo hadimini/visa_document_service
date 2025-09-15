@@ -25,6 +25,7 @@ class Client(IDIntMixin, CreatedAtMixin, UpdatedAtMixin, IsActiveMixin, Base):
     tariff_id: Mapped[int] = mapped_column(Integer, ForeignKey("tariffs.id", ondelete="RESTRICT"))
     name: Mapped[str] = mapped_column(String(100))
     type: Mapped[str] = mapped_column(ChoiceType(TYPE_CHOICES))
+    email: Mapped[str] = mapped_column(String(100), nullable=True)
 
     tariff: Mapped["Tariff"] = relationship(back_populates="clients")
 

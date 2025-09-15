@@ -1,9 +1,10 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path, status, BackgroundTasks
 
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
+from app.api.dependencies.order import get_order_service
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.orders import OrdersRepository
 from app.exceptions import NotFoundException
@@ -17,6 +18,7 @@ from app.schemas.order.admin import (
     AdminOrderUpdateSchema,
 )
 from app.schemas.pagination import PageParamsSchema
+from app.services.order import OrderService
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -96,24 +98,19 @@ async def order_create(
 )
 async def order_update(
         data: AdminOrderUpdateSchema,
+        bg_tasks: BackgroundTasks,
         order_id: int = Path(..., gt=0, description="Order ID must be a positive integer"),
-        orders_repo: OrdersRepository = Depends(get_repository(OrdersRepository)),
-        audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
-        current_user: User = Depends(get_current_active_user)
+        order_service: OrderService = Depends(get_order_service),
+        current_user: User = Depends(get_current_active_user),
+
 ):
     try:
-        order = await orders_repo.update(order_id=order_id, data=data, populate_client=True)
-
-        if not order:
-            raise NotFoundException()
-
-        await audit_repo.create(
-            data=LogEntryCreateSchema(
-                user_id=current_user.id,
-                action=LogEntry.ACTION_UPDATE,
-                model_type=Order.get_model_type(),
-                target_id=order.id
-            )
+        order = await order_service.update_order(
+            order_id=order_id,
+            data=data,
+            user_id=current_user.id,
+            bg_tasks=bg_tasks,
+            populate_client=True
         )
         return order
 

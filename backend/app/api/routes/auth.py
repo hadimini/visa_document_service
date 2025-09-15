@@ -56,6 +56,7 @@ async def register(
     new_client = ClientCreateSchema(
         tariff_id=default_tariff.id,
         name=f"{new_user.first_name} {new_user.last_name}",
+        email=new_user.email,
         type=Client.TYPE_INDIVIDUAL  # type: ignore[arg-type]
     )
     client = await clients_repo.create(new_client=new_client)

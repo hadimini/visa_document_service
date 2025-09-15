@@ -60,6 +60,7 @@ class TestRegister:
 
             created_client = await clients_repo.get_by_id(client_id=user_in_db.individual_client_id)
             assert created_client.name == user_in_db.full_name
+            assert created_client.email == user_in_db.email
 
             log_entries = await audit_repo.get_for_user(user_id=user_in_db.id)
             assert len(log_entries) == 1

@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Annotated, Optional
 
 from fastapi import Query
-from pydantic import Field, StringConstraints
+from pydantic import Field, StringConstraints, EmailStr
 
 from app.models import Client
 from app.schemas.core import CoreSchema, IDSchemaMixin
@@ -24,6 +24,7 @@ class ClientBaseSchema(CoreSchema):
 
 class ClientCreateSchema(CoreSchema):
     tariff_id: int
+    email: EmailStr
     name: Annotated[str, StringConstraints(min_length=3, max_length=100, pattern="^[a-zA-Z0-9 ]+$")]
     type: ClientTypeEnum
 
