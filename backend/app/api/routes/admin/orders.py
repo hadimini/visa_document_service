@@ -16,7 +16,6 @@ from app.schemas.order.admin import (
     AdminOrderCreateSchema,
     AdminOrderUpdateSchema,
 )
-from app.schemas.order.base import OrderStatusEnum
 from app.schemas.pagination import PageParamsSchema
 
 logger = logging.getLogger(__name__)
