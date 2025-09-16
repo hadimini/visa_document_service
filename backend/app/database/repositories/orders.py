@@ -18,12 +18,35 @@ logger = logging.getLogger(__name__)
 
 
 class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
+    """Repository for managing orders in the database.
+
+    This class provides methods to create, update, retrieve, and filter orders.
+
+    Attributes:
+        db (AsyncSession): The asynchronous database session used for operations.
+    """
 
     def __init__(self, db: AsyncSession) -> None:
+        """Initialize the OrdersRepository with a database session.
+
+        Args:
+            db (AsyncSession): The asynchronous database session.
+        """
         super().__init__(db=db, model=Order)
 
     def build_filters(self, *, query_filters: AdminOrderFilterSchema) -> list:
-        """Convert filter schema to SQLAlchemy filter conditions"""
+        """Convert filter schema to SQLAlchemy filter conditions.
+
+        This method constructs a list of filter conditions based on the provided
+        AdminOrderFilterSchema.
+
+        Args:
+            query_filters (AdminOrderFilterSchema): The filter schema containing the attributes to filter by.
+
+        Returns:
+            list: A list of SQLAlchemy filter conditions.
+        """
+
         filters: list[ClauseElement] = list()
 
         for attr in {
@@ -44,6 +67,19 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
             order_id: int,
             populate_client: Optional[bool] = False
     ) -> Order | None:
+        """Retrieve an order by its ID.
+
+        This method fetches an order from the database, optionally populating
+        the associated client data.
+
+        Args:
+            order_id (int): The ID of the order to retrieve.
+            populate_client (Optional[bool]): Whether to include client data in
+                the result. Defaults to False.
+
+        Returns:
+            Order | None: The retrieved order, or None if not found.
+        """
         options = [
             joinedload(Order.country),
             joinedload(Order.created_by),
@@ -62,6 +98,23 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
         return result.scalars().one_or_none()
 
     async def create(self, *, data: AdminOrderCreateSchema, populate_client: bool = False) -> Order:
+        """Create a new order in the database.
+
+        This method adds a new order based on the provided data schema and
+        commits it to the database.
+
+        Args:
+            data (AdminOrderCreateSchema): The data schema containing order
+                details.
+            populate_client (bool): Whether to include client data in the
+                returned order. Defaults to False.
+
+        Returns:
+            Order: The created order instance.
+
+        Raises:
+            Exception: If the order creation fails.
+        """
         # TODO: assert country.available_for_order is True
 
         try:
@@ -82,6 +135,22 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
             data: AdminOrderUpdateSchema,
             populate_client: bool = False
     ) -> Order | None:
+        """Update an existing order in the database.
+
+        This method modifies an existing order based on the provided data
+        schema and commits the changes to the database.
+
+        Args:
+            order_id (int): The ID of the order to update.
+            data (AdminOrderUpdateSchema): The data schema containing updated
+                order details.
+            populate_client (bool): Whether to include client data in the
+                returned order. Defaults to False.
+
+        Returns:
+            Order | None: The updated order instance, or None if not
+        """
+
         try:
             order = await self.get_by_id(order_id=order_id)
 
