@@ -77,5 +77,11 @@ class Service(ArchivedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base)
 
 @event.listens_for(Service, "before_update")
 def set_updated_at(mapper, connection, target):
-    """Automatically set updated_at on any update"""
+    """Automatically set the updated_at timestamp before any update to the Service instance.
+
+    Args:
+        mapper: The mapper associated with the Service class.
+        connection: The database connection being used.
+        target: The instance of the Service being updated.
+    """
     target.updated_at = datetime.now()
