@@ -35,6 +35,19 @@ async def order_paginated_list(
         page_params: PageParamsSchema = Depends(),
         orders_repo: OrdersRepository = Depends(get_repository(OrdersRepository)),
 ):
+    """Retrieve a paginated list of orders based on filter criteria.
+
+    This endpoint allows administrators to fetch a list of orders with optional
+    filtering and pagination.
+
+    Args:
+        query_filters (AdminOrderFilterSchema): The filters to apply to the order list.
+        page_params (PageParamsSchema): The pagination parameters (page number and size).
+        orders_repo (OrdersRepository): The repository for accessing order data.
+
+    Returns:
+        AdminOrderPaginatedListSchema: A paginated list of orders.
+    """
     result = await orders_repo.get_paginated_list(query_filters=query_filters, page_params=page_params)
     return result
 
@@ -49,6 +62,21 @@ async def order_detail(
         order_id: int = Path(..., gt=0, description="Order ID must be a positive integer"),
         orders_repo: OrdersRepository = Depends(get_repository(OrdersRepository))
 ):
+    """Retrieve the details of a specific order by its ID.
+
+    This endpoint allows administrators to fetch detailed information about a specific
+    order.
+
+    Args:
+        order_id (int): The ID of the order to retrieve.
+        orders_repo (OrdersRepository): The repository for accessing order data.
+
+    Returns:
+        AdminOrderDetailSchema: The details of the requested order.
+
+    Raises:
+        NotFoundException: If the order with the specified ID does not exist.
+    """
     result = await orders_repo.get_by_id(order_id=order_id, populate_client=True)
 
     if result is None:
@@ -69,6 +97,22 @@ async def order_create(
         audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
         current_user: User = Depends(get_current_active_user)
 ):
+    """Create a new order in the system.
+
+    This endpoint allows administrators to create a new order and log the action.
+
+    Args:
+        data (AdminOrderCreateSchema): The data schema containing order details.
+        orders_repo (OrdersRepository): The repository for accessing order data.
+        audit_repo (AuditRepository): The repository for logging actions.
+        current_user (User): The currently authenticated user.
+
+    Returns:
+        AdminOrderDetailSchema: The details of the created order.
+
+    Raises:
+        HTTPException: If the order creation fails.
+    """
     try:
         order_data = AdminOrderCreateSchema(
             created_by_id=current_user.id,
@@ -104,6 +148,25 @@ async def order_update(
         current_user: User = Depends(get_current_active_user),
 
 ):
+    """Update an existing order in the system.
+
+    This endpoint allows administrators to modify the details of an existing order.
+    It also supports background tasks for additional processing if needed.
+
+    Args:
+        data (AdminOrderUpdateSchema): The data schema containing updated order details.
+        bg_tasks (BackgroundTasks): Background tasks to be executed after the response is sent.
+        order_id (int): The ID of the order to update.
+        order_service (OrderService): The service for handling order-related operations.
+        current_user (User): The currently authenticated user.
+
+    Returns:
+        AdminOrderDetailSchema: The details of the updated order.
+
+    Raises:
+        NotFoundException: If the order with the specified ID does not exist.
+        HTTPException: If the order update fails for any reason.
+    """
     try:
         order = await order_service.update_order(
             order_id=order_id,
