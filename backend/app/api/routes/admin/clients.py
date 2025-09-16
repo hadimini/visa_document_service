@@ -19,6 +19,19 @@ async def client_list(
         page_params: PageParamsSchema = Depends(),
         clients_repository: ClientsRepository = Depends(get_repository(ClientsRepository)),
 ):
+    """Retrieve a paginated list of clients based on filter criteria.
+
+    This endpoint allows administrators to fetch a list of clients with optional
+    filtering and pagination.
+
+    Args:
+        query_filters (ClientFilterSchema): The filters to apply to the client list.
+        page_params (PageParamsSchema): The pagination parameters (page number and size).
+        clients_repository (ClientsRepository): The repository for accessing client data.
+
+    Returns:
+        ClientListResponseSchema: A paginated list of clients.
+    """
     result = await clients_repository.get_paginated_list(query_filters=query_filters, page_params=page_params)
     return result
 
@@ -32,6 +45,21 @@ async def client_detail(
         client_id: int,
         clients_repository: ClientsRepository = Depends(get_repository(ClientsRepository)),
 ):
+    """Retrieve the details of a specific client by their ID.
+
+    This endpoint allows administrators to fetch detailed information about a specific
+    client.
+
+    Args:
+        client_id (int): The ID of the client to retrieve.
+        clients_repository (ClientsRepository): The repository for accessing client data.
+
+    Returns:
+        ClientPublicSchema: The details of the requested client.
+
+    Raises:
+        NotFoundException: If the client with the specified ID does not exist.
+    """
     client = await clients_repository.get_by_id(client_id=client_id)
 
     if client is None:
