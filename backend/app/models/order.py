@@ -18,6 +18,29 @@ if TYPE_CHECKING:
 
 
 class Order(ArchivedAtMixin, CompletedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base):
+    """Represents an order in the system.
+
+    This class defines the structure of an order, including its status, relationships
+    with other entities, and methods for managing order data.
+
+    Attributes:
+        status (Mapped[str]): The current status of the order.
+        number (Mapped[str]): The unique identifier for the order.
+        country_id (Mapped[int]): Foreign key referencing the associated country.
+        client_id (Mapped[int]): Foreign key referencing the associated client.
+        created_by_id (Mapped[int]): Foreign key referencing the user who created the order.
+        urgency_id (Mapped[int]): Foreign key referencing the urgency level of the order.
+        visa_duration_id (Mapped[int]): Foreign key referencing the duration of the visa.
+        visa_type_id (Mapped[int]): Foreign key referencing the type of visa.
+        country (Mapped[Country]): Relationship to the Country model.
+        client (Mapped[Client]): Relationship to the Client model.
+        created_by (Mapped[User]): Relationship to the User model.
+        applicant (Mapped[Applicant]): Relationship to the Applicant model.
+        urgency (Mapped[Urgency]): Relationship to the Urgency model.
+        visa_duration (Mapped[VisaDuration]): Relationship to the VisaDuration model.
+        visa_type (Mapped[VisaType]): Relationship to the VisaType model.
+    """
+
     __tablename__ = "orders"
 
     STATUS_DRAFT = "draft"
@@ -76,10 +99,16 @@ class Order(ArchivedAtMixin, CompletedAtMixin, CreatedAtMixin, IDIntMixin, Updat
     visa_type: Mapped["VisaType"] = relationship()
 
     def __repr__(self) -> str:
+        """Return a string representation of the Order instance."""
         return f"<Order {self.number}>"
 
     @staticmethod
     def get_model_type() -> str:
+        """Return the model type as a string.
+
+        Returns:
+            str: The type of the model, which is 'order'.
+        """
         return "order"
 
 
