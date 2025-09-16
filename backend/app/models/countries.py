@@ -37,7 +37,7 @@ class Country(IDIntMixin, Base):
         super().__init__(**kwargs)
         self.visa_data = None
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"<Country {self.id}>"
 
     @staticmethod

@@ -13,7 +13,7 @@ class BlackListToken(CreatedAtMixin, Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, index=True, default=uuid.uuid4)
     expire: Mapped[datetime]
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"<BlackListToken {self.id}>"
 
     @staticmethod

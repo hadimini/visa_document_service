@@ -59,7 +59,7 @@ class User(CreatedAtMixin, IDIntMixin, IsActiveMixin, UpdatedAtMixin, Base):
         foreign_keys="Order.created_by_id",
     )
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"<User {self.id}>"
 
     @staticmethod

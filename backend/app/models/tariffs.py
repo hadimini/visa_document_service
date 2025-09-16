@@ -23,7 +23,7 @@ class Tariff(IDIntMixin, Base):
         foreign_keys="TariffService.tariff_id"
     )
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return "<Tariff {}>".format(self.id)
 
     @staticmethod

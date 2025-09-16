@@ -25,7 +25,7 @@ class VisaType(IDIntMixin, Base):
         foreign_keys="CountryVisa.visa_type_id"
     )
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"<VisaType: {self.name}>"
 
     @staticmethod

@@ -64,7 +64,7 @@ class VisaDuration(IDIntMixin, Base):
         back_populates="visa_durations",
     )
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f'<VisaDuration(name={self.term}, term={self.entry})>'
 
     @staticmethod

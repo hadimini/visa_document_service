@@ -18,7 +18,7 @@ class Urgency(IDIntMixin, Base):
     # Relations
     services: Mapped[list["Service"]] = relationship(back_populates="urgency", foreign_keys="Service.urgency_id")
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"<Urgency {self.id}>"
 
     @staticmethod

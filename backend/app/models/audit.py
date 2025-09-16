@@ -48,7 +48,7 @@ class LogEntry(IDIntMixin, Base):
 
     user: Mapped["User"] = relationship(back_populates="entry_logs")
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return "<LogEntry {}>".format(self.id)
 
     @staticmethod

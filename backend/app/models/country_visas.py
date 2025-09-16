@@ -31,7 +31,7 @@ class CountryVisa(IDIntMixin, IsActiveMixin, Base):
         super().__init__(**kwargs)
         self.duration_data = None
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"<CountryVisa {self.id}>"
 
     @staticmethod

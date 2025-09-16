@@ -13,6 +13,22 @@ if TYPE_CHECKING:
 
 
 class Service(ArchivedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base):
+    """Represents a service offered, including its fee type and associated entities.
+
+        Attributes:
+            name (Mapped[str]): The name of the service.
+            fee_type (Mapped[str]): The type of fee associated with the service (consular or general).
+            country_id (Mapped[int]): Foreign key referencing the associated country.
+            urgency_id (Mapped[int]): Foreign key referencing the associated urgency.
+            visa_duration_id (Mapped[int]): Foreign key referencing the associated visa duration.
+            visa_type_id (Mapped[int]): Foreign key referencing the associated visa type.
+            country (Mapped[Country]): Relationship to the Country model.
+            tariff_services (Mapped[list[TariffService]]): Relationship to the TariffService model.
+            urgency (Mapped[Urgency]): Relationship to the Urgency model.
+            visa_duration (Mapped[VisaDuration]): Relationship to the VisaDuration model.
+            visa_type (Mapped[VisaType]): Relationship to the VisaType model.
+        """
+
     __tablename__ = "services"
 
     FEE_TYPE_CONSULAR = "consular"
@@ -51,7 +67,7 @@ class Service(ArchivedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base)
     visa_duration: Mapped["VisaDuration"] = relationship(back_populates="services")
     visa_type: Mapped["VisaType"] = relationship(back_populates="services")
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         return f"<Service {self.id}>"
 
     @staticmethod
