@@ -11,17 +11,46 @@ from app.tasks import task_notify_on_order_status_update
 
 
 class OrderService:
+    """Service class for managing orders, including creation and updates.
+
+        This class provides methods to create and update orders, as well as to log
+        actions and send notifications when order statuses change.
+
+        Attributes:
+            orders_repo (OrdersRepository): Repository for accessing order data.
+            audit_repo (AuditRepository): Repository for logging actions.
+            notification_service (NotificationService): Service for handling notifications.
+        """
+
     def __init__(
             self,
             orders_repo: OrdersRepository,
             audit_repo: AuditRepository,
             notification_service: NotificationService,
     ):
+        """Initialize the OrderService with the necessary repositories and services.
+
+        Args:
+            orders_repo (OrdersRepository): The repository for accessing order data.
+            audit_repo (AuditRepository): The repository for logging actions.
+            notification_service (NotificationService): The service for handling notifications.
+        """
         self.orders_repo = orders_repo
         self.audit_repo = audit_repo
         self.notification_service = notification_service
 
     async def create_order(self, data: AdminOrderCreateSchema) -> Order:
+        """Create a new order in the system.
+
+        This method adds a new order based on the provided data schema and
+        commits it to the database.
+
+        Args:
+            data (AdminOrderCreateSchema): The data schema containing order details.
+
+        Returns:
+            Order: The created order instance.
+        """
         ...
 
     async def update_order(
@@ -34,6 +63,24 @@ class OrderService:
             populate_client: bool = False,
 
     ) -> Order:
+        """Update an existing order in the system.
+
+        This method modifies an existing order based on the provided data schema
+        and logs the action. It also sends a notification if the order status changes.
+
+        Args:
+            order_id (int): The ID of the order to update.
+            data (AdminOrderUpdateSchema): The data schema containing updated order details.
+            user_id (int): The ID of the user making the update.
+            bg_tasks (BackgroundTasks): Background tasks to be executed after the response is sent.
+            populate_client (bool): Whether to include client data in the returned order. Defaults to False.
+
+        Returns:
+            Order: The updated order instance.
+
+        Raises:
+            NotFoundException: If the order with the specified ID does not exist.
+        """
         current_order = await self.orders_repo.get_by_id(order_id=order_id)
 
         if not current_order:
