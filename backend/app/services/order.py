@@ -1,7 +1,10 @@
+from typing import Any
+
 from fastapi import BackgroundTasks
 
 from app.database.repositories.audit import AuditRepository
 from app.database.repositories.orders import OrdersRepository
+from app.database.repositories.order_services import OrderServicesRepository
 from app.exceptions import NotFoundException
 from app.models import Order, LogEntry
 from app.schemas.audit import LogEntryCreateSchema
@@ -27,6 +30,7 @@ class OrderService:
             orders_repo: OrdersRepository,
             audit_repo: AuditRepository,
             notification_service: NotificationService,
+            order_services_repo: OrderServicesRepository
     ):
         """Initialize the OrderService with the necessary repositories and services.
 
@@ -38,6 +42,7 @@ class OrderService:
         self.orders_repo = orders_repo
         self.audit_repo = audit_repo
         self.notification_service = notification_service
+        self.order_services_repo = order_services_repo
 
     async def create_order(self, data: AdminOrderCreateSchema) -> Order:
         """Create a new order in the system.
@@ -107,3 +112,9 @@ class OrderService:
             bg_tasks.add_task(task_notify_on_order_status_update, updated_order, old_status, updated_order.status)
 
         return updated_order
+
+    async def get_order_services(self, *, order_id: int) -> dict[str, Any]:
+        if not await self.orders_repo.get_by_id(order_id=order_id):
+            raise NotFoundException(detail="Order not found")
+
+        return await self.order_services_repo.get_for_order(order_id=order_id)
