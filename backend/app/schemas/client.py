@@ -16,7 +16,6 @@ class ClientTypeEnum(str, Enum):
 
 
 class ClientBaseSchema(CoreSchema):
-    MODEL_TYPE: str = Field(default_factory=lambda: Client.get_model_type())
     tariff: Optional[TariffPublicSchema] = None
     name: Optional[str] = None
     type: Optional[ClientTypeEnum] = None
@@ -30,7 +29,7 @@ class ClientCreateSchema(CoreSchema):
 
 
 class ClientPublicSchema(IDSchemaMixin, ClientBaseSchema):
-    pass
+    MODEL_TYPE: str = Field(default_factory=lambda: Client.get_model_type())
 
 
 class ClientFilterSchema(CoreSchema):

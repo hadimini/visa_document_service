@@ -9,7 +9,7 @@ from sqlalchemy.sql.elements import ClauseElement
 
 from app.database.repositories.base import BasePaginatedRepository
 from app.database.repositories.mixins import BuildFiltersMixin
-from app.models import Order, Applicant
+from app.models import Order, Applicant, Client
 from app.schemas.order.admin import AdminOrderCreateSchema, AdminOrderUpdateSchema
 from app.schemas.order.admin import AdminOrderFilterSchema
 
@@ -90,7 +90,7 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
         statement = select(Order)
 
         if populate_client:
-            options.append(joinedload(Order.client))
+            options.append(joinedload(Order.client).joinedload(Client.tariff))
 
         statement = statement.options(*options).where(Order.id == order_id)
         result = await self.db.execute(statement)
@@ -119,6 +119,13 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
         try:
             order = Order(**data.model_dump())
             self.db.add(order)
+            # sends the INSERT for the new Order so the DB assigns server-side defaults (id, created_at) and the ORM knows those values.
+            await self.db.flush()
+            # refresh: reloads the instance with any server-generated values (if needed).
+            await self.db.refresh(order)
+            order.number = f"{order.created_at.year}-{order.id:04d}"
+            # Second flush: sends an UPDATE (or includes the changed column) to persist order.number in the DB so the value is stored before the commit completes.
+            await self.db.flush()
             await self.db.commit()
             order = await self.get_by_id(order_id=order.id, populate_client=populate_client)
             return order

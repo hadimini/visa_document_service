@@ -7,7 +7,6 @@ from app.schemas.core import CoreSchema, IDSchemaMixin
 
 
 class TariffBaseSchema(CoreSchema):
-    MODEL_TYPE: str = Field(default_factory=lambda: Tariff.get_model_type())
     name: Annotated[str, StringConstraints(min_length=3, max_length=100)] | None = None
     is_default: bool = False
 
@@ -18,4 +17,4 @@ class TariffCreateSchema(CoreSchema):
 
 
 class TariffPublicSchema(IDSchemaMixin, TariffBaseSchema):
-    pass
+    MODEL_TYPE: str = Field(default_factory=lambda: Tariff.get_model_type())

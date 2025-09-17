@@ -7,8 +7,7 @@ STRFTIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 class CoreSchema(BaseModel):
-    class Config:
-        from_attributes = True
+    model_config={"from_attributes": True}
 
 
 class IDSchemaMixin(BaseModel):
@@ -16,6 +15,7 @@ class IDSchemaMixin(BaseModel):
 
 
 class ArchivedAtSchemaMixin(BaseModel):
+    model_config = {"from_attributes": True}
     archived_at: Optional[datetime] = None
 
     @field_validator("archived_at")
@@ -24,6 +24,7 @@ class ArchivedAtSchemaMixin(BaseModel):
 
 
 class CreatedAtSchemaMixin(BaseModel):
+    model_config = {"from_attributes": True}
     created_at: datetime
 
     @field_validator("created_at")
@@ -36,6 +37,7 @@ class CreatedAtSchemaMixin(BaseModel):
 
 
 class UpdatedAtSchemaMixin(BaseModel):
+    model_config = {"from_attributes": True}
     updated_at: datetime
 
     @field_validator("updated_at")
@@ -48,6 +50,7 @@ class UpdatedAtSchemaMixin(BaseModel):
 
 
 class CompletedAtSchemaMixin(BaseModel):
+    model_config = {"from_attributes": True}
     completed_at: Optional[datetime] = None
 
     @field_validator("completed_at")
