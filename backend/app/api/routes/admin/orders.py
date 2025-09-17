@@ -17,6 +17,7 @@ from app.schemas.order.admin import (
     AdminOrderCreateSchema,
     AdminOrderUpdateSchema,
 )
+from app.schemas.order_service import OrderServicesDataSchema
 from app.schemas.pagination import PageParamsSchema
 from app.services.order import OrderService
 
@@ -183,3 +184,44 @@ async def order_update(
     except Exception as e:
         logger.error(f"Failed to update order {order_id}: {str(e)}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to update order")
+
+
+@router.get(
+    path="/{order_id}/services",
+    name="admin:order-service-list",
+    response_model=OrderServicesDataSchema,
+    status_code=status.HTTP_200_OK,
+)
+async def orders_service_list(
+        order_id: int = Path(..., gt=0, description="Order ID must be a positive integer"),
+        orders_repo: OrdersRepository = Depends(get_repository(OrdersRepository)),
+        order_service: OrderService = Depends(get_order_service),
+):
+    """Get services related to an order.
+
+    Retrieves the services attached and available for a specified order ID.
+    Returns HTTP 200 with a JSON object containing two lists:
+     - **"attached"**: services currently attached to the order.
+     - **"available"**: services that can be attached.
+
+    Parameters:
+        order_id : int
+            Path parameter. ** Must be a positive integer.**
+        order_service : OrderService
+            Dependency-injected service used to retrieve attached and available services.
+
+    Returns
+    -------
+    dict
+        JSON object with keys "attatched" and "available", each mapping to a list of service objects.
+
+    Raises
+    ------
+    NotFoundException
+        Raised when no order with the given ID exists.
+    """
+    if await orders_repo.get_by_id(order_id=order_id) is None:
+        raise NotFoundException(detail="Order not found")
+
+    result = await order_service.get_order_services(order_id=order_id)
+    return result
