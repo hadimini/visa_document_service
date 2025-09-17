@@ -5,8 +5,9 @@ from app.models.countries import Country
 from app.models.country_visas import CountryVisa
 from app.models.m2m_country_visa_duration import country_visa_duration
 from app.models.order import Order
+from app.models.order_service import OrderService
 from app.models.services import Service
-from app.models.tariff_services import TariffService
+from app.models.tariff_service import TariffService
 from app.models.tariffs import Tariff
 from app.models.tokens import BlackListToken
 from app.models.urgencies import Urgency
