@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Integer, Numeric, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.helpers import calculate_tax
 from app.models.base import Base
 from app.models.mixins import ArchivedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin
 
@@ -18,7 +19,7 @@ class TariffService(IDIntMixin, CreatedAtMixin, UpdatedAtMixin, ArchivedAtMixin,
     )
 
     price: Mapped[Decimal] = mapped_column(Numeric(10, 2))  # Net price
-    tax: Mapped[Decimal] = mapped_column(Numeric(10, 2))  # Tax amount
+    tax: Mapped[Decimal] = mapped_column(Numeric(10, 2))  # Tax / 100
     tax_amount: Mapped[Decimal] = mapped_column(Numeric(10, 2))  # Tax amount
     total: Mapped[Decimal] = mapped_column(Numeric(10, 2))  # Total
 
@@ -42,7 +43,7 @@ class TariffService(IDIntMixin, CreatedAtMixin, UpdatedAtMixin, ArchivedAtMixin,
     @staticmethod
     def calculate_tax(price: Decimal, tax: Decimal) -> Decimal:
         """Calculate tax based on price and tax"""
-        return price * tax
+        return calculate_tax(price, tax)
 
     @staticmethod
     def get_model_type() -> str:

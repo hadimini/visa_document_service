@@ -1,4 +1,5 @@
 import re
+from decimal import Decimal
 from urllib.parse import urlparse, parse_qs
 
 
@@ -12,3 +13,7 @@ def fetch_url_param_value(*, url: str, param: str) -> str:
     parsed = urlparse(url)
     value = parse_qs(parsed.query)[param][0]
     return value
+
+
+def calculate_tax(price: Decimal, tax: Decimal) -> Decimal:
+    return price * tax
