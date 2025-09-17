@@ -13,7 +13,6 @@ from app.models import Order, Applicant
 from app.schemas.order.admin import AdminOrderCreateSchema, AdminOrderUpdateSchema
 from app.schemas.order.admin import AdminOrderFilterSchema
 
-
 logger = logging.getLogger(__name__)
 
 
