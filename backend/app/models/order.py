@@ -14,7 +14,7 @@ from app.models.mixins import (
 )
 
 if TYPE_CHECKING:
-    from app.models import Applicant, Client, Country, User, Urgency, VisaDuration, VisaType
+    from app.models import Applicant, Client, Country, OrderService, User, Urgency, VisaDuration, VisaType
 
 
 class Order(ArchivedAtMixin, CompletedAtMixin, CreatedAtMixin, IDIntMixin, UpdatedAtMixin, Base):
@@ -86,13 +86,18 @@ class Order(ArchivedAtMixin, CompletedAtMixin, CreatedAtMixin, IDIntMixin, Updat
     )
 
     # Relationships
-    country: Mapped["Country"] = relationship(back_populates="orders")
-    client: Mapped["Client"] = relationship(back_populates="orders")
-    created_by: Mapped["User"] = relationship(back_populates="orders")
     applicant: Mapped["Applicant"] = relationship(
         back_populates="order",
         uselist=False,
         cascade="all, delete-orphan"
+    )
+    client: Mapped["Client"] = relationship(back_populates="orders")
+    country: Mapped["Country"] = relationship(back_populates="orders")
+    created_by: Mapped["User"] = relationship(back_populates="orders")
+    order_services: Mapped[list["OrderService"]] = relationship(
+        back_populates="order",
+        foreign_keys="OrderService.order_id",
+        cascade="all, delete-orphan",
     )
     urgency: Mapped["Urgency"] = relationship()
     visa_duration: Mapped["VisaDuration"] = relationship()
@@ -110,9 +115,3 @@ class Order(ArchivedAtMixin, CompletedAtMixin, CreatedAtMixin, IDIntMixin, Updat
             str: The type of the model, which is 'order'.
         """
         return "order"
-
-
-@event.listens_for(Order, "after_insert")
-def set_number(mapper, connection, target):
-    """Automatically set number on order creation"""
-    target.number = f"{target.created_at.year}-{target.id:04d}"
