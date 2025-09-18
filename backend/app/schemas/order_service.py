@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Optional
 
-from pydantic import Field
+from pydantic import Field, ConfigDict
 
 from app.models import OrderService, Service, TariffService
 from app.schemas.core import CoreSchema, IDSchemaMixin
@@ -41,3 +41,11 @@ class OrderServicesDataSchema(CoreSchema):
 
 class OrderServicesUpdateSchema(CoreSchema):
     tariff_services_ids: Optional[list[int]] = None
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "tariff_services_ids": [1, 2, 3]
+            }
+        }
+    )
