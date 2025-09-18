@@ -215,16 +215,23 @@ async def order_service_list(
     dict
         JSON object with keys "attatched" and "available", each mapping to a list of service objects.
 
-    Raises
-    ------
-    NotFoundException
-        Raised when no order with the given ID exists.
+    Raises:
+    _______
+        HTTPException 404: If the specified order does not exist.
+        HTTPException 400: If there is an error updating the order services.
     """
-    if await orders_repo.get_by_id(order_id=order_id) is None:
+    try:
+        if await orders_repo.get_by_id(order_id=order_id) is None:
+            raise NotFoundException()
+
+        result = await order_service.get_order_services(order_id=order_id)
+        return result
+    except NotFoundException:
         raise NotFoundException(detail="Order not found")
 
-    result = await order_service.get_order_services(order_id=order_id)
-    return result
+    except Exception as e:
+        logger.error(f"Failed to get services for order {order_id}: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to update order services")
 
 
 @router.put(
@@ -239,9 +246,42 @@ async def order_service_update(
         orders_repo: OrdersRepository = Depends(get_repository(OrdersRepository)),
         order_service: OrderService = Depends(get_order_service),
 ):
-    """TODO DOCSTRING"""
-    if await orders_repo.get_by_id(order_id=order_id) is None:
+    """
+    Update services for an existing order.
+
+    Replaces all currently attached services with the specified tariff services.
+    Returns the updated list of both attached and available services for the order.
+
+    Args:
+        order_id: ID of the order to update services for (path parameter, must be positive integer).
+        data: Request body containing tariff services IDs to attach to the order.
+
+    Returns:
+        OrderServicesDataSchema: Object containing:
+            - attached: list of services currently attached to the order.
+            - available: list of services available for attachment based on order criteria.
+
+    Raises:
+    ______
+        HTTPException 404: If the specified order does not exist.
+        HTTPException 400: If there is an error updating the order services.
+
+    Example:
+        PUT /admin/orders/123/services
+        {
+            "tariff_services_ids": [1, 2, 3]
+        }
+    """
+    try:
+        if await orders_repo.get_by_id(order_id=order_id) is None:
+            raise NotFoundException()
+
+        result = await order_service.update_order_services(order_id=order_id, data=data)
+        return result
+
+    except NotFoundException:
         raise NotFoundException(detail="Order not found")
 
-    result = await order_service.update_order_services(order_id=order_id, data=data)
-    return result
+    except Exception as e:
+        logger.error(f"Failed to update services for order {order_id}: {str(e)}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to update order services")
