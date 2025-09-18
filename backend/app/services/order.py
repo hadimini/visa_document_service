@@ -115,12 +115,36 @@ class OrderService:
         return updated_order
 
     async def get_order_services(self, *, order_id: int) -> dict[str, Any]:
+        """
+        Retrieve all services for a specific order, including attached and available services.
+
+        This method fetches:
+        - Services already attached to the order
+        - Services available for attachment based on order criteria and client's tariff
+
+        Args:
+            order_id: ID of the order to retrieve services for
+        Returns:
+            Dictionary with two keys:
+            - 'attached': List of OrderService objects currently attached to the order
+            - 'available': List of available services with tariff pricing information
+        """
         if not await self.orders_repo.get_by_id(order_id=order_id):
             raise NotFoundException(detail="Order not found")
 
         return await self.order_services_repo.get_for_order(order_id=order_id)
 
     async def update_order_services(self, *, order_id: int, data: OrderServicesUpdateSchema) -> dict[str, Any]:
+        """
+        Update services for a specific order and return the updated service list.
+
+        Args:
+            order_id (int): The ID of the order to update.
+            data: Schema containing tariff service IDs to attach to the order.
+
+        Returns:
+            Dictionary with 'attached' and 'available' service lists.
+        """
         if not await self.orders_repo.get_by_id(order_id=order_id):
             raise NotFoundException(detail="Order not found")
 
