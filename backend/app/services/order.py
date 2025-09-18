@@ -45,7 +45,13 @@ class OrderService:
         self.notification_service = notification_service
         self.order_services_repo = order_services_repo
 
-    async def create_order(self, data: AdminOrderCreateSchema) -> Order:
+    async def create_order(
+            self,
+            *,
+            data: AdminOrderCreateSchema,
+            user_id: int,
+            populate_client: bool = False
+    ) -> Order:
         """Create a new order in the system.
 
         This method adds a new order based on the provided data schema and
@@ -57,7 +63,21 @@ class OrderService:
         Returns:
             Order: The created order instance.
         """
-        ...
+        order_data = AdminOrderCreateSchema(
+            created_by_id=user_id,
+            **data.model_dump(exclude={"created_by_id"}),
+        )
+        order = await self.orders_repo.create(data=order_data, populate_client=populate_client)
+
+        await self.audit_repo.create(
+            data=LogEntryCreateSchema(
+                user_id=user_id,
+                action=LogEntry.ACTION_CREATE,
+                model_type=Order.get_model_type(),
+                target_id=order.id
+            )
+        )
+        return order
 
     async def update_order(
             self,

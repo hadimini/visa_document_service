@@ -94,6 +94,7 @@ async def order_detail(
 )
 async def order_create(
         data: AdminOrderCreateSchema,
+        order_service: OrderService = Depends(get_order_service),
         orders_repo: OrdersRepository = Depends(get_repository(OrdersRepository)),
         audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
         current_user: User = Depends(get_current_active_user)
@@ -115,21 +116,27 @@ async def order_create(
         HTTPException: If the order creation fails.
     """
     try:
-        order_data = AdminOrderCreateSchema(
-            created_by_id=current_user.id,
-            **data.model_dump(exclude={"created_by_id"}),
-        )
-        order = await orders_repo.create(data=order_data, populate_client=True)
-
-        await audit_repo.create(
-            data=LogEntryCreateSchema(
-                user_id=current_user.id,
-                action=LogEntry.ACTION_CREATE,
-                model_type=Order.get_model_type(),
-                target_id=order.id
-            )
+        # order_data = AdminOrderCreateSchema(
+        #     created_by_id=current_user.id,
+        #     **data.model_dump(exclude={"created_by_id"}),
+        # )
+        # order = await orders_repo.create(data=order_data, populate_client=True)
+        #
+        # await audit_repo.create(
+        #     data=LogEntryCreateSchema(
+        #         user_id=current_user.id,
+        #         action=LogEntry.ACTION_CREATE,
+        #         model_type=Order.get_model_type(),
+        #         target_id=order.id
+        #     )
+        # )
+        order = await order_service.create_order(
+            data=data,
+            user_id=current_user.id,
+            populate_client=True
         )
         return order
+
     except Exception as e:
         logger.error(f"Failed to create order: {str(e)}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to create order")
