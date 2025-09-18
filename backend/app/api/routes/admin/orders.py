@@ -192,7 +192,7 @@ async def order_update(
     response_model=OrderServicesDataSchema,
     status_code=status.HTTP_200_OK,
 )
-async def orders_service_list(
+async def order_service_list(
         order_id: int = Path(..., gt=0, description="Order ID must be a positive integer"),
         orders_repo: OrdersRepository = Depends(get_repository(OrdersRepository)),
         order_service: OrderService = Depends(get_order_service),
