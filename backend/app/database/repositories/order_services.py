@@ -14,12 +14,41 @@ logger = logging.getLogger(__name__)
 
 
 class OrderServicesRepository(BaseRepository):
+    """
+    Repository for managing order services operations.
+
+    Handles retrieval of available services for orders and updating order service assignments.
+    """
 
     def __init__(self, db: AsyncSession) -> None:
+        """
+        Initialize the repository with a database session.
+
+        Args:
+            db: Async database session
+        """
         super().__init__(db)
 
     async def get_for_order(self, *, order_id: int) -> dict[str, Sequence | None]:
+        """
+        Retrieve all services for a specific order, including attached and available services.
 
+        This method fetches:
+        - Services already attached to the order
+        - Services available for attachment based on order criteria and client's tariff
+
+        Args:
+            order_id: ID of the order to retrieve services for
+
+        Returns:
+            Dictionary with two keys:
+            - 'attached': List of OrderService objects currently attached to the order
+            - 'available': List of available services with tariff pricing information
+
+        Raises:
+            ValueError: If order is not found or client has no tariff assigned
+            Exception: If database operation fails
+        """
         try:
             stmt = (
                 select(
@@ -99,6 +128,25 @@ class OrderServicesRepository(BaseRepository):
             raise Exception(f"Failed to get services for order: {str(e)}") from e
 
     async def update_for_order(self, *, order_id: int, data: OrderServicesUpdateSchema) -> None:
+        """
+        Update services for a specific order.
+
+        Replaces all existing services attached to the order with new services
+        specified by tariff service IDs. Fetches pricing information from the
+        tariff services to create proper OrderService records with calculated taxes.
+
+        Args:
+            order_id: ID of the order to update services for
+            data: Schema containing tariff_services_ids to attach to the order
+
+        Raises:
+            Exception: If database operation fails
+
+        Note:
+            - If tariff_services_ids is None, no action is taken
+            - If tariff_services_ids is empty list, all services are removed from the order
+            - Tax amounts and totals are automatically calculated during OrderService creation
+        """
         try:
             tariff_services_ids: Optional[list[int]] = data.tariff_services_ids
 
