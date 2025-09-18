@@ -7,7 +7,7 @@ STRFTIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 
 class CoreSchema(BaseModel):
-    model_config={"from_attributes": True}
+    model_config = {"from_attributes": True}
 
 
 class IDSchemaMixin(BaseModel):

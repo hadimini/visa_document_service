@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Integer, ForeignKey, String, event
+from sqlalchemy import Integer, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.custom_types import ChoiceType
