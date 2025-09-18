@@ -5,11 +5,9 @@ from fastapi import APIRouter, Depends, HTTPException, Path, status, BackgroundT
 from app.api.dependencies.auth import get_current_active_user
 from app.api.dependencies.db import get_repository
 from app.api.dependencies.order import get_order_service
-from app.database.repositories.audit import AuditRepository
 from app.database.repositories.orders import OrdersRepository
 from app.exceptions import NotFoundException
-from app.models import LogEntry, Order, User
-from app.schemas.audit import LogEntryCreateSchema
+from app.models import User
 from app.schemas.order.admin import (
     AdminOrderFilterSchema,
     AdminOrderPaginatedListSchema,
@@ -95,8 +93,6 @@ async def order_detail(
 async def order_create(
         data: AdminOrderCreateSchema,
         order_service: OrderService = Depends(get_order_service),
-        orders_repo: OrdersRepository = Depends(get_repository(OrdersRepository)),
-        audit_repo: AuditRepository = Depends(get_repository(AuditRepository)),
         current_user: User = Depends(get_current_active_user)
 ):
     """Create a new order in the system.
@@ -116,20 +112,6 @@ async def order_create(
         HTTPException: If the order creation fails.
     """
     try:
-        # order_data = AdminOrderCreateSchema(
-        #     created_by_id=current_user.id,
-        #     **data.model_dump(exclude={"created_by_id"}),
-        # )
-        # order = await orders_repo.create(data=order_data, populate_client=True)
-        #
-        # await audit_repo.create(
-        #     data=LogEntryCreateSchema(
-        #         user_id=current_user.id,
-        #         action=LogEntry.ACTION_CREATE,
-        #         model_type=Order.get_model_type(),
-        #         target_id=order.id
-        #     )
-        # )
         order = await order_service.create_order(
             data=data,
             user_id=current_user.id,
