@@ -37,3 +37,7 @@ class TariffServicePublicSchema(IDSchemaMixin, CoreSchema):
 class OrderServicesDataSchema(CoreSchema):
     attached: Optional[list[OrderServicePublicSchema]] = None
     available: Optional[list[TariffServicePublicSchema]] = None
+
+
+class OrderServicesUpdateSchema(CoreSchema):
+    tariff_services_ids: Optional[list[int]] = None

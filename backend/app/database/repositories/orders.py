@@ -3,6 +3,7 @@ import logging
 from typing import Optional
 
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from sqlalchemy.sql.elements import ClauseElement
@@ -129,7 +130,7 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
             await self.db.commit()
             order = await self.get_by_id(order_id=order.id, populate_client=populate_client)
             return order
-        except Exception as e:
+        except SQLAlchemyError as e:
             logger.error(f"Failed to create order: {str(e)}")
             await self.db.rollback()
             raise e
@@ -186,7 +187,7 @@ class OrdersRepository(BasePaginatedRepository[Order], BuildFiltersMixin):
             order = await self.get_by_id(order_id=order.id, populate_client=populate_client)
             return order
 
-        except Exception as e:
+        except SQLAlchemyError as e:
             logger.error(f"Failed to create order: {str(e)}")
             await self.db.rollback()
             raise e

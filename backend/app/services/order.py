@@ -9,6 +9,7 @@ from app.exceptions import NotFoundException
 from app.models import Order, LogEntry
 from app.schemas.audit import LogEntryCreateSchema
 from app.schemas.order.admin import AdminOrderCreateSchema, AdminOrderUpdateSchema
+from app.schemas.order_service import OrderServicesUpdateSchema
 from app.services.notification import NotificationService
 from app.tasks import task_notify_on_order_status_update
 
@@ -117,4 +118,11 @@ class OrderService:
         if not await self.orders_repo.get_by_id(order_id=order_id):
             raise NotFoundException(detail="Order not found")
 
+        return await self.order_services_repo.get_for_order(order_id=order_id)
+
+    async def update_order_services(self, *, order_id: int, data: OrderServicesUpdateSchema) -> dict[str, Any]:
+        if not await self.orders_repo.get_by_id(order_id=order_id):
+            raise NotFoundException(detail="Order not found")
+
+        await self.order_services_repo.update_for_order(order_id=order_id, data=data)
         return await self.order_services_repo.get_for_order(order_id=order_id)
